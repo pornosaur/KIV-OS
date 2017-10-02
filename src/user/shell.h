@@ -16,3 +16,23 @@ extern "C" size_t __stdcall rgen(const kiv_os::TRegisters &regs) { return 0; }
 extern "C" size_t __stdcall freq(const kiv_os::TRegisters &regs) { return 0; }
 extern "C" size_t __stdcall ps(const kiv_os::TRegisters &regs) { return 0; }
 extern "C" size_t __stdcall shutdown(const kiv_os::TRegisters &regs) { return 0; }
+
+
+/* Tabulka muze byt max. velikosti uint8_t => 256 - pro nase ucely postacujici */
+const static struct {
+	const char* name;
+	size_t(__stdcall *cmd_fun)(const kiv_os::TRegisters&) = NULL;
+} Cmd_Function [] = {
+	{"type", type},
+	{"md", md},
+	{"rd", rd},
+	{"echo", echo},
+	{"wc", wc},
+	{"sort", sort},
+	{"rgen", rgen},
+	{"freq", freq},
+	{"ps", ps},
+	{"shutdown", shutdown}
+};
+
+int8_t call_Cmd_Function(const char* name, const kiv_os::TRegisters &regs);
