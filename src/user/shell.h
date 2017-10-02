@@ -35,4 +35,4 @@ const static struct {
 	{"shutdown", shutdown}
 };
 
-int8_t call_Cmd_Function(const char* name, const kiv_os::TRegisters &regs);
+int8_t call_cmd_function(const char* name, const kiv_os::TRegisters &regs);
