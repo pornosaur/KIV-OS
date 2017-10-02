@@ -1,2 +1,3 @@
-complied/*
-msvc/*
+compiled/**
+msvc/**
+./vc
