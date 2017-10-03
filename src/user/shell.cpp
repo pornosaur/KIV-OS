@@ -7,7 +7,6 @@ size_t __stdcall shell(const kiv_os::TRegisters &regs) {
 	const char* hello = "Hello world!\n";
 	size_t written;
 	kiv_os_rtl::Write_File(stdin, hello, /*strlen(hello)*/13, written);
-	//kiv_os_rtl::Read_File(stdin, hello, /*strlen(hello)*/13, written);
 	kiv_os_rtl::Close_File(stdin);
 	return 0;
 }
