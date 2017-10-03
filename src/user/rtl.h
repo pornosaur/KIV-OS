@@ -15,7 +15,7 @@ namespace kiv_os_rtl {
 	bool Close_File(const kiv_os::THandle file_handle);
 	//uzavre soubor identifikovany pomoci deskriptoru
 	//vraci true, kdyz vse OK
-	bool Read_File(const kiv_os::THandle file_handle, const void *buffer, const size_t buffer_size, size_t &read);
+	bool Read_File(const kiv_os::THandle file_handle, void *buffer, const size_t buffer_size, size_t &read);
 	//cte ze souboru do buffer o velikosti buffer_size a vraci pocet precenych dat ve read
 	//vraci true, kdyz vse OK
 }

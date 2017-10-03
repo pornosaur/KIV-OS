@@ -54,8 +54,9 @@ bool kiv_os_rtl::Close_File(const kiv_os::THandle file_handle) {
 	return Do_SysCall(regs);
 }
 
-bool kiv_os_rtl::Read_File(const kiv_os::THandle file_handle, const void *buffer, const size_t buffer_size, size_t &read) {
+bool kiv_os_rtl::Read_File(const kiv_os::THandle file_handle, void *buffer, const size_t buffer_size, size_t &read) {
 	kiv_os::TRegisters regs = Prepare_SysCall_Context(kiv_os::scIO, kiv_os::scRead_File);
+	regs.rdx.x = static_cast<decltype(regs.rdx.x)>(file_handle);
 	regs.rdi.r = reinterpret_cast<decltype(regs.rdi.r)>(buffer);
 	regs.rcx.r = buffer_size;
 
