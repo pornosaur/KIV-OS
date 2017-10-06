@@ -42,7 +42,7 @@ int32_t *get_fat(FILE *p_file, uint fat_record_size, int cluster_count, uint fat
  */
 void delete_cluster(FILE *p_file, uint start_of_cluster, int16_t cluster_size) {
     int i = 0;
-    charchar new_value = 0;
+    char new_value = 0;
 
     fseek(p_file, start_of_cluster, SEEK_SET);
     for (i = 0; i < cluster_size; i++) {
