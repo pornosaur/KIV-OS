@@ -24,7 +24,7 @@ long find_empty_space_in_dir(FILE *p_file, int32_t max_entries, int32_t start_of
 
 int write_to_dir(FILE *p_file, struct dir_file file, int32_t write_position);
 
-int write_file_to_fat(FILE *fat_file, FILE *file, int32_t *clusters, int32_t clusters_size, uint start_of_data, int16_t cluster_size);
+int write_file_to_fat(FILE *fat_file, char *file, int file_size, int32_t *clusters, int32_t clusters_size, uint start_of_data, int16_t cluster_size);
 
 int write_empty_dir_to_fat(FILE *fat_file, int32_t *clusters, int32_t clusters_size, uint start_of_data, int16_t cluster_size);
 
