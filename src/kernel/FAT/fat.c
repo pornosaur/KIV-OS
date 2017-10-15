@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "fat_structure.h"
 #include "library.h"
@@ -15,54 +16,70 @@ uint start_of_root_dir = 0;
 uint max_dir_entries = 0;
 uint start_of_data = 0;
 
+struct boot_record *boot_record = NULL;
+int32_t *fat1 = NULL;
+int32_t *fat2 = NULL;
 
-void create_file(struct boot_record *boot_record, int32_t *fat1, int32_t *fat2, char file_name[], char file_path[]);
+int init(char * fat_name);
 
-int32_t get_directory_position(struct boot_record *boot_record, char file_path[]);
+int close_fat();
 
-void create_values_from_clusters(int32_t *clusters, int32_t *values, long size);
+int create_file(char *data, int data_size, char file_name[], int32_t act_fat_position);
+
+void create_values_from_clusters(const int32_t *clusters, int32_t *values, long size);
 
 void init_object(struct dir_file *object, char name[], int32_t file_size, int8_t file_type, int32_t first_cluster);
 
-void delete_file(struct boot_record *boot_record, int32_t *fat1, int32_t *fat2, char file_path[]);
+int delete_file(char file_name[], int32_t act_fat_position);
 
-void print_clusters(struct boot_record *boot_record, int32_t *fat, char file_path[]);
+int create_dir(char dir_name[], int32_t act_fat_position);
 
-void create_dir(struct boot_record *boot_record, int32_t *fat1, int32_t *fat2, char dir_name[], char dir_path[]);
+int delete_empty_dir(char dir_name[], int32_t act_fat_position);
 
-void delete_empty_dir(struct boot_record *boot_record, int32_t *fat1, int32_t *fat2, char dir_path[]);
+char* read_object(int *ret_code, int *data_size, char file_name[], int32_t act_fat_position);
 
-void print_file(struct boot_record *boot_record, int32_t *fat, char file_path[]);
+void print_all();
 
-void print_all(struct boot_record *boot_record);
+int main(){
+    init("../output.fat");
 
-int check_arguments(int argc, int number_of_arguments);
+    print_all();
 
-void crossroad(struct boot_record *boot_record, int32_t *fat1, int32_t *fat2, int argc, char *argv[]);
+    int result = 0;
 
-/**
- * Nacte potrebna data z FAT, initializuje potrabne hodnoty.
- *
- * @param argc pocet vstupnich argumentu
- * @param argv vstupni argumenty
- * @return -1 pri chybe, jinak vraci 0
- */
-int main(int argc, char *argv[]) {
-    struct boot_record *boot_record = NULL;
-    int32_t *fat1 = NULL;
-    int32_t *fat2 = NULL;
+    result = create_file("pokus", 6, "pokus", 0);
+    printf("%d\n", result);
+    print_all();
 
-    if (argc < 3) {
-        printf("Invalid number of parameters\n");
-        return -1;
-    }
+    int ret_code = 0;
+    int data_size = 0;
 
-    if (argv[2][0] != '-') {
-        printf("Invalid parameter\n");
-        return -1;
-    }
+    char * data = read_object(&ret_code, &data_size, "pokus", 0);
+    printf("%d\n", ret_code);
+    print_all();
+    printf("size: %d\n", data_size);
+    printf("data: %s\n", data);
 
-    p_file = fopen(argv[1], "r+");
+    result = delete_file("pokus",0);
+    print_all();
+    printf("%d\n", result);
+
+    result = create_dir("dir_pokus", 0);
+    print_all();
+    printf("%d\n", result);
+
+    result = delete_empty_dir("dir_pokus", 0);
+    print_all();
+    printf("%d\n", result);
+
+
+    close_fat();
+    pause();
+}
+
+int init(char * fat_name){
+
+    p_file = fopen(fat_name, "r+");
     if (p_file == NULL) {
         printf("%d", errno);
         printf("Can't open file\n");
@@ -83,154 +100,79 @@ int main(int argc, char *argv[]) {
     fseek(p_file, start_of_fat, SEEK_SET);
     fat1 = get_fat(p_file, fat_record_size, boot_record->usable_cluster_count, fat_size);
     fat2 = get_fat(p_file, fat_record_size, boot_record->usable_cluster_count, fat_size);
+}
 
-    crossroad(boot_record, fat1, fat2, argc, argv);
-
+int close_fat(){
+    // TODO free memory
     fclose(p_file);
 }
 
 /**
- * Zkontroluje, zda se vstpuni hodnoty rovnaji. Pokud se nerovnaji, vypise se hlaska a vrati 1.
+ * Vlozi data do fat.
  *
- * @param argc pocet vstupnich argumentu programu.
- * @param number_of_arguments pocet pozadovanuch argumentu
- * @return 0 rovnaji-li se, jinak vraci 1
+ * @param data data, ktera se zapisi
+ * @param data_size velikost zapisovanych dat
+ * @param file_name jmeno vytvareneho souboru
+ * @param act_fat_position pozice adresare ve kterem vytvarime soubor
+ * @return chybovy kod nebo 0 pri uspechu
  */
-int check_arguments(int argc, int number_of_arguments) {
-    if (argc == number_of_arguments) {
-        return 0;
-    } else {
-        printf("Invalid number of parameters\n");
-        return 1;
-    }
-}
-
-/**
- * Rozhoduje, dle tretiho vstupniho argumentu programu, ktera operace se vykona.
- * @param boot_record zavadec nacten z FAT
- *
- * @param fat1 prvni kopie FAT tabulky
- * @param fat2 druha kopie FAT tabulky
- * @param argc pocet vstupnich argumentu programu
- * @param argv vstupni argumenty programu
- */
-void crossroad(struct boot_record *boot_record, int32_t *fat1, int32_t *fat2, int argc, char *argv[]) {
-    switch (argv[2][1]) {
-        case 'a':
-            if (!check_arguments(argc, 5))
-                create_file(boot_record, fat1, fat2, argv[3], argv[4]);
-            break;
-        case 'f':
-            if (!check_arguments(argc, 4))
-                delete_file(boot_record, fat1, fat2, argv[3]);
-            break;
-        case 'c':
-            if (!check_arguments(argc, 4))
-                print_clusters(boot_record, fat1, argv[3]);
-            break;
-        case 'm':
-            if (!check_arguments(argc, 5))
-                create_dir(boot_record, fat1, fat2, argv[3], argv[4]);
-            break;
-        case 'r':
-            if (!check_arguments(argc, 4))
-                delete_empty_dir(boot_record, fat1, fat2, argv[3]);
-            break;
-        case 'l':
-            if (!check_arguments(argc, 4))
-                print_file(boot_record, fat1, argv[3]);
-            break;
-        case 'p':
-            if (!check_arguments(argc, 3))
-                print_all(boot_record);
-            break;
-        default:
-            printf("Invalid parameter\n");
-            break;
-    }
-}
-
-/**
- * Vlozi soubor do fat. Funkce muze vypsat tato hlaseni.
- *
- * NAME IS TOO LONG - jmeno noveho souboru je prilis dlouhe
- * PATH NOT FOUND - umisteni adresare, kam ma byt soubor vlozeni, nebylo nalezeno
- * PATH EXISTS - soubor se stejnym nazvem jiz na zvolenem miste existuje
- * DIRECTORY IS FULL - aktualni slozka jiz obsahuje maximalni pocet prvku
- * FAT IS FULL - neni dostatek volnych cluteru pro vlozeni souboru
- * FILE NOT FOUND - nebyl nalezen soubor, ktery se ma nahravat
- * OK - vse probehlo v poradku
- *
- * @param boot_record zavadec nacten z FAT
- * @param fat1 prvni kopie FAT tabulky
- * @param fat2 druha kopie FAT tabulky
- * @param file_name nazev nahravaneho souboru
- * @param file_path cesta ve fat, kde bude soubor ulozen
- */
-void create_file(struct boot_record *boot_record, int32_t *fat1, int32_t *fat2, char file_name[], char file_path[]) {
+int create_file(char *data, int data_size, char file_name[], int32_t act_fat_position) {
     struct dir_file *file = NULL;
     struct dir_file new_local_file;
     int32_t *clusters = NULL;
     int32_t *values = NULL;
     int32_t position = 0;
     long dir_position = 0;
-    long file_size = 0;
     long file_cluster_count = 0;
-    FILE *new_file = NULL;
+
+    if(boot_record == NULL || fat1 == NULL || fat2 == NULL){
+        return 1;
+    }
+
+    if(data == NULL || data_size < 0){
+        return 10;
+    }
 
     if(strlen(file_name) > 12){
-        printf("NAME IS TOO LONG\n");
-        return;
+        return 2;
     }
 
-    position = get_directory_position(boot_record, file_path);
-    if(position < 0){
-        printf("PATH NOT FOUND\n");
-        return;
+    if(act_fat_position > 0 && act_fat_position < boot_record->usable_cluster_count){
+        return 9;
     }
 
+    position = start_of_root_dir + (act_fat_position * boot_record->cluster_size);
+
+    // check if file exists
     file = get_object_in_dir(p_file, file_name, position, max_dir_entries);
     if (file != NULL) {
-        printf("PATH EXISTS\n");
         free(file);
-        return;
+        return 4;
     }
 
+    // check empty space in dir
     dir_position = find_empty_space_in_dir(p_file, max_dir_entries, position);
     if (dir_position == -1) {
-        printf("DIRECTORY IS FULL\n");
-        return;
+        return 6;
     }
 
-    new_file = fopen(file_name, "r");
-    if (!new_file) {
-        printf("FILE NOT FOUND\n");
-        return;
-    }
-
-    fseek(new_file, 0, SEEK_END);
-    file_size = ftell(new_file);
-    rewind(new_file);
-    file_cluster_count = file_size / boot_record->cluster_size;
-    if (file_size % boot_record->cluster_size > 0) {
+    // count number of clusters of new file
+    file_cluster_count = data_size / boot_record->cluster_size;
+    if (data_size % boot_record->cluster_size > 0) {
         file_cluster_count++;
     }
 
-
+    // search free space in fat
     clusters = malloc(sizeof(int32_t) * file_cluster_count);
-
     if(find_empty_clusters(boot_record->usable_cluster_count, fat1, clusters, file_cluster_count) == -1){
-        printf("FAT IS FULL\n");
         free(clusters);
-        fclose(new_file);
-        return;
+        return 7;
     }
 
 
-    init_object(&new_local_file, file_name, (int32_t) file_size, OBJECT_FILE, clusters[0]);
+    init_object(&new_local_file, file_name, (int32_t) data_size, OBJECT_FILE, clusters[0]);
 
-
-    write_file_to_fat(p_file, new_file, clusters, (int32_t) file_cluster_count, start_of_data, boot_record->cluster_size);
+    write_file_to_fat(p_file,data, data_size, clusters, (int32_t) file_cluster_count, start_of_data, boot_record->cluster_size);
     write_to_dir(p_file, new_local_file, (int32_t) dir_position);
 
     values = malloc(sizeof(int32_t) * file_cluster_count);
@@ -244,34 +186,8 @@ void create_file(struct boot_record *boot_record, int32_t *fat1, int32_t *fat2, 
 
     free(clusters);
     free(values);
-    fclose(new_file);
 
-    printf("OK\n");
-}
-
-/**
- * Nalezne pozici v souboru kde zacina zaznam slozky danou vstupni cestou.
- *
- * @param boot_record zavadec nacten z FAT
- * @param file_path cesta ke slozce
- * @return pozici slozky v souboru (od zacatku souboru), -1 pri chybe
- */
-int32_t get_directory_position(struct boot_record *boot_record, char file_path[]){
-    struct dir_file *directory;
-    int32_t position = 0;
-
-    if(strcmp(file_path, "/")) {
-        directory = find_file(p_file, boot_record, file_path, start_of_root_dir, start_of_data, max_dir_entries);
-        if (directory == NULL || directory->file_type != OBJECT_DIRECTORY) {
-            return -1;
-        }
-        position = start_of_data + (directory->first_cluster * boot_record->cluster_size);
-        free(directory);
-    }else{
-        position = start_of_root_dir;
-    }
-
-    return position;
+    return 0;
 }
 
 /**
@@ -282,7 +198,7 @@ int32_t get_directory_position(struct boot_record *boot_record, char file_path[]
  * @param values prazdne pole ktere bude naplneno
  * @param size velikost techto poli
  */
-void create_values_from_clusters(int32_t *clusters, int32_t *values, long size){
+void create_values_from_clusters(const int32_t *clusters, int32_t *values, long size){
     int i = 0;
 
     for(i = 1; i < size; i++){
@@ -294,7 +210,7 @@ void create_values_from_clusters(int32_t *clusters, int32_t *values, long size){
 /**
  * Nastavi vstupni strukture objekt parametry, ktere jsou predany jako ostatni parametry.
  *
- * @param objekt struktura, ktera se bude nastavovat
+ * @param object struktura, ktera se bude nastavovat
  * @param name nazev objektu
  * @param file_size velikost objektu
  * @param file_type typ objektu
@@ -309,30 +225,45 @@ void init_object(struct dir_file *object, char name[], int32_t file_size, int8_t
 }
 
 /**
- * Smaze soubor ve FAT dany vstupni cestou. Neni-li soubor nalezen vypise PATH NOT FOUND.
+ * Smaze soubor ve FAT v danem adresari s danym jmenem.
  *
- * @param boot_record zavadec nacteny z FAT
- * @param fat1 prvni kopie FAT tabulky
- * @param fat2 druha kopie FAT tabulky
- * @param file_path cesta k souboru, ktery se ma smazat
+ * @param file_name jmeno hledaneho souboru
+ * @param act_fat_position pozice adresare ve kterem hledame soubor
+ * @return chybovy kod nebo 0 pri uspechu
  */
-void delete_file(struct boot_record *boot_record, int32_t *fat1, int32_t *fat2, char file_path[]) {
+int delete_file(char file_name[], int32_t act_fat_position) {
     int32_t file_clusters_size = 0;
     struct dir_file *file = NULL;
     unsigned int new_value = 0;
     int *clusters = NULL;
+    int32_t position = 0;
     uint i = 0;
 
-    file = find_file(p_file, boot_record, file_path, start_of_root_dir, start_of_data, max_dir_entries);
+    if(boot_record == NULL || fat1 == NULL || fat2 == NULL){
+        return 1;
+    }
+
+    if(strlen(file_name) > 12){
+        return 2;
+    }
+
+    if(act_fat_position > 0 && act_fat_position < boot_record->usable_cluster_count){
+        return 9;
+    }
+
+    position = start_of_root_dir + (act_fat_position * boot_record->cluster_size);
+
+    file = get_object_in_dir(p_file, file_name, position, max_dir_entries);
     if (file == NULL || file->file_type != OBJECT_FILE) {
-        printf("PATH NOT FOUND\n");
-        return;
+        free(file);
+        return 3;
     }
 
     clusters = get_file_clusters(file, &file_clusters_size, boot_record->cluster_size, fat1,
                                  boot_record->dir_clusters);
     if (clusters == NULL) {
-        return;
+        free(file);
+        return 11;
     }
 
     fseek(p_file, ftell(p_file) - sizeof(struct dir_file), SEEK_SET);
@@ -348,62 +279,17 @@ void delete_file(struct boot_record *boot_record, int32_t *fat1, int32_t *fat2, 
     free(file);
     free(clusters);
 
-    printf("OK\n");
+    return 0;
 }
 
 /**
- * Vypise veskere clustery souboru v poradi, v jakem jdou za sebou. Neni-li soubor nalezen vypise PATH NOT FOUND.
+ * Vytrovy novy prazdny adresar na zvolenem miste.
  *
- * @param boot_record zavadec nacteny z FAT
- * @param fat FAT tabulka
- * @param file_path cesta k souboru, ktery se bude zpracovavat
+ * @param dir_name jmeno hledaneho adresare
+ * @param act_fat_position pozice adresare ve kterem hledame adresar
+ * @return chybovy kod nebo 0 pri uspechu
  */
-void print_clusters(struct boot_record *boot_record, int32_t *fat, char file_path[]) {
-    int32_t file_clusters_size = 0;
-    struct dir_file *file = NULL;
-    int *clusters = NULL;
-    int i = 0;
-
-    file = find_file(p_file, boot_record, file_path, start_of_root_dir, start_of_data, max_dir_entries);
-    if (file == NULL) {
-        printf("PATH NOT FOUND\n");
-        return;
-    }
-
-    clusters = get_file_clusters(file, &file_clusters_size, boot_record->cluster_size, fat,
-                                 boot_record->dir_clusters);
-    if (clusters == NULL) {
-        return;
-    }
-
-    free(file);
-
-    printf("%s ", file_path);
-    for (i = 0; i < file_clusters_size; i++) {
-        printf("%d", clusters[i]);
-        printf("%c", i + 1 == file_clusters_size ? '\n' : ':');
-    }
-
-    free(clusters);
-}
-
-/**
- * Vytrovy novy prazdny adresar na zvolenem miste. Funkce muze vypsat tato hlaseni:
- *
- * NAME IS TOO LONG - jmeno noveho adresare je prilis dlouhe
- * PATH NOT FOUND - umisteni adresare nebylo nalezeno
- * PATH EXISTS - adresar jiz na zvolenem miste existuje
- * DIRECTORY IS FULL - aktualni slozka jiz obsahuje maximalni pocet prvku
- * FAT IS FULL - neni dostatek volnych cluteru pro vytvoreni slozky
- * OK - vse probehlo v poradku
- *
- * @param boot_record zavadec nacteny z FAT
- * @param fat1 prvni kopie fat tabulky
- * @param fat2 druha kopie fat tabulky
- * @param dir_name nazev nove slozky
- * @param dir_path cesta, kde bude slozka vytvorena
- */
-void create_dir(struct boot_record *boot_record, int32_t *fat1, int32_t *fat2, char dir_name[], char dir_path[]) {
+int create_dir(char dir_name[], int32_t act_fat_position) {
     struct dir_file *file = NULL;
     struct dir_file new_local_file;
     int32_t *clusters = NULL;
@@ -412,44 +298,40 @@ void create_dir(struct boot_record *boot_record, int32_t *fat1, int32_t *fat2, c
     long dir_position = 0;
     long file_cluster_count = 0;
 
-    if(strlen(dir_name) > 12){
-        printf("NAME IS TOO LONG\n");
-        return;
+    if(boot_record == NULL || fat1 == NULL || fat2 == NULL){
+        return 1;
     }
 
-    position = get_directory_position(boot_record, dir_path);
-    if(position < 0){
-        printf("PATH NOT FOUND\n");
-        return;
+    if(strlen(dir_name) > 12){
+        return 2;
     }
+
+    if(act_fat_position > 0 && act_fat_position < boot_record->usable_cluster_count){
+        return 9;
+    }
+
+    position = start_of_root_dir + (act_fat_position * boot_record->cluster_size);
 
     file = get_object_in_dir(p_file, dir_name, position, max_dir_entries);
     if (file != NULL) {
-        printf("PATH EXISTS\n");
         free(file);
-        return;
+        return 4;
     }
 
     dir_position = find_empty_space_in_dir(p_file, max_dir_entries, position);
     if (dir_position == -1) {
-        printf("DIRECTORY IS FULL\n");
-        return;
+        return 6;
     }
 
-
     file_cluster_count = boot_record->dir_clusters;
-
     clusters = malloc(sizeof(int32_t) * file_cluster_count);
-
     if(find_empty_clusters(boot_record->usable_cluster_count, fat1, clusters, file_cluster_count) == -1){
-        printf("FAT IS FULL\n");
         free(clusters);
-        return;
+        return 7;
     }
 
 
     init_object(&new_local_file, dir_name, 0, OBJECT_DIRECTORY, clusters[0]);
-
 
     write_empty_dir_to_fat(p_file, clusters, (int32_t) file_cluster_count, start_of_data, boot_record->cluster_size);
     write_to_dir(p_file, new_local_file, (int32_t) dir_position);
@@ -466,20 +348,19 @@ void create_dir(struct boot_record *boot_record, int32_t *fat1, int32_t *fat2, c
     free(clusters);
     free(values);
 
-    printf("OK\n");
+    return 0;
 }
 
 /**
- * Smaze prazdny adresar ve FAT. Neni-li adresar nalezen je vypsana hlaska PATH NOT FOUND. Obsahuje-li slozka
- * soubory, nebo jine adresare je vypsana hlaska PATH NOT EMPTY. Pri uspechu je vypsano OK.
+ * Smaze prazdny adresar ve FAT.
  *
- * @param boot_record zavadec nacteny z FAT
- * @param fat1 prvni kopie fat tabulky
- * @param fat2 druha kopie fat tabulky
- * @param dir_path cesta k adresari
+ * @param dir_name jmeno hledaneho adresare
+ * @param act_fat_position pozice adresare ve kterem hledame adresar
+ * @return chybovy kod nebo 0 pri uspechu
  */
-void delete_empty_dir(struct boot_record *boot_record, int32_t *fat1, int32_t *fat2, char dir_path[]) {
+int delete_empty_dir(char dir_name[], int32_t act_fat_position) {
     long position = 0;
+    int32_t parent_position = 0;
     int32_t file_clusters_size = 0;
     struct dir_file *file = NULL;
     int *clusters = NULL;
@@ -487,29 +368,41 @@ void delete_empty_dir(struct boot_record *boot_record, int32_t *fat1, int32_t *f
     uint i = 0;
     unsigned int new_value = 0;
 
-    file = find_file(p_file, boot_record, dir_path, start_of_root_dir, start_of_data, max_dir_entries);
+    if(boot_record == NULL || fat1 == NULL || fat2 == NULL){
+        return 1;
+    }
+
+    if(strlen(dir_name) > 12){
+        return 2;
+    }
+
+    if(act_fat_position > 0 && act_fat_position < boot_record->usable_cluster_count){
+        return 9;
+    }
+
+    parent_position = start_of_root_dir + (act_fat_position * boot_record->cluster_size);
+
+    file = get_object_in_dir(p_file, dir_name, parent_position, max_dir_entries);
     if (file == NULL || file->file_type != OBJECT_DIRECTORY) {
-        printf("PATH NOT FOUND\n");
         free(file);
-        return;
+        return 3;
     }
     position = ftell(p_file);
 
     result = is_dir_empty(p_file, max_dir_entries, start_of_data + (file->first_cluster * boot_record->cluster_size));
     if (result == 0) {
-        printf("PATH NOT EMPTY\n");
         free(file);
-        return;
+        return 5;
     } else if (result == -1) {
-        printf("ERROR\n");
         free(file);
-        return;
+        return 8;
     }
 
     clusters = get_file_clusters(file, &file_clusters_size, boot_record->cluster_size, fat1,
                                  boot_record->dir_clusters);
     if (clusters == NULL) {
-        return;
+        free(file);
+        return 11;
     }
 
     rm_from_fat(fat1, clusters, file_clusters_size);
@@ -526,55 +419,83 @@ void delete_empty_dir(struct boot_record *boot_record, int32_t *fat1, int32_t *f
     free(file);
     free(clusters);
 
-    printf("OK\n");
+    return 0;
 }
 
 /**
- * Vypise na obrazovku obsah souboru daneho cestou. Vystup je ve tvaru:
- * nazev_souboru: text souboru
+ * Vrati soubor s nactenymi daty
  *
- * Neni-li soubor nalezen vypise se:
- * PATH NOT FOUND
- *
- * @param boot_record zavadec nacteny z FAT
- * @param fat FAT tabulka
- * @param file_path cesta k souboru, ktery se ma vytisknout
+ * @param ret_code obsahuje chybovy kode nebo 0 pri uspechu
+ * @param data_size velikost vracenych dat
+ * @param file_name jmeno hledaneho souboru
+ * @param act_fat_position pozice adresare ve kterem hledame soubor
+ * @return nactena data nebo NULL pri neuspechu
  */
-void print_file(struct boot_record *boot_record, int32_t *fat, char file_path[]) {
+char* read_object(int *ret_code, int *data_size, char file_name[], int32_t act_fat_position) {
     int32_t file_clusters_size = 0;
     struct dir_file *file = NULL;
     int *clusters = NULL;
     char *cluster = NULL;
+    char *data = NULL;
+    int32_t position = 0;
+    int32_t read_size = 0;
+    int32_t writed_size = 0;
     int i = 0;
 
-
-    file = find_file(p_file, boot_record, file_path, start_of_root_dir, start_of_data, max_dir_entries);
-    if (file == NULL || file->file_type != OBJECT_FILE) {
-        printf("PATH NOT FOUND\n");
-        free(file);
-        return;
+    if(boot_record == NULL || fat1 == NULL){
+        *ret_code = 1;
+        return NULL;
     }
 
-    clusters = get_file_clusters(file, &file_clusters_size, boot_record->cluster_size, fat,
+    if(strlen(file_name) > 12){
+        *ret_code = 2;
+        return NULL;
+    }
+
+    if(act_fat_position > 0 && act_fat_position < boot_record->usable_cluster_count){
+        *ret_code = 9;
+        return NULL;
+    }
+
+    position = start_of_root_dir + (act_fat_position * boot_record->cluster_size);
+
+    file = get_object_in_dir(p_file, file_name, position, max_dir_entries);
+    if (file == NULL || file->file_type != OBJECT_FILE) {
+        free(file);
+        *ret_code = 3;
+        return NULL;
+    }
+
+    clusters = get_file_clusters(file, &file_clusters_size, boot_record->cluster_size, fat1,
                                  boot_record->dir_clusters);
     if (clusters == NULL) {
         free(file);
-        return;
+        *ret_code = 3;
+        return NULL;
     }
 
+    *data_size = file->file_size;
+
     cluster = malloc(sizeof(char) * boot_record->cluster_size);
-    printf("%s: ", file_path);
+    data = malloc(sizeof(char) * *data_size);
+
+    read_size = sizeof(char) * boot_record->cluster_size;
+
     for (i = 0; i < file_clusters_size; i++) {
         fseek(p_file, clusters[i] * boot_record->cluster_size + start_of_data, SEEK_SET);
-        fread(cluster, sizeof(char) * boot_record->cluster_size, 1, p_file);
-        if (cluster[0] != '\0')
-            printf("%s", cluster);
+        writed_size = i * boot_record->cluster_size;
+        if(writed_size + read_size > *data_size){
+            read_size = *data_size - writed_size;
+        }
+        fread(data + writed_size, (size_t) read_size, 1, p_file);
     }
-    printf("\n");
 
     free(file);
     free(clusters);
     free(cluster);
+
+    *ret_code = 0;
+    return data;
 }
 
 /**
@@ -591,9 +512,13 @@ void print_file(struct boot_record *boot_record, int32_t *fat, char file_path[])
  *
  * @param boot_record zavadec nacteny z FAT
  */
-void print_all(struct boot_record *boot_record) {
+void print_all() {
     struct dir_file *files = NULL;
     int number_of_objects = 0;
+
+    if(boot_record == NULL){
+        return;
+    }
 
     files = get_all_in_dir(p_file, &number_of_objects, NULL , start_of_root_dir, max_dir_entries);
 

@@ -42,7 +42,7 @@ int32_t *get_fat(FILE *p_file, uint fat_record_size, int cluster_count, uint fat
  */
 void delete_cluster(FILE *p_file, uint start_of_cluster, int16_t cluster_size) {
     int i = 0;
-    charchar new_value = 0;
+    char new_value = 0;
 
     fseek(p_file, start_of_cluster, SEEK_SET);
     for (i = 0; i < cluster_size; i++) {
@@ -82,7 +82,6 @@ int *get_file_clusters(struct dir_file *file, int32_t *clusters_size, int16_t cl
     while (cluster_position != FAT_FILE_END) {
         counter++;
         if (*clusters_size < counter || cluster_position == FAT_BAD_CLUSTER  || cluster_position == FAT_UNUSED) {
-            printf("BROKEN FAT\n");
             free(clusters);
             clusters = NULL;
             break;
@@ -302,7 +301,7 @@ int write_to_dir(FILE *p_file, struct dir_file file, int32_t write_position) {
  * @param cluster_size velikost jednoho clusteru
  * @return -1 pri chybe, jinak 0
  */
-int write_file_to_fat(FILE *fat_file, FILE *file, int32_t *clusters, int32_t clusters_size, uint start_of_data, int16_t cluster_size){
+int write_file_to_fat(FILE *fat_file, char *file, int file_size, int32_t *clusters, int32_t clusters_size, uint start_of_data, int16_t cluster_size){
     long cluster_position = 0;
     uint16_t u_cluster_size = 0;
     int i = 0;
@@ -312,19 +311,19 @@ int write_file_to_fat(FILE *fat_file, FILE *file, int32_t *clusters, int32_t clu
     }
     u_cluster_size = (uint16_t) cluster_size;
 
-    data = malloc(u_cluster_size);
-
     for(i = 0; i < clusters_size; i++){
-        memset(data, 0, u_cluster_size);
-        fread(data, u_cluster_size, 1, file);
+        data = &file[i * cluster_size];
 
         cluster_position = start_of_data + (clusters[i] * cluster_size);
         fseek(fat_file, cluster_position, SEEK_SET);
 
+        if((i+1) * cluster_size < file_size){
+            u_cluster_size = (uint16_t) (file_size - i * cluster_size);
+        }
+
         fwrite(data, u_cluster_size, 1, fat_file);
     }
 
-    free(data);
     return 0;
 }
 
@@ -401,7 +400,7 @@ int rm_from_fat(int32_t *fat, int32_t *indexes, int32_t number_of_clusters) {
         return -1;
     }
 
-    for (i = 1; i < number_of_clusters; i++) {
+    for (i = 0; i < number_of_clusters; i++) {
         if (fat[indexes[i]] != FAT_BAD_CLUSTER) {
             fat[indexes[i]] = FAT_UNUSED;
         }
