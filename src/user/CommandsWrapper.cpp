@@ -15,6 +15,12 @@ const kiv_os_cmd::cmd_function_t kiv_os_cmd::CommandsWrapper::cmd_fcs_list[] = {
 	{ "shutdown", shutdown }
 };
 
+
+kiv_os_cmd::CommandsWrapper::CommandsWrapper(kiv_os_cmd::Arguments& args)
+{
+
+}
+
 int kiv_os_cmd::CommandsWrapper::call_cmd_function(char* cmd_name, const char* params)
 {
 	uint8_t i, size = sizeof(cmd_fcs_list) / sizeof(cmd_fcs_list[0]);

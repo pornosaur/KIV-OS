@@ -3,6 +3,8 @@
 #include "..\api\api.h"
 #include "commands.h"
 
+#include "Arguments.h"
+
 namespace kiv_os_cmd {
 
 	/* Tabulka muze byt max. velikosti uint8_t => 256 - pro nase ucely postacujici */
@@ -18,9 +20,8 @@ namespace kiv_os_cmd {
 
 		int call_cmd_function(char* cmd_name, const char* params);
 
-
 	public:
-
+		CommandsWrapper(kiv_os_cmd::Arguments& args);
 
 	};
 }

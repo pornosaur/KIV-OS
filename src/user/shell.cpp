@@ -14,16 +14,17 @@ size_t __stdcall shell(const kiv_os::TRegisters &regs) {
 	static const std::regex regex_redirect("(.*)\\s>{1,2}\\s([\\w\\._]+)");
 	static std::cmatch match, m_redirect;
 
-	size_t written, read, run = 1;
+	size_t written, read;
 
 	const char* hello = "****KIV-OS****\n";
 	kiv_os_rtl::Write_File(stdinn, hello, strlen(hello), written);
 
 	char *input = (char *)calloc(MAX_SIZE_BUFFER_IN, sizeof(char));
-	while (run) {
+	while (run_shell) {
 		kiv_os_rtl::Read_File(stdio, input, MAX_SIZE_BUFFER_IN, read);
-		kiv_os_cmd::Arguments a(input, 50);
+		kiv_os_cmd::Arguments args(input, read);
 
+		/*
 		if (std::regex_search(input, match, regex_cmd) && (match.size() == REGEX_DEF_GROUP)) {
 			
 			char *params = kiv_os_str::copy_string(match[2].str());
@@ -36,16 +37,16 @@ size_t __stdcall shell(const kiv_os::TRegisters &regs) {
 			}
 
 			char *cmd_name = kiv_os_str::copy_string(match[1].str());
-			/*if (call_cmd_function(cmd_name, params) == ERROR_RESULT) {
+			 if (call_cmd_function(cmd_name, params) == ERROR_RESULT) {
 				kiv_os_rtl::Write_File(stdinn, error_dialog, strlen(error_dialog), error_write);
-			}*/
+			}
 
 			free(cmd_name);
 			free(params);
 		}
 		else {
 			kiv_os_rtl::Write_File(stdinn, error_dialog, strlen(error_dialog), error_write);
-		}
+		}*/
 
 		input = (char *)calloc(MAX_SIZE_BUFFER_IN, sizeof(char));
 	}
@@ -59,6 +60,7 @@ size_t __stdcall shell(const kiv_os::TRegisters &regs) {
 void __stdcall shell_stop()
 {
 	//TODO: implement shell stop 
+	run_shell = 0;
 }
 
 
