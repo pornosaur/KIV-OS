@@ -19,14 +19,20 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\user\commands.cpp" />
+    <ClCompile Include="..\..\src\user\CommandsWrapper.cpp" />
     <ClCompile Include="..\..\src\user\dllmain.cpp" />
     <ClCompile Include="..\..\src\user\rtl.cpp" />
     <ClCompile Include="..\..\src\user\shell.cpp" />
+    <ClCompile Include="..\..\src\user\string.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\api\api.h" />
+    <ClInclude Include="..\..\src\user\commands.h" />
+    <ClInclude Include="..\..\src\user\CommandsWrapper.h" />
     <ClInclude Include="..\..\src\user\rtl.h" />
     <ClInclude Include="..\..\src\user\shell.h" />
+    <ClInclude Include="..\..\src\user\string.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{A5F63FF3-DE9A-4B0B-BBF9-AD27200CE81F}</ProjectGuid>
