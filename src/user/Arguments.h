@@ -1,10 +1,11 @@
 #pragma once
 
 #include "string.h"
-
 #include <regex>
 #include <list>
 
+#define SPACE	'\x20'
+#define PIPE	'\x7C'
 
 namespace kiv_os_cmd {
 

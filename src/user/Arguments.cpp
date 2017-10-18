@@ -15,23 +15,41 @@ kiv_os_cmd::Arguments::Arguments(char* line, size_t size)
 	}
 
 	Parse_Line();
-
-	kiv_os_cmd::Arguments::cmd_item i;
-	commands.push_back(i);
 }
 
 bool kiv_os_cmd::Arguments::Parse_Line()
 {
 	std::smatch m_cmd;
+	std::string check_line = cmd_line;
+	bool is_pipe = false;
 
 	//TODO: make loop if suffix.len of match > 0
-	if (std::regex_search(cmd_line, m_cmd, r_split_pipe)) {
-		std::string pipe = std::string(m_cmd[1].str());
-
-		//TODO: apply another regex to parse 
+	if (*check_line.begin() == PIPE) {
+		//Line starts with PIPE => incorrect
+		return false;
 	}
-	else {
-		//TODO: no input was put
+
+	while (!check_line.empty()) {
+		if (std::regex_search(check_line, m_cmd, r_split_pipe)) {
+			std::string pipe = std::string(m_cmd[1].str());
+			check_line = std::string(m_cmd.suffix().str());
+
+			if ((*check_line.begin() == PIPE)) {
+				if ((*(check_line.begin() + 1)) != SPACE && (*(pipe.end() - 1) != SPACE)) {
+					//TODO: write error -> missed space before and after | (pipe)
+					return false;
+				}
+				is_pipe = true;
+			}
+			else {
+				is_pipe = false;
+			}
+
+			//TODO: apply another regex to parse 
+		}
+		else {
+			//TODO: no match with input
+		}
 	}
 
 	return true;
