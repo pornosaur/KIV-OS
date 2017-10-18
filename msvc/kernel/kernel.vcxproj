@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\kernel\ConsoleInputStream.cpp" />
     <ClCompile Include="..\..\src\kernel\dllmain.cpp" />
     <ClCompile Include="..\..\src\kernel\handles.cpp" />
     <ClCompile Include="..\..\src\kernel\io.cpp" />
@@ -26,6 +27,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\api\api.h" />
+    <ClInclude Include="..\..\src\kernel\ConsoleInputStream.h" />
     <ClInclude Include="..\..\src\kernel\handles.h" />
     <ClInclude Include="..\..\src\kernel\io.h" />
     <ClInclude Include="..\..\src\kernel\kernel.h" />
