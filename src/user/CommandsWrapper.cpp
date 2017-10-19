@@ -20,6 +20,7 @@ kiv_os_cmd::CommandsWrapper::CommandsWrapper(kiv_os_cmd::Arguments& args)
 {
 		//init 
 
+
 }
 
 int kiv_os_cmd::CommandsWrapper::call_cmd_function(char* cmd_name, const char* params)
