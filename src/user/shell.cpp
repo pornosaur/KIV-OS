@@ -21,39 +21,37 @@ size_t __stdcall shell(const kiv_os::TRegisters &regs) {
 
 	char *input = (char *)calloc(MAX_SIZE_BUFFER_IN, sizeof(char));
 	while (run_shell) {
-		kiv_os_rtl::Read_File(stdio, input, MAX_SIZE_BUFFER_IN, read);
+		kiv_os_rtl::Read_File(kiv_os::stdInput, input, MAX_SIZE_BUFFER_IN, read);
 		kiv_os_cmd::Arguments args(input, read);
 
 		/*
 		if (std::regex_search(input, match, regex_cmd) && (match.size() == REGEX_DEF_GROUP)) {
-			
-			char *params = kiv_os_str::copy_string(match[2].str());
-			if (!match[2].str().empty() && std::regex_search(params, m_redirect, regex_redirect)) {
-				const char* msg = "\tRedirect found\n";
-				kiv_os_rtl::Write_File(stdinn, msg, strlen(msg), error_write);
-				char *new_params = kiv_os_str::copy_string(m_redirect[1].str());
-				free(params);
-				params = new_params;
-			}
 
-			char *cmd_name = kiv_os_str::copy_string(match[1].str());
-			 if (call_cmd_function(cmd_name, params) == ERROR_RESULT) {
-				kiv_os_rtl::Write_File(stdinn, error_dialog, strlen(error_dialog), error_write);
-			}
-
-			free(cmd_name);
-			free(params);
+		char *params = kiv_os_str::copy_string(match[2].str());
+		if (!match[2].str().empty() && std::regex_search(params, m_redirect, regex_redirect)) {
+		const char* msg = "\tRedirect found\n";
+		kiv_os_rtl::Write_File(stdinn, msg, strlen(msg), error_write);
+		char *new_params = kiv_os_str::copy_string(m_redirect[1].str());
+		free(params);
+		params = new_params;
+		}
+		char *cmd_name = kiv_os_str::copy_string(match[1].str());
+		if (call_cmd_function(cmd_name, params) == ERROR_RESULT) {
+		kiv_os_rtl::Write_File(stdinn, error_dialog, strlen(error_dialog), error_write);
+		}
+		free(cmd_name);
+		free(params);
 		}
 		else {
-			kiv_os_rtl::Write_File(stdinn, error_dialog, strlen(error_dialog), error_write);
+		kiv_os_rtl::Write_File(stdinn, error_dialog, strlen(error_dialog), error_write);
 		}*/
 
 		input = (char *)calloc(MAX_SIZE_BUFFER_IN, sizeof(char));
 	}
-			
+
 	kiv_os_rtl::Close_File(stdinn);
 	free(input);
-	
+
 	return 0;
 }
 
@@ -62,5 +60,3 @@ void __stdcall shell_stop()
 	//TODO: implement shell stop 
 	run_shell = 0;
 }
-
-
