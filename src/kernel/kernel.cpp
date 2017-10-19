@@ -37,13 +37,13 @@ void Shutdown_Kernel() {
 
 void __stdcall Sys_Call(kiv_os::TRegisters &regs) 
 {
-	//Lock_Kernel();
+	Lock_Kernel();
 
 	switch (regs.rax.h) {
 		case kiv_os::scIO:		HandleIO(regs);
 	}
 
-	//Unlock_Kernel();
+	Unlock_Kernel();
 }
 
 void __stdcall Run_VM() {
