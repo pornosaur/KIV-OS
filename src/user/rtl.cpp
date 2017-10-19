@@ -37,6 +37,7 @@ kiv_os::THandle kiv_os_rtl::Create_File(const char* file_name, size_t flags) {
 	return static_cast<kiv_os::THandle>(regs.rax.x);
 }
 
+
 bool kiv_os_rtl::Write_File(const kiv_os::THandle file_handle, const void *buffer, const size_t buffer_size, size_t &written) {
 	kiv_os::TRegisters regs = Prepare_SysCall_Context(kiv_os::scIO, kiv_os::scWrite_File);
 	regs.rdx.x = static_cast<decltype(regs.rdx.x)>(file_handle);

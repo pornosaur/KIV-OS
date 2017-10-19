@@ -43,11 +43,19 @@ void HandleIO(kiv_os::TRegisters &regs) {
 
 		case kiv_os::scRead_File: {
 			DWORD read;
-			HANDLE hnd = Resolve_kiv_os_Handle(regs.rdx.x);
-			regs.flags.carry = hnd == INVALID_HANDLE_VALUE;
-			if (!regs.flags.carry) regs.flags.carry = !ReadFile(hnd, reinterpret_cast<void*>(regs.rdi.r), (DWORD)regs.rcx.r, &read, NULL);
-			if (!regs.flags.carry) regs.rax.r = read;
-			else regs.rax.r = GetLastError();
+			
+			if (regs.rdx.x == kiv_os::stdInput) {
+				std::shared_ptr<CConsoleInputStream> cis = std::make_shared<CConsoleInputStream>();
+				read = cis->read(reinterpret_cast<char*>(regs.rdi.r), (size_t)0, (size_t)regs.rcx.r); //predelat, offset(0) zmenit na promenou
+				regs.rax.r = read;
+			}else{
+				HANDLE hnd = Resolve_kiv_os_Handle(regs.rdx.x);
+				regs.flags.carry = hnd == INVALID_HANDLE_VALUE;
+				if (!regs.flags.carry) regs.flags.carry = !ReadFile(hnd, reinterpret_cast<void*>(regs.rdi.r), (DWORD)regs.rcx.r, &read, NULL);
+				if (!regs.flags.carry) regs.rax.r = read;
+				else regs.rax.r = GetLastError();
+			}
+			
 
 			
 			char* b = reinterpret_cast<char*>(regs.rdi.r);
