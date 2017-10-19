@@ -17,7 +17,7 @@
 #include <Windows.h>
 #endif
 
-class CConsoleInputStream{
+class ConsoleInputStream{
 private:
 #ifdef _WIN32
 	HANDLE mStdIn;
@@ -27,8 +27,8 @@ private:
 
 
 public:
-	CConsoleInputStream();
-	~CConsoleInputStream();
+	ConsoleInputStream();
+	~ConsoleInputStream();
 
 	int read();
 
@@ -40,10 +40,10 @@ public:
 #ifdef jbcc_use_rc
 	typedef std::shared_ptr<CConsoleInputStream> CConsoleInputStream_heap;
 #else
-    typedef CConsoleInputStream *CConsoleInputStream_heap;
+    typedef ConsoleInputStream *CConsoleInputStream_heap;
 #endif
 
 inline CConsoleInputStream_heap halloc_CConsoleInputStream() {
-	CConsoleInputStream_heap tmp( new CConsoleInputStream() );
+	CConsoleInputStream_heap tmp( new ConsoleInputStream() );
 	return tmp;
 }

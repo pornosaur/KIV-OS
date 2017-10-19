@@ -12,7 +12,7 @@
 
 
 
-CConsoleInputStream::CConsoleInputStream() {
+ConsoleInputStream::ConsoleInputStream() {
 
 #ifdef _WIN32
 	_setmode( _fileno( stdin ), _O_BINARY );
@@ -22,15 +22,15 @@ CConsoleInputStream::CConsoleInputStream() {
 #endif
 }
 
-CConsoleInputStream::~CConsoleInputStream() {
+ConsoleInputStream::~ConsoleInputStream() {
 }
 
-int CConsoleInputStream::read(){
+int ConsoleInputStream::read(){
 	int tmp= getchar();
 	return tmp != EOF ? tmp : -1;
 }
 
-int CConsoleInputStream::read(char* b) {
+int ConsoleInputStream::read(char* b) {
 	//until the length(array) is implemented, read just one char
 
 	int tmp= getchar();
@@ -42,7 +42,7 @@ int CConsoleInputStream::read(char* b) {
 		return -1;
 }
 
-int CConsoleInputStream::read(char* b, size_t offset, size_t length) {
+int ConsoleInputStream::read(char* b, size_t offset, size_t length) {
 
 #ifdef _WIN32
 
