@@ -1,6 +1,7 @@
 #include "io.h"
 #include "kernel.h"
 #include "handles.h"
+#include "ConsoleInputStream.h"
 #include <memory>
 
 
@@ -43,9 +44,10 @@ void HandleIO(kiv_os::TRegisters &regs) {
 
 		case kiv_os::scRead_File: {
 			DWORD read;
-			
+			Unlock_Kernel();	//TODO: Can I allow to interruption while reading a file?
+
 			if (regs.rdx.x == kiv_os::stdInput) {
-				std::shared_ptr<CConsoleInputStream> cis = std::make_shared<CConsoleInputStream>();
+				std::shared_ptr<ConsoleInputStream> cis = std::make_shared<ConsoleInputStream>();
 				read = cis->read(reinterpret_cast<char*>(regs.rdi.r), (size_t)0, (size_t)regs.rcx.r); //predelat, offset(0) zmenit na promenou
 				regs.rax.r = read;
 			}else{
