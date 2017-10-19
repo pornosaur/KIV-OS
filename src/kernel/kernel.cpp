@@ -6,8 +6,7 @@
 
 HMODULE User_Programs;
 
-
-
+BinSemaphore interrupt_sem;
 
 void Set_Error(const bool failed, kiv_os::TRegisters &regs) {
 	if (failed) {
@@ -18,6 +17,15 @@ void Set_Error(const bool failed, kiv_os::TRegisters &regs) {
 		regs.flags.carry = false;
 }
 
+void Lock_Kernel()
+{
+	interrupt_sem.P();
+}
+
+void Unlock_Kernel() 
+{
+	interrupt_sem.V();
+}
 
 void Initialize_Kernel() {
 	User_Programs = LoadLibrary(L"user.dll");	
@@ -27,12 +35,15 @@ void Shutdown_Kernel() {
 	FreeLibrary(User_Programs);
 }
 
-void __stdcall Sys_Call(kiv_os::TRegisters &regs) {
+void __stdcall Sys_Call(kiv_os::TRegisters &regs) 
+{
+	//Lock_Kernel();
 
 	switch (regs.rax.h) {
 		case kiv_os::scIO:		HandleIO(regs);
 	}
 
+	//Unlock_Kernel();
 }
 
 void __stdcall Run_VM() {
