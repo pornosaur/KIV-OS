@@ -23,9 +23,8 @@ bool kiv_os_cmd::Arguments::Parse_Line()
 	std::string check_line = cmd_line;
 	bool is_pipe = false;
 
-	//TODO: make loop if suffix.len of match > 0
 	if (*check_line.begin() == PIPE) {
-		//Line starts with PIPE => incorrect
+		error = "An incorrect command!";
 		return false;
 	}
 
@@ -36,23 +35,19 @@ bool kiv_os_cmd::Arguments::Parse_Line()
 
 			if ((check_line.size() >= 2) && (*check_line.begin() == PIPE)) {
 				if ((*(check_line.begin() + 1)) != SPACE || (*(pipe.end() - 1) != SPACE)) {
-					//TODO: write error -> missed space before and after | (pipe)
+					error = "Pipe needs left and right side seperated by gaps!";
 					return false;
 				}
 				is_pipe = true;
-			}
-			else {
+			} else {
 				if (is_pipe && !pipe.empty() && (*pipe.begin() == LF)) {
-					//TODO: error pipe has to right and left side!!!
+					error = "Right side of pipe is empty!";		//TODO: put which pipe is incorrect!
 					return false;
 				}
 				is_pipe = false;
 			}
 
 			//TODO: apply another regex to parse 
-		}
-		else {
-			//TODO: no match with input
 		}
 	}
 
@@ -64,9 +59,4 @@ bool kiv_os_cmd::Arguments::Parse_Args(const std::string& args)
 	std::smatch m_args;
 
 	return true;
-}
-
-std::string& kiv_os_cmd::Arguments::Read_Error()
-{
-	//TODO: maybe it wont have to be -> Impl. part of arg. processing...
 }

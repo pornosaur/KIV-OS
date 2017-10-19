@@ -38,9 +38,6 @@ namespace kiv_os_cmd {
 	public:
 		Arguments(char* line, size_t size);
 
-		std::string& Read_Error();
-
-		//std::string& Get_Command() { return command; };
 
 	}; //class Arguments
 
