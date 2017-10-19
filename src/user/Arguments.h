@@ -4,8 +4,9 @@
 #include <regex>
 #include <list>
 
-#define SPACE	'\x20'
-#define PIPE	'\x7C'
+#define SPACE		'\x20'
+#define PIPE		'\x7C'
+#define LF			'\x0A'
 
 namespace kiv_os_cmd {
 
@@ -25,7 +26,7 @@ namespace kiv_os_cmd {
 
 		static const std::regex r_cmd_line, r_split_pipe;
 
-		std::string cmd_line;
+		std::string cmd_line, error;
 		size_t size_line;
 
 		std::list<struct cmd_item> commands;
@@ -36,6 +37,8 @@ namespace kiv_os_cmd {
 
 	public:
 		Arguments(char* line, size_t size);
+
+		std::string& Read_Error();
 
 		//std::string& Get_Command() { return command; };
 

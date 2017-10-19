@@ -3,7 +3,7 @@
 #include <iostream>
 
 const std::regex kiv_os_cmd::Arguments::r_cmd_line("\\s*(\\w+)\\s*(.*)");
-const std::regex kiv_os_cmd::Arguments::r_split_pipe("([^\\|]+)");
+const std::regex kiv_os_cmd::Arguments::r_split_pipe("\\s*([^\\|]+)");
 
 kiv_os_cmd::Arguments::Arguments(char* line, size_t size)
 {	
@@ -34,14 +34,18 @@ bool kiv_os_cmd::Arguments::Parse_Line()
 			std::string pipe = std::string(m_cmd[1].str());
 			check_line = std::string(m_cmd.suffix().str());
 
-			if ((*check_line.begin() == PIPE)) {
-				if ((*(check_line.begin() + 1)) != SPACE && (*(pipe.end() - 1) != SPACE)) {
+			if ((check_line.size() >= 2) && (*check_line.begin() == PIPE)) {
+				if ((*(check_line.begin() + 1)) != SPACE || (*(pipe.end() - 1) != SPACE)) {
 					//TODO: write error -> missed space before and after | (pipe)
 					return false;
 				}
 				is_pipe = true;
 			}
 			else {
+				if (is_pipe && !pipe.empty() && (*pipe.begin() == LF)) {
+					//TODO: error pipe has to right and left side!!!
+					return false;
+				}
 				is_pipe = false;
 			}
 
@@ -60,4 +64,9 @@ bool kiv_os_cmd::Arguments::Parse_Args(const std::string& args)
 	std::smatch m_args;
 
 	return true;
+}
+
+std::string& kiv_os_cmd::Arguments::Read_Error()
+{
+	//TODO: maybe it wont have to be -> Impl. part of arg. processing...
 }
