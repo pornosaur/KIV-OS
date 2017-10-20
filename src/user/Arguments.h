@@ -20,8 +20,7 @@ namespace kiv_os_cmd {
 
 		struct cmd_item {
 			std::string command;
-			std::string arg;
-			struct redirect redir = {"", 0};
+			std::list<std::string> args;
 		};
 
 		static const std::regex r_cmd_line, r_split_pipe;
@@ -33,7 +32,7 @@ namespace kiv_os_cmd {
 
 
 		bool Parse_Line();
-		bool Parse_Args(const std::string& args);
+		bool Parse_Args(struct cmd_item& cmd, const std::string& args);
 
 	public:
 		Arguments(char* line, size_t size);
