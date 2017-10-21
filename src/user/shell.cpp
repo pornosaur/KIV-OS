@@ -22,7 +22,11 @@ size_t __stdcall shell(const kiv_os::TRegisters &regs) {
 	char *input = (char *)calloc(MAX_SIZE_BUFFER_IN, sizeof(char));
 	while (run_shell) {
 		kiv_os_rtl::Read_File(kiv_os::stdInput, input, MAX_SIZE_BUFFER_IN, read);
-		kiv_os_cmd::Arguments args(input, read);
+
+		/* Input is not empty; 2 because of \r\n */
+		if (read > 2) {
+			kiv_os_cmd::Arguments args(input, read);
+		}
 
 		/*
 		if (std::regex_search(input, match, regex_cmd) && (match.size() == REGEX_DEF_GROUP)) {
