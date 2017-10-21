@@ -327,6 +327,42 @@ int write_file_to_fat(FILE *fat_file, char *file, int file_size, int32_t *cluste
     return 0;
 }
 
+int write_bytes_to_fat(FILE *fat_file, char *bytes, int bytes_size, long offset, int32_t *clusters, int32_t clusters_size, uint start_of_data, int16_t cluster_size){
+    uint16_t first_cluster = 0;
+    int cluster_offset = 0;
+    int i = 0;
+    int writed_bytes = 0;
+    int write_size = 0;
+    long write_position = 0;
+
+    if(fat_file == NULL || bytes == NULL || clusters == NULL || cluster_size < 0){
+        return 0;
+    }
+
+    first_cluster = (uint16_t)(offset / cluster_size);
+    cluster_offset = (int)(offset % cluster_size);
+
+    writed_bytes = 0;
+    for(i = first_cluster; i < clusters_size; i++){
+
+        write_size = cluster_size - cluster_offset;
+        write_position = start_of_data + (clusters[i] * cluster_size) + cluster_offset;
+
+        fseek(fat_file, write_position, SEEK_SET);
+
+        if (writed_bytes + write_size > bytes_size){
+            write_size = bytes_size - writed_bytes;
+        }
+
+        fwrite(&bytes[writed_bytes], (size_t) write_size, 1, fat_file);
+
+        writed_bytes += write_size;
+        cluster_offset = 0;
+    }
+
+    return writed_bytes;
+}
+
 /**
  * Vytvori prazdny adresar zabirajici velikost pres dane clustery.
  *

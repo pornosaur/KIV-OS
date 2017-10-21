@@ -26,6 +26,8 @@ int write_to_dir(FILE *p_file, struct dir_file file, int32_t write_position);
 
 int write_file_to_fat(FILE *fat_file, char *file, int file_size, int32_t *clusters, int32_t clusters_size, uint start_of_data, int16_t cluster_size);
 
+int write_bytes_to_fat(FILE *fat_file, char *bytes, int bytes_size, long offset, int32_t *clusters, int32_t clusters_size, uint start_of_data, int16_t cluster_size);
+
 int write_empty_dir_to_fat(FILE *fat_file, int32_t *clusters, int32_t clusters_size, uint start_of_data, int16_t cluster_size);
 
 int find_empty_clusters(int32_t usable_cluster_count, int32_t *fat, int32_t *clusters, long number_of_clusters);
