@@ -65,13 +65,7 @@ bool kiv_os_cmd::Arguments::Parse_Args(struct cmd_item& cmd, const std::string& 
 		std::string str_args = std::string(m_args[2].str());
 
 		while (std::regex_search(str_args, m_args, r_args)) {
-			if (!m_args[1].str().empty()) {
-				cmd.args.push_back(m_args[1].str());
-			}
-			else {
-				cmd.args.push_back(m_args[2].str());
-			}
-			
+			cmd.args.push_back(!m_args[1].str().empty() ? m_args[1].str() : m_args[2].str());
 			str_args = m_args.suffix();
 		}
 	}
