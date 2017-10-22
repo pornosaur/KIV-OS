@@ -36,14 +36,3 @@ public:
 
 	int read(char* b, size_t offset, size_t length);	
 };
-
-#ifdef jbcc_use_rc
-	typedef std::shared_ptr<CConsoleInputStream> CConsoleInputStream_heap;
-#else
-    typedef ConsoleInputStream *CConsoleInputStream_heap;
-#endif
-
-inline CConsoleInputStream_heap halloc_CConsoleInputStream() {
-	CConsoleInputStream_heap tmp( new ConsoleInputStream() );
-	return tmp;
-}
