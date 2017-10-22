@@ -17,12 +17,11 @@ size_t __stdcall shell(const kiv_os::TRegisters &regs) {
 	size_t written, read;
 
 	const char* hello = "****KIV-OS****\n";
-	kiv_os_rtl::Write_File(stdinn, hello, strlen(hello), written);
+	kiv_os_rtl::Write_File(kiv_os::stdOutput, hello, strlen(hello), written);
 
 	char *input = (char *)calloc(MAX_SIZE_BUFFER_IN, sizeof(char));
 	while (run_shell) {
 		kiv_os_rtl::Read_File(kiv_os::stdInput, input, MAX_SIZE_BUFFER_IN, read);
-
 		/* Input is not empty; 2 because of \r\n */
 		if (read > 2) {
 			kiv_os_cmd::Arguments args(input, read);
@@ -53,7 +52,7 @@ size_t __stdcall shell(const kiv_os::TRegisters &regs) {
 		input = (char *)calloc(MAX_SIZE_BUFFER_IN, sizeof(char));
 	}
 
-	kiv_os_rtl::Close_File(stdinn);
+	//kiv_os_rtl::Close_File(stdinn);
 	free(input);
 
 	return 0;
