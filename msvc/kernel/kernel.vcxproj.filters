@@ -33,7 +33,7 @@
     <ClCompile Include="..\..\src\kernel\BinSemaphore.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\kernel\Vfs.cpp">
+    <ClCompile Include="..\..\src\kernel\ConsoleOutputStream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -56,7 +56,7 @@
     <ClInclude Include="..\..\src\kernel\BinSemaphore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\kernel\Vfs.h">
+    <ClInclude Include="..\..\src\kernel\ConsoleOutputStream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
