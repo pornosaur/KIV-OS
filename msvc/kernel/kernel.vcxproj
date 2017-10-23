@@ -22,6 +22,7 @@
     <ClCompile Include="..\..\src\kernel\ConsoleInputStream.cpp" />
     <ClCompile Include="..\..\src\kernel\dllmain.cpp" />
     <ClCompile Include="..\..\src\kernel\FAT\fat.c" />
+    <ClCompile Include="..\..\src\kernel\FAT\library.c" />
     <ClCompile Include="..\..\src\kernel\handles.cpp" />
     <ClCompile Include="..\..\src\kernel\io.cpp" />
     <ClCompile Include="..\..\src\kernel\kernel.cpp" />
@@ -33,6 +34,8 @@
     <ClInclude Include="..\..\src\api\api.h" />
     <ClInclude Include="..\..\src\kernel\ConsoleInputStream.h" />
     <ClInclude Include="..\..\src\kernel\FAT\fat.h" />
+    <ClInclude Include="..\..\src\kernel\FAT\fat_structure.h" />
+    <ClInclude Include="..\..\src\kernel\FAT\library.h" />
     <ClInclude Include="..\..\src\kernel\handles.h" />
     <ClInclude Include="..\..\src\kernel\io.h" />
     <ClInclude Include="..\..\src\kernel\kernel.h" />
