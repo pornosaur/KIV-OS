@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
-#include <unistd.h>
 
 #include "fat_structure.h"
 #include "library.h"
@@ -16,7 +15,7 @@ long write_same_file(int32_t *old_clusters, long new_file_clusters_size, char *b
 
 void create_values_from_clusters(const int32_t *clusters, int32_t *values, long size);
 
-void init_object(struct dir_file *object, char name[], int32_t file_size, int8_t file_type, int32_t first_cluster);
+void init_object(struct dir_file *object,const char name[], int32_t file_size, int8_t file_type, int32_t first_cluster);
 
 void print_all();
 
@@ -78,14 +77,16 @@ int main(){
 
 
     close_fat();
-    pause();
+    //pause();
 }
 
-int fat_init(char * fat_path){
+int fat_init(const char * fat_path){
 
-    p_file = fopen(fat_path, "r+");
-    if (p_file == NULL) {
-        printf("%d", errno);
+	errno_t err;
+
+    err = fopen_s(&p_file, fat_path, "r+");
+    if (err != 0) {
+        printf("%d", err);
         printf("Can't open file\n");
         return -1;
     }
@@ -123,7 +124,7 @@ int close_fat(){
  * @param act_fat_position pozice adresare ve kterem vytvarime soubor
  * @return chybovy kod nebo 0 pri uspechu
  */
-struct dir_file *fat_create_file(char *file_name, int32_t act_fat_position, long *dir_position) {
+struct dir_file *fat_create_file(const char *file_name, int32_t act_fat_position, long *dir_position) {
     struct dir_file *file = NULL;
     struct dir_file *new_local_file;
     int32_t *clusters = NULL;
@@ -277,9 +278,9 @@ void create_values_from_clusters(const int32_t *clusters, int32_t *values, long 
  * @param file_type typ objektu
  * @param first_cluster index prvniho clusteru objektu
  */
-void init_object(struct dir_file *object, char name[], int32_t file_size, int8_t file_type, int32_t first_cluster){
+void init_object(struct dir_file *object,const char name[], int32_t file_size, int8_t file_type, int32_t first_cluster){
     memset(object->file_name, 0, 12);
-    strcpy(object->file_name, name);
+    strcpy_s(object->file_name, 12, name);
     object->file_size = file_size;
     object->file_type = file_type;
     object->first_cluster = first_cluster;
@@ -292,7 +293,7 @@ void init_object(struct dir_file *object, char name[], int32_t file_size, int8_t
  * @param act_fat_position pozice adresare ve kterem hledame soubor
  * @return chybovy kod nebo 0 pri uspechu
  */
-int fat_delete_file_by_name(char *file_name, int32_t act_fat_position) {
+int fat_delete_file_by_name(const char *file_name, int32_t act_fat_position) {
 
     struct dir_file *file = NULL;
 
@@ -363,7 +364,7 @@ int fat_delete_file_by_file(struct dir_file *file, long position){
  * @param act_fat_position pozice adresare ve kterem hledame adresar
  * @return chybovy kod nebo 0 pri uspechu
  */
-struct dir_file *fat_create_dir(char *dir_name, int32_t act_fat_position, long *dir_position) {
+struct dir_file *fat_create_dir(const char *dir_name, int32_t act_fat_position, long *dir_position) {
     struct dir_file *file = NULL;
     struct dir_file *new_local_file;
     int32_t *clusters = NULL;
@@ -438,7 +439,7 @@ struct dir_file *fat_create_dir(char *dir_name, int32_t act_fat_position, long *
  * @param act_fat_position pozice adresare ve kterem hledame adresar
  * @return chybovy kod nebo 0 pri uspechu
  */
-int fat_delete_empty_dir(char *dir_name, int32_t act_fat_position) {
+int fat_delete_empty_dir(const char *dir_name, int32_t act_fat_position) {
     long position = 0;
     int32_t parent_position = 0;
     int32_t file_clusters_size = 0;
@@ -511,7 +512,7 @@ int fat_delete_empty_dir(char *dir_name, int32_t act_fat_position) {
  * @param act_fat_position pozice adresare ve kterem hledame soubor
  * @return nactena data nebo NULL pri neuspechu
  */
-char* read_object(int *ret_code, int *data_size, char file_name[], int32_t act_fat_position) {
+char* read_object(int *ret_code, int *data_size,const char file_name[], int32_t act_fat_position) {
     int32_t file_clusters_size = 0;
     struct dir_file *file = NULL;
     int *clusters = NULL;

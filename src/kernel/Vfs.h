@@ -4,6 +4,7 @@
 
 class Vfs
 {
+public:
 	struct super_block;
 	struct dentry;
 	struct file;
@@ -14,14 +15,14 @@ class Vfs
 		unsigned long long		s_maxbytes;			/* max file size */
 		struct Vfs::dentry		*s_root;			/* directory mount point */
 		unsigned int			s_count;			/* superblock ref count */
-		char					s_id[32];			/* text name */
+		std::string				s_id;				/* text name */
 	};
 
-	struct dentry{
+	struct dentry {
 		struct Vfs::super_block		*d_sb;				/* super block */
 		struct Vfs::dentry			*d_parent;			/* dentry objects of parent */
 
-		char						d_name[32];			/* dentry name */
+		std::string					d_name;				/* dentry name */
 		unsigned int 				d_count;			/* reference counter */
 		bool						d_mounted;			/* is this a mount point? */
 		unsigned long				d_position;			/* file position (cluster) */
@@ -40,7 +41,6 @@ class Vfs
 		unsigned long			position;		/* position in file */
 	};
 
-public:
 	Vfs();
 	~Vfs();
 
@@ -65,11 +65,11 @@ public:
 
 
 protected:
-	static struct Vfs::super_block sb;
-	static struct Vfs::file root_file;
+	struct Vfs::super_block sb; // TODO kdyz je static nejde prelozit (linker)
+	struct Vfs::file root_file;
 	
-	static const int OBJECT_DIRECTORY = 0;
-	static const int OBJECT_FILE = 1;
+	static const int VFS_OBJECT_DIRECTORY = 0;
+	static const int VFS_OBJECT_FILE = 1;
 
 	void init_super_block(
 		unsigned long s_blocksize,
@@ -77,12 +77,12 @@ protected:
 		unsigned long long s_maxbytes,
 		struct Vfs::dentry *s_root,
 		unsigned int s_count,
-		char s_id[32]);
+		std::string s_id);
 
 	struct Vfs::dentry* init_dentry(
 		struct Vfs::super_block *d_sb,
 		struct Vfs::dentry *d_parent,
-		char d_name[32],
+		std::string d_name,
 		unsigned int d_count,
 		bool d_mounted,
 		unsigned long d_position,
@@ -104,6 +104,6 @@ protected:
 
 	int sb_remove_dentry(struct Vfs::dentry * dentry);
 
-	struct Vfs::dentry *sb_find_dentry_in_dentry(struct Vfs::dentry * dentry, char name[]);
+	struct Vfs::dentry *sb_find_dentry_in_dentry(struct Vfs::dentry * dentry, std::string name);
 };
 

@@ -1,10 +1,11 @@
-#pragma once
+#include <string>
+
+#include "Vfs.h"
 
 extern "C" {
-	#include "FAT\fat.h"
+	#include "FAT/fat.h"
 	#include "FAT/fat_structure.h"
 }
-#include "Vfs.h"
 
 class VfsFat : public Vfs
 {
@@ -14,6 +15,7 @@ public:
 	~VfsFat();
 
 protected:
+
 	struct Vfs::file *create_dir(std::string absolute_path) = 0;
 	int remove_emtpy_dir(struct Vfs::file *file) = 0;
 	int read_dir(struct Vfs::file *file) = 0;
@@ -35,5 +37,4 @@ protected:
 
 private:
 	struct Vfs::dentry *VfsFat::find_object_in_directory(struct Vfs::dentry *mDentry, const std::string& dentry_name);
-	struct Vfs::dentry *VfsFat::find_object_by_path(std::string absolute_path, int object_type);
 };
