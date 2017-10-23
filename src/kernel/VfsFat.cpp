@@ -98,6 +98,7 @@ int VfsFat::remove_emtpy_dir(struct Vfs::file *file)
 
 int VfsFat::read_dir(struct Vfs::file *file)
 {
+
 	//TODO
 }
 
@@ -279,5 +280,13 @@ int VfsFat::remove_file(struct Vfs::file *file)
 
 int VfsFat::close_file(struct Vfs::file *file)
 {
-	//TODO
+	if (file == NULL || file->f_dentry == NULL) {
+		return -1;
+	}
+
+	file->f_dentry->d_count--;
+	Vfs::sb_remove_dentry(file->f_dentry); // !! cant close root dir
+
+	file->f_dentry = NULL;
+	return 0;
 }
