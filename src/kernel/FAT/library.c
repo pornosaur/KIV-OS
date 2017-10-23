@@ -75,6 +75,10 @@ int *get_file_clusters(struct dir_file *file, int32_t *clusters_size, int16_t cl
         *clusters_size += 1;
     }
 
+    if(*clusters_size == 0){
+        *clusters_size = 1;
+    }
+
     clusters = malloc(sizeof(int) * (*clusters_size) + 1);
 
     cluster_position = file->first_cluster;
@@ -154,7 +158,7 @@ struct dir_file *find_file(FILE *p_file, struct boot_record *boot_record, char f
  * @param max_entries maximalni pocet polozek ve slozce
  * @return
  */
-struct dir_file *get_object_in_dir(FILE *p_file, char name[], int32_t start_position, uint max_entries) {
+struct dir_file *get_object_in_dir(FILE *p_file,const char name[], int32_t start_position, uint max_entries) {
     uint i = 0;
     struct dir_file *object = (struct dir_file *) malloc(sizeof(struct dir_file));
 

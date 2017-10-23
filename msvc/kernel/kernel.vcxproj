@@ -21,20 +21,24 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\kernel\ConsoleInputStream.cpp" />
     <ClCompile Include="..\..\src\kernel\dllmain.cpp" />
+    <ClCompile Include="..\..\src\kernel\FAT\fat.c" />
     <ClCompile Include="..\..\src\kernel\handles.cpp" />
     <ClCompile Include="..\..\src\kernel\io.cpp" />
     <ClCompile Include="..\..\src\kernel\kernel.cpp" />
     <ClCompile Include="..\..\src\kernel\BinSemaphore.cpp" />
     <ClCompile Include="..\..\src\kernel\Vfs.cpp" />
+    <ClCompile Include="..\..\src\kernel\VfsFat.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\api\api.h" />
     <ClInclude Include="..\..\src\kernel\ConsoleInputStream.h" />
+    <ClInclude Include="..\..\src\kernel\FAT\fat.h" />
     <ClInclude Include="..\..\src\kernel\handles.h" />
     <ClInclude Include="..\..\src\kernel\io.h" />
     <ClInclude Include="..\..\src\kernel\kernel.h" />
     <ClInclude Include="..\..\src\kernel\BinSemaphore.h" />
     <ClInclude Include="..\..\src\kernel\Vfs.h" />
+    <ClInclude Include="..\..\src\kernel\VfsFat.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B4305463-59C5-40C3-9A1A-92976A40562D}</ProjectGuid>

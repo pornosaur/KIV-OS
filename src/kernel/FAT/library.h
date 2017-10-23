@@ -14,7 +14,7 @@ int *get_file_clusters(struct dir_file *file, int32_t *clusters_size, int16_t cl
 
 struct dir_file *find_file(FILE *p_file, struct boot_record *boot_record, char file_path[], uint start_of_root_dir, uint start_of_data, uint max_dir_entries);
 
-struct dir_file *get_object_in_dir(FILE * p_file, char name[], int32_t start_position, uint max_entries);
+struct dir_file *get_object_in_dir(FILE * p_file,const char name[], int32_t start_position, uint max_entries);
 
 struct dir_file *get_all_in_dir(FILE *p_file, int32_t *number_of_objects, long * positions, long start_position, uint max_entries);
 
