@@ -8,10 +8,6 @@ class Vfs
 	struct dentry;
 	struct file;
 
-	struct list_head {
-		void *first;
-	};
-
 	struct super_block {
 		unsigned long			s_blocksize;		/* block size in bytes */
 		bool					s_dirt;				/* dirty flag */
@@ -48,8 +44,6 @@ public:
 	Vfs();
 	~Vfs();
 
-
-
 	virtual struct Vfs::file *create_dir(std::string absolute_path) = 0;
 	virtual int remove_emtpy_dir(struct Vfs::file *file) = 0;
 	virtual int read_dir(struct Vfs::file *file) = 0;
@@ -78,14 +72,11 @@ protected:
 	static const int OBJECT_FILE = 1;
 
 	void init_super_block(
-		unsigned long s_blocksize, 
-		bool s_dirt, 
+		unsigned long s_blocksize,
+		bool s_dirt,
 		unsigned long long s_maxbytes,
-		struct Vfs::dentry *s_root, 
-		unsigned int s_count, 
-		struct Vfs::list_head *s_dentries, 
-		struct Vfs::list_head *s_dirty, 
-		struct Vfs::list_head *s_files, 
+		struct Vfs::dentry *s_root,
+		unsigned int s_count,
 		char s_id[32]);
 
 	struct Vfs::dentry* init_dentry(
@@ -105,7 +96,7 @@ protected:
 
 	struct Vfs::file *init_file(
 		struct Vfs::dentry *f_dentry,
-		unsigned int f_count, // TODO k cemu to je tady potreba
+		unsigned int f_count,
 		unsigned long position);
 
 

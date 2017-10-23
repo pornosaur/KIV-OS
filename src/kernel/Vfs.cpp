@@ -16,11 +16,8 @@ void Vfs::init_super_block(
 	unsigned long s_blocksize,
 	bool s_dirt,
 	unsigned long long s_maxbytes,
-	struct dentry *s_root,
+	struct Vfs::dentry *s_root,
 	unsigned int s_count,
-	struct list_head *s_dentries,
-	struct list_head *s_dirty, 
-	struct list_head *s_files, 
 	char s_id[32])
 {
 	Vfs::sb.s_blocksize = s_blocksize;
@@ -28,23 +25,23 @@ void Vfs::init_super_block(
 	Vfs::sb.s_maxbytes = s_maxbytes;
 	Vfs::sb.s_root = s_root;
 	Vfs::sb.s_count = s_count;
-	Vfs::sb.s_dentries = s_dentries;
-	Vfs::sb.s_dirty = s_dirty;
-	Vfs::sb.s_files = s_files;
 	strcpy(Vfs::sb.s_id, s_id);
 }
 
-struct Vfs::dentry* init_dentry(
+struct Vfs::dentry* Vfs::init_dentry(
 	struct Vfs::super_block *d_sb,
 	struct Vfs::dentry *d_parent,
 	char d_name[32],
 	unsigned int d_count,
 	bool d_mounted,
 	unsigned long d_position,
+	unsigned long d_file_position,
 	unsigned int d_file_type,
 	unsigned long d_size,
 	unsigned int d_blocks,
-	unsigned char d_dirt)
+	unsigned char d_dirt,
+	struct Vfs::dentry *d_subdirectories,
+	struct Vfs::dentry *d_next_subdir)
 {
 	struct Vfs::dentry *d_entry = (struct Vfs::dentry*)malloc(sizeof(struct Vfs::dentry));
 	d_entry->d_sb = d_sb;
@@ -52,16 +49,24 @@ struct Vfs::dentry* init_dentry(
 	strcpy(d_entry->d_name, d_name);
 	d_entry->d_count = d_count;
 	d_entry->d_mounted = d_mounted;
-	d_entry->d_position= d_position;
+	d_entry->d_position = d_position;
+	d_entry->d_file_position = d_file_position;
 	d_entry->d_file_type = d_file_type;
 	d_entry->d_size = d_size;
 	d_entry->d_blocks = d_blocks;
 	d_entry->d_dirt = d_dirt;
+	d_entry->d_subdirectories = d_subdirectories;
+	d_entry->d_next_subdir = d_next_subdir;
+
+
 	
 	return d_entry;
 }
 
-struct Vfs::file *init_file(struct Vfs::list_head f_list, struct Vfs::dentry *f_dentry, unsigned int f_count, unsigned long f_file_position)
+struct Vfs::file *Vfs::init_file(
+	struct Vfs::dentry *f_dentry,
+	unsigned int f_count,
+	unsigned long position)
 {
 	struct Vfs::file *file = (struct Vfs::file*)malloc(sizeof(struct Vfs::file));
 	file->f_dentry = f_dentry;
