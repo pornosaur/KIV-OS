@@ -13,6 +13,10 @@ VfsFat::VfsFat()
 	struct Vfs::dentry *root = Vfs::init_dentry(&(Vfs::sb), NULL, "C:", 1, 1, 0, start_of_root_dir, VFS_OBJECT_DIRECTORY, 
 		boot_record->cluster_size * boot_record->dir_clusters, boot_record->dir_clusters, 0, NULL, NULL);
 
+	Vfs::root_file.f_count = 0;
+	Vfs::root_file.f_dentry = root;
+	Vfs::root_file.position = 0;
+
 	Vfs::sb.s_root = root;
 }
 
