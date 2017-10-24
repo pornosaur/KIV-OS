@@ -23,7 +23,6 @@ ConsoleInputStream::ConsoleInputStream() {
 }
 
 ConsoleInputStream::~ConsoleInputStream() {
-	CloseHandle(mStdIn);
 }
 
 int ConsoleInputStream::read(){

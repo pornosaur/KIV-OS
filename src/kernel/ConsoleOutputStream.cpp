@@ -21,7 +21,6 @@ ConsoleOutputStream::ConsoleOutputStream(bool is_std_err) {
 }
 
 ConsoleOutputStream::~ConsoleOutputStream() {
-	CloseHandle(mStdOut);
 }
 
 int ConsoleOutputStream::write(char c){
