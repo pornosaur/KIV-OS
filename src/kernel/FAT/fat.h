@@ -39,6 +39,18 @@ struct dir_file *fat_read_dir(int32_t act_fat_position, int32_t *files);
 
 char *read_object(int *ret_code, int *data_size, const char file_name[], int32_t act_fat_position);
 
+int is_boot_record_init();
+
+int16_t get_cluster_size();
+
+int32_t get_fat_size_in_bytes();
+
+int16_t get_dir_clusters();
+
+int32_t get_dir_size_in_bytes();
+
+unsigned int get_start_of_root_dir();
+
 
 
 #endif

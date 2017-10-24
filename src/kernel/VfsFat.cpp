@@ -3,15 +3,20 @@
 VfsFat::VfsFat()
 {
 	fat_init("output.fat");
+	if (result != 0 || !is_boot_record_init())
+	{
+		std::cout << "boot record is null" << std::endl;
+		return; // TODO rict systemu ze nelze pracovat s FAT
+	}
 
 
 	Vfs::init_super_block(
-		boot_record->cluster_size, 0,
-		boot_record->usable_cluster_count * boot_record->cluster_size,
+		get_cluster_size(), 0,
+		get_fat_size_in_bytes(),
 		NULL, 1, "FAT_DISK");
 
-	struct Vfs::dentry *root = Vfs::init_dentry(&(Vfs::sb), NULL, "C:", 1, 1, 0, start_of_root_dir, VFS_OBJECT_DIRECTORY, 
-		boot_record->cluster_size * boot_record->dir_clusters, boot_record->dir_clusters, 0, NULL, NULL);
+	struct Vfs::dentry *root = Vfs::init_dentry(&(Vfs::sb), NULL, "C:", 1, 1, 0, get_start_of_root_dir(), VFS_OBJECT_DIRECTORY,
+		get_dir_size_in_bytes(), get_dir_clusters(), 0, NULL, NULL);
 
 	Vfs::root_file.f_count = 0;
 	Vfs::root_file.f_dentry = root;
@@ -66,7 +71,7 @@ struct Vfs::file *VfsFat::create_dir(std::string absolute_path)
 		}
 
 		fDentry = Vfs::init_dentry(&(Vfs::sb), mDentry, absolute_path.substr(start, end), 0, 0, dirFile->first_cluster, dir_position, dirFile->file_type,
-			dirFile->file_size, (long) ceil(dirFile->file_size / boot_record->cluster_size), 0, NULL, NULL);
+			dirFile->file_size, (long) ceil(dirFile->file_size / get_cluster_size()), 0, NULL, NULL);
 		fDentry->d_next_subdir = mDentry->d_subdirectories;
 		mDentry->d_subdirectories = fDentry;
 		mDentry->d_count++;
@@ -144,7 +149,7 @@ struct Vfs::file *VfsFat::create_file(std::string absolute_path)
 		}
 
 		fDentry = Vfs::init_dentry(&(Vfs::sb), mDentry, absolute_path.substr(start, end), 0, 0, dirFile->first_cluster, dir_position, dirFile->file_type,
-			dirFile->file_size, (long) ceil(dirFile->file_size / boot_record->cluster_size), 0, NULL, NULL);
+			dirFile->file_size, (long) ceil(dirFile->file_size / get_cluster_size()), 0, NULL, NULL);
 		fDentry->d_next_subdir = mDentry->d_subdirectories;
 		mDentry->d_subdirectories = fDentry;
 		mDentry->d_count++;
@@ -216,7 +221,7 @@ struct Vfs::dentry *VfsFat::find_object_in_directory(struct Vfs::dentry *mDentry
 		}
 
 		fDentry = Vfs::init_dentry(&(Vfs::sb), mDentry, dentry_name, 0, 0, dirFile->first_cluster, dir_position, dirFile->file_type,
-			dirFile->file_size, (long)ceil(dirFile->file_size / boot_record->cluster_size), 0, NULL, NULL);
+			dirFile->file_size, (long)ceil(dirFile->file_size / get_cluster_size()), 0, NULL, NULL);
 		fDentry->d_next_subdir = mDentry->d_subdirectories;
 		mDentry->d_subdirectories = fDentry;
 		mDentry->d_count++;
@@ -242,7 +247,7 @@ int VfsFat::write_to_file(struct Vfs::file *file, char *buffer, int buffer_size)
 
 	if (writed_size != 0) {
 		file->f_dentry->d_size = dirFile.file_size;
-		file->f_dentry->d_blocks = (unsigned int) ceil(dirFile.file_size / boot_record->cluster_size);
+		file->f_dentry->d_blocks = (unsigned int) ceil(dirFile.file_size / get_cluster_size());
 	}
 
 	return writed_size;

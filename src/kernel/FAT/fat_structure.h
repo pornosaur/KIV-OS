@@ -26,7 +26,7 @@ struct dir_file{
     char file_name[12];             //8+3 format + '/0'
     int8_t file_type;               //1 = soubor, 0 = adresar
     int32_t file_size;              //pocet znaku v souboru
-    unsigned long first_cluster;          //cluster ve FAT, kde soubor zacina
+    int32_t first_cluster;          //cluster ve FAT, kde soubor zacina
 };
 
 #endif

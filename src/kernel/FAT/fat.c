@@ -842,3 +842,35 @@ void print_all() {
 
     print_directory(p_file, files, number_of_objects, boot_record->cluster_size, start_of_data, max_dir_entries, 1);
 }
+
+
+int is_boot_record_init()
+{
+	return boot_record != NULL;
+}
+
+int16_t get_cluster_size()
+{
+	boot_record->cluster_size;
+}
+
+int32_t get_fat_size_in_bytes()
+{
+	boot_record->usable_cluster_count * boot_record->cluster_size;
+}
+
+
+int16_t get_dir_clusters()
+{
+	return boot_record->dir_clusters;
+}
+
+int32_t get_dir_size_in_bytes()
+{
+	boot_record->cluster_size * boot_record->dir_clusters;
+}
+
+unsigned int get_start_of_root_dir()
+{
+	return start_of_root_dir;
+}

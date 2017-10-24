@@ -1,7 +1,6 @@
 #include "Vfs.h"
 
 
-
 Vfs::Vfs()
 {
 }
@@ -43,7 +42,8 @@ struct Vfs::dentry* Vfs::init_dentry(
 	struct Vfs::dentry *d_subdirectories,
 	struct Vfs::dentry *d_next_subdir)
 {
-	struct Vfs::dentry *d_entry = (struct Vfs::dentry*)malloc(sizeof(struct Vfs::dentry));
+	struct Vfs::dentry *d_entry = new struct Vfs::dentry();
+	//struct Vfs::dentry *d_entry = (struct Vfs::dentry*)malloc(sizeof(struct Vfs::dentry));
 	d_entry->d_sb = d_sb;
 	d_entry->d_parent = d_parent;
 	d_entry->d_name = d_name;
@@ -68,7 +68,8 @@ struct Vfs::file *Vfs::init_file(
 	unsigned int f_count,
 	unsigned long position)
 {
-	struct Vfs::file *file = (struct Vfs::file*)malloc(sizeof(struct Vfs::file));
+	struct Vfs::file *file = new struct Vfs::file();
+	//struct Vfs::file *file = (struct Vfs::file*)malloc(sizeof(struct Vfs::file));
 	file->f_dentry = f_dentry;
 	file->f_count = f_count;
 
@@ -113,7 +114,8 @@ int Vfs::sb_remove_dentry(struct Vfs::dentry *mDentry) {
 			}
 		}
 	}
-	free(mDentry);
+	delete mDentry;
+	//free(mDentry);
 
 	parent->d_count--;
 	Vfs::sb_remove_dentry(parent);
