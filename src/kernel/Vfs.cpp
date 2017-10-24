@@ -82,6 +82,8 @@ int Vfs::sb_remove_file(struct Vfs::file *file) {
 
 	file->f_dentry->d_count--;
 	Vfs::sb_remove_dentry(file->f_dentry); // nesmaze se kdyz na nej nekdo odkazuje
+
+	return 0;
 }
 
 int Vfs::sb_remove_dentry(struct Vfs::dentry *mDentry) {
@@ -96,7 +98,7 @@ int Vfs::sb_remove_dentry(struct Vfs::dentry *mDentry) {
 	{
 		if (parent->d_subdirectories == mDentry)
 		{
-			parent->d_subdirectories == mDentry->d_next_subdir;
+			parent->d_subdirectories = mDentry->d_next_subdir;
 		}
 		else
 		{

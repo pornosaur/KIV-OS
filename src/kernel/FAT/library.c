@@ -119,7 +119,7 @@ struct dir_file *find_file(FILE *p_file, struct boot_record *boot_record, char f
     struct dir_file *object = NULL;
     unsigned int position = start_of_root_dir;
     unsigned int max_entries = max_dir_entries;
-	int length = 0;
+	size_t length = 0;
 
 	length = strlen(file_path);
     path = malloc(length*sizeof(char));

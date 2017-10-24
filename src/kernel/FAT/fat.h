@@ -21,7 +21,7 @@ static int32_t *fat1 = NULL;
 static int32_t *fat2 = NULL;
 
 int fat_init(const char *fat_name);
-int close_fat();
+void close_fat();
 
 struct dir_file *fat_create_file(const char *file_name, int32_t act_fat_position, long *dir_position);
 struct dir_file *fat_get_object_info_by_name(const char *file_name, int32_t act_fat_position, long *dir_position);

@@ -21,13 +21,13 @@ void print_all();
 
 
 
-int main(){
-    fat_init("../output.fat");
+//int main(){
+//    fat_init("../output.fat");
 
-    fat_delete_file_by_name("pokus", 0);
+//    fat_delete_file_by_name("pokus", 0);
 
 
-    print_all();
+//    print_all();
 
 //    long dir_position = 0;
 //    struct dir_file* new_file;
@@ -48,9 +48,9 @@ int main(){
 //    red = fat_read_file(*new_file, buffer, 100, 100);
 //    printf("%li - %.*s\n", red, (int) red, buffer);
 
-    int data_size = 0;
-    int ret_code = 0;
-    printf("%d - %.*s\n",data_size,data_size, read_object(&ret_code,&data_size, "b.txt", 0));
+//    int data_size = 0;
+//    int ret_code = 0;
+//    printf("%d - %.*s\n",data_size,data_size, read_object(&ret_code,&data_size, "b.txt", 0));
 
 
 
@@ -76,9 +76,9 @@ int main(){
 //    printf("%d\n", result);
 
 
-    close_fat();
+//    close_fat();
     //pause();
-}
+//}
 
 int fat_init(const char * fat_path){
 
@@ -105,9 +105,11 @@ int fat_init(const char * fat_path){
     fseek(p_file, start_of_fat, SEEK_SET);
     fat1 = get_fat(p_file, fat_record_size, boot_record->usable_cluster_count, fat_size);
     fat2 = get_fat(p_file, fat_record_size, boot_record->usable_cluster_count, fat_size);
+	
+	return 0;
 }
 
-int close_fat(){
+void close_fat(){
     free(boot_record);
     free(fat1);
     free(fat2);

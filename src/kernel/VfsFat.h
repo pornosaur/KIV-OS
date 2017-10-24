@@ -14,8 +14,6 @@ public:
 	VfsFat();
 	~VfsFat();
 
-protected:
-
 	struct Vfs::file *create_dir(std::string absolute_path);
 	int remove_emtpy_dir(struct Vfs::file *file);
 	int read_dir(struct Vfs::file *file);
