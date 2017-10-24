@@ -8,6 +8,9 @@
 #define PIPE		'\x7C'
 #define LF			'\x0A'
 
+#define CMD_ARG			0
+#define CMD_INPUT		1
+
 namespace kiv_os_cmd {
 
 	struct redirect_t {
@@ -17,7 +20,7 @@ namespace kiv_os_cmd {
 
 	struct cmd_item_t {
 		std::string command = "";
-		std::list<std::string> args;
+		std::list<std::string> args;	//TODO: RECOGNIZE arg or input
 		bool is_redirect = false;
 		struct redirect_t redirect;
 	};

@@ -76,6 +76,7 @@ bool kiv_os_cmd::Arguments::Parse_Args(struct cmd_item_t& cmd_item, const std::s
 		
 
 		while (std::regex_search(str_args, m_args, r_args)) {
+			//TODO: RECOGNIZE args with '-' or '--' and input to command.
 			cmd_item.args.push_back(!m_args[1].str().empty() ? m_args[1].str() : m_args[2].str());
 			str_args = m_args.suffix();
 		}
@@ -91,22 +92,22 @@ bool kiv_os_cmd::Arguments::Parse_Args(struct cmd_item_t& cmd_item, const std::s
 bool kiv_os_cmd::Arguments::Parse_Redirect(struct cmd_item_t& cmd_item, std::string& args)
 {
 	std::smatch m_redirect;
-	static std::regex r_redirect("^([^\\>]*)([\\>]+)([^\\>]*)&");
+	static std::regex r_redirect("\\s*([^\\>]*)(\\s([\\>]{1,2})\\s)\\s*([^\\>^\\s]*)");
 
-	if (std::regex_match(args, m_redirect, r_redirect)) {
-		if (m_redirect[1].str().empty() || (m_redirect[2].str().size() > 2) || m_redirect[3].str().empty()) {
+	if (std::regex_search(args, m_redirect, r_redirect)) {
+		if (m_redirect[1].str().empty() || m_redirect[2].str().empty() || m_redirect[4].str().empty()) {
 			return false;
 		}
 
-		if (*m_redirect[1].str().end() != SPACE || *m_redirect[3].str().begin() != SPACE) {
+		if ((*(m_redirect[2].str().end() - 1) != SPACE) || (*m_redirect[2].str().begin() != SPACE)) {
 			return false;
 		}
 
 		//TODO: multiple redirect !!!
 
 		cmd_item.is_redirect = true;
-		cmd_item.redirect.append = (m_redirect[2].str().size() == 2);
-		cmd_item.redirect.dest = std::string(m_redirect[3].str());
+		cmd_item.redirect.append = (m_redirect[3].str().size() == 2);
+		cmd_item.redirect.dest = std::string(m_redirect[4].str());
 		args = std::string(m_redirect[1].str());
 	}
 	
