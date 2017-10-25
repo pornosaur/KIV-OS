@@ -186,7 +186,7 @@ struct dir_file *fat_create_file(const char *file_name, int32_t act_fat_position
     }
 
     new_local_file = malloc(sizeof(struct dir_file));
-    init_object(new_local_file, file_name, 0, OBJECT_FILE, clusters[0]);
+    init_object(new_local_file, file_name, 1, OBJECT_FILE, clusters[0]);
 
     write_to_dir(p_file, *new_local_file, (int32_t) *dir_position);
 
@@ -851,12 +851,12 @@ int is_boot_record_init()
 
 int16_t get_cluster_size()
 {
-	boot_record->cluster_size;
+	return boot_record->cluster_size;
 }
 
 int32_t get_fat_size_in_bytes()
 {
-	boot_record->usable_cluster_count * boot_record->cluster_size;
+	return boot_record->usable_cluster_count * boot_record->cluster_size;
 }
 
 
@@ -867,7 +867,7 @@ int16_t get_dir_clusters()
 
 int32_t get_dir_size_in_bytes()
 {
-	boot_record->cluster_size * boot_record->dir_clusters;
+	return boot_record->cluster_size * boot_record->dir_clusters;
 }
 
 unsigned int get_start_of_root_dir()

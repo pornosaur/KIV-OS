@@ -41,6 +41,9 @@ public:
 		unsigned long			position;		/* position in file */
 	};
 
+	static const int VFS_OBJECT_DIRECTORY = 0;
+	static const int VFS_OBJECT_FILE = 1;
+
 	Vfs();
 	~Vfs();
 
@@ -67,9 +70,6 @@ public:
 protected:
 	struct Vfs::super_block sb; // TODO kdyz je static nejde prelozit (linker)
 	struct Vfs::file root_file;
-	
-	static const int VFS_OBJECT_DIRECTORY = 0;
-	static const int VFS_OBJECT_FILE = 1;
 
 	void init_super_block(
 		unsigned long s_blocksize,

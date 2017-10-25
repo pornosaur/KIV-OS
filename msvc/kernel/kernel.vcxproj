@@ -27,6 +27,7 @@
     <ClCompile Include="..\..\src\kernel\io.cpp" />
     <ClCompile Include="..\..\src\kernel\kernel.cpp" />
     <ClCompile Include="..\..\src\kernel\BinSemaphore.cpp" />
+    <ClCompile Include="..\..\src\kernel\Test_vfs.cpp" />
     <ClCompile Include="..\..\src\kernel\Vfs.cpp" />
     <ClCompile Include="..\..\src\kernel\VfsFat.cpp" />
   </ItemGroup>
@@ -40,6 +41,7 @@
     <ClInclude Include="..\..\src\kernel\io.h" />
     <ClInclude Include="..\..\src\kernel\kernel.h" />
     <ClInclude Include="..\..\src\kernel\BinSemaphore.h" />
+    <ClInclude Include="..\..\src\kernel\Test_vfs.h" />
     <ClInclude Include="..\..\src\kernel\Vfs.h" />
     <ClInclude Include="..\..\src\kernel\VfsFat.h" />
   </ItemGroup>
