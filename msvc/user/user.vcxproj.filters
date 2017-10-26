@@ -33,9 +33,6 @@
     <ClCompile Include="..\..\src\user\commands.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\user\Arguments.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\user\rtl.h">
@@ -54,9 +51,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\user\commands.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\user\Arguments.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
