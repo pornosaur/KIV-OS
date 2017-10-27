@@ -23,6 +23,7 @@ class Test_vfs
 
 		// CREATE FILE
 		void create_new_file();
+		void create_new_file_not_in_root();
 		void create_new_file_with_long_name();
 		void create_new_file_with_bad_path();
 		void create_existing_file();
@@ -40,6 +41,17 @@ class Test_vfs
 		void create_dir_not_in_root();
 		void create_dir_with_too_long_name();
 		void create_dir_in_not_exist_path();
+
+		// REMOVE DIR
+		void remove_dir();
+		void try_delete_not_empty_dir();
+		void try_delete_not_exist_dir();
+		void try_delete_root();
+
+		// OPEN DIR
+		void open_normal_dir();
+		void open_not_exist_dir();
+		void open_dir_with_long_name();
 
 
 };

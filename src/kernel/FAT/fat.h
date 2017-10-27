@@ -14,7 +14,6 @@ static unsigned int fat_record_size = 0;
 static unsigned int fat_size = 0;
 static unsigned int start_of_root_dir = 0;
 static unsigned int max_dir_entries = 0;
-static unsigned int start_of_data = 0;
 
 static struct boot_record *boot_record = NULL;
 static int32_t *fat1 = NULL;

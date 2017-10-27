@@ -51,7 +51,7 @@ public:
 	virtual int remove_emtpy_dir(struct Vfs::file **file) = 0;
 	virtual int read_dir(struct Vfs::file *file) = 0;
 	
-	virtual struct Vfs::file *open_file(std::string absolute_path) = 0;
+	virtual struct Vfs::file *open_object(std::string absolute_path, int type) = 0;
 	virtual struct Vfs::file *create_file(std::string absolute_path) = 0; /* smaze jiz existujici soubor, existuje-li*/
 	virtual int write_to_file(struct Vfs::file *file, char *buffer, int buffer_size) = 0;
 	virtual int read_file(struct Vfs::file *file, char *buffer, int buffer_size) = 0;
