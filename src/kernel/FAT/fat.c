@@ -140,12 +140,12 @@ struct dir_file *fat_create_file(const char *file_name, int32_t act_fat_position
         return NULL;
     }
 
-    if(strlen(file_name) > 12){
+    if(strlen(file_name) > NAME_SIZE){
         //return 2;
         return NULL;
     }
 
-    if(act_fat_position > 0 && act_fat_position < boot_record->usable_cluster_count){
+    if(act_fat_position < 0 || act_fat_position >= boot_record->usable_cluster_count){
         //return 9;
         return NULL;
     }
@@ -213,12 +213,12 @@ struct dir_file *fat_get_object_info_by_name(const char *file_name, int32_t act_
         return NULL;
     }
 
-    if(strlen(file_name) > 12){
+    if(strlen(file_name) > NAME_SIZE){
         //return 2;
         return NULL;
     }
 
-    if(act_fat_position > 0 && act_fat_position < boot_record->usable_cluster_count){
+    if(act_fat_position < 0 || act_fat_position >= boot_record->usable_cluster_count){
         //return 9;
         return NULL;
     }
@@ -240,12 +240,12 @@ struct dir_file *get_file_info(char file_name[], int32_t act_fat_position){
         return NULL;
     }
 
-    if(strlen(file_name) > 12){
+    if(strlen(file_name) > NAME_SIZE){
         //return 2;
         return NULL;
     }
 
-    if(act_fat_position > 0 && act_fat_position < boot_record->usable_cluster_count){
+    if(act_fat_position < 0 || act_fat_position >= boot_record->usable_cluster_count){
         //return 9;
         return NULL;
     }
@@ -281,8 +281,8 @@ void create_values_from_clusters(const int32_t *clusters, int32_t *values, long 
  * @param first_cluster index prvniho clusteru objektu
  */
 void init_object(struct dir_file *object,const char name[], int32_t file_size, int8_t file_type, int32_t first_cluster){
-    memset(object->file_name, 0, 12);
-    strcpy_s(object->file_name, 12, name);
+    memset(object->file_name, 0, NAME_SIZE + 1);
+    strcpy_s(object->file_name, NAME_SIZE + 1, name);
     object->file_size = file_size;
     object->file_type = file_type;
     object->first_cluster = first_cluster;
@@ -306,11 +306,11 @@ int fat_delete_file_by_name(const char *file_name, int32_t act_fat_position) {
         return 1;
     }
 
-    if(strlen(file_name) > 12){
+    if(strlen(file_name) > NAME_SIZE){
         return 2;
     }
 
-    if(act_fat_position > 0 && act_fat_position < boot_record->usable_cluster_count){
+    if(act_fat_position < 0 || act_fat_position >= boot_record->usable_cluster_count){
         return 9;
     }
 
@@ -379,12 +379,12 @@ struct dir_file *fat_create_dir(const char *dir_name, int32_t act_fat_position, 
         return NULL;
     }
 
-    if(strlen(dir_name) > 12){
+    if(strlen(dir_name) > NAME_SIZE){
 //        return 2;
         return NULL;
     }
 
-    if(act_fat_position > 0 && act_fat_position < boot_record->usable_cluster_count){
+    if(act_fat_position < 0 || act_fat_position >= boot_record->usable_cluster_count){
 //        return 9;
         return NULL;
     }
@@ -455,11 +455,11 @@ int fat_delete_empty_dir(const char *dir_name, int32_t act_fat_position) {
         return 1;
     }
 
-    if(strlen(dir_name) > 12){
+    if(strlen(dir_name) > NAME_SIZE){
         return 2;
     }
 
-    if(act_fat_position > 0 && act_fat_position < boot_record->usable_cluster_count){
+    if(act_fat_position < 0 || act_fat_position >= boot_record->usable_cluster_count){
         return 9;
     }
 
@@ -530,12 +530,12 @@ char* read_object(int *ret_code, int *data_size,const char file_name[], int32_t 
         return NULL;
     }
 
-    if(strlen(file_name) > 12){
+    if(strlen(file_name) > NAME_SIZE){
         *ret_code = 2;
         return NULL;
     }
 
-    if(act_fat_position > 0 && act_fat_position < boot_record->usable_cluster_count){
+    if(act_fat_position < 0 || act_fat_position >= boot_record->usable_cluster_count){
         *ret_code = 9;
         return NULL;
     }
@@ -801,7 +801,7 @@ struct dir_file *fat_read_dir(int32_t act_fat_position, int32_t *files) {
         return NULL;
     }
 
-    if(act_fat_position > 0 && act_fat_position < boot_record->usable_cluster_count){
+    if(act_fat_position < 0 || act_fat_position >= boot_record->usable_cluster_count){
         return NULL;
     }
 

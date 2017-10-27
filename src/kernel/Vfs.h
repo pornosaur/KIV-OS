@@ -48,16 +48,16 @@ public:
 	~Vfs();
 
 	virtual struct Vfs::file *create_dir(std::string absolute_path) = 0;
-	virtual int remove_emtpy_dir(struct Vfs::file *file) = 0;
+	virtual int remove_emtpy_dir(struct Vfs::file **file) = 0;
 	virtual int read_dir(struct Vfs::file *file) = 0;
 	
 	virtual struct Vfs::file *open_file(std::string absolute_path) = 0;
 	virtual struct Vfs::file *create_file(std::string absolute_path) = 0; /* smaze jiz existujici soubor, existuje-li*/
 	virtual int write_to_file(struct Vfs::file *file, char *buffer, int buffer_size) = 0;
 	virtual int read_file(struct Vfs::file *file, char *buffer, int buffer_size) = 0;
-	virtual int remove_file(struct Vfs::file *file) = 0;
+	virtual int remove_file(struct Vfs::file **file) = 0;
 
-	virtual int close_file(struct Vfs::file *file) = 0;
+	virtual int close_file(struct Vfs::file **file) = 0;
 
 	//virtual int set_file_position(struct Vfs::file *file) = 0;
 	//virtual int get_file_position(struct Vfs::file *file) = 0;
@@ -100,7 +100,7 @@ protected:
 		unsigned long position);
 
 
-	int sb_remove_file(struct Vfs::file *file);
+	int sb_remove_file(struct Vfs::file **file);
 
 	int sb_remove_dentry(struct Vfs::dentry * dentry);
 

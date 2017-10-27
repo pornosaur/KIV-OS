@@ -43,7 +43,6 @@ struct Vfs::dentry* Vfs::init_dentry(
 	struct Vfs::dentry *d_next_subdir)
 {
 	struct Vfs::dentry *d_entry = new struct Vfs::dentry();
-	//struct Vfs::dentry *d_entry = (struct Vfs::dentry*)malloc(sizeof(struct Vfs::dentry));
 	d_entry->d_sb = d_sb;
 	d_entry->d_parent = d_parent;
 	d_entry->d_name = d_name;
@@ -69,20 +68,26 @@ struct Vfs::file *Vfs::init_file(
 	unsigned long position)
 {
 	struct Vfs::file *file = new struct Vfs::file();
-	//struct Vfs::file *file = (struct Vfs::file*)malloc(sizeof(struct Vfs::file));
 	file->f_dentry = f_dentry;
 	file->f_count = f_count;
 
 	return file;
 }
 
-int Vfs::sb_remove_file(struct Vfs::file *file) {
-	if (file == NULL || file->f_dentry == NULL) {
+int Vfs::sb_remove_file(struct Vfs::file **file) {
+	if ((*file) == NULL) {
 		return -1;
 	}
 
-	file->f_dentry->d_count--;
-	Vfs::sb_remove_dentry(file->f_dentry); // nesmaze se kdyz na nej nekdo odkazuje
+	if ((*file)->f_dentry != NULL)
+	{
+		(*file)->f_dentry->d_count--;
+		Vfs::sb_remove_dentry((*file)->f_dentry); // nesmaze se kdyz na nej nekdo odkazuje
+		(*file)->f_dentry = NULL;
+	}
+
+	delete *file;
+	(*file) = NULL;
 
 	return 0;
 }
@@ -115,7 +120,6 @@ int Vfs::sb_remove_dentry(struct Vfs::dentry *mDentry) {
 		}
 	}
 	delete mDentry;
-	//free(mDentry);
 
 	parent->d_count--;
 	Vfs::sb_remove_dentry(parent);

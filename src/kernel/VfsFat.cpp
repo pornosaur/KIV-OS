@@ -88,14 +88,14 @@ struct Vfs::file *VfsFat::create_dir(std::string absolute_path)
 	return Vfs::init_file(fDentry, 0, 0);
 }
 
-int VfsFat::remove_emtpy_dir(struct Vfs::file *file)
+int VfsFat::remove_emtpy_dir(struct Vfs::file **file)
 {
-	if (file == NULL || file->f_dentry == NULL || file->f_dentry->d_parent == NULL || file->f_dentry->d_file_type != 0) {
+	if (*file == NULL || (*file)->f_dentry == NULL || (*file)->f_dentry->d_parent == NULL || (*file)->f_dentry->d_file_type != 0) {
 		// TODO mohu vymazat File, protoze f_dentry je NULL
 		return -1;
 	}
 
-	int result = fat_delete_empty_dir(file->f_dentry->d_name.c_str(), file->f_dentry->d_parent->d_position);
+	int result = fat_delete_empty_dir((*file)->f_dentry->d_name.c_str(), (*file)->f_dentry->d_parent->d_position);
 
 	if (result == 0) {
 		Vfs::sb_remove_file(file);
@@ -275,31 +275,32 @@ int VfsFat::read_file(struct Vfs::file *file, char *buffer, int buffer_size)
 	return fat_read_file(dirFile, buffer, buffer_size, file->position);
 }
 
-int VfsFat::remove_file(struct Vfs::file *file)
+int VfsFat::remove_file(struct Vfs::file **file)
 {
-	if (file == NULL || file->f_dentry == NULL || file->f_dentry->d_file_type != 1) {
+	if (*file == NULL || (*file)->f_dentry == NULL || (*file)->f_dentry->d_file_type != 1) {
 		// TODO mohu vymazat File, protoze f_dentry je NULL
 		return -1;
 	}
 
-	int result = fat_delete_file_by_name(file->f_dentry->d_name.c_str(), file->f_dentry->d_parent->d_position);
+	int result = fat_delete_file_by_name((*file)->f_dentry->d_name.c_str(), (*file)->f_dentry->d_parent->d_position);
 
 	if (result == 0) {
 		sb_remove_file(file);
+	}
+	else {
+		return -1;
 	}
 
 	return 0;
 }
 
-int VfsFat::close_file(struct Vfs::file *file)
+int VfsFat::close_file(struct Vfs::file **file)
 {
-	if (file == NULL || file->f_dentry == NULL) {
+	if (*file == NULL)
+	{
 		return -1;
 	}
 
-	file->f_dentry->d_count--;
-	Vfs::sb_remove_dentry(file->f_dentry); // !! cant close root dir
-
-	file->f_dentry = NULL;
+	Vfs::sb_remove_file(file);
 	return 0;
 }

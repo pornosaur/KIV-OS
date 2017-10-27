@@ -9,6 +9,7 @@ static const int32_t FAT_BAD_CLUSTER = INT32_MAX - 3;
 
 static const int OBJECT_DIRECTORY = 0;
 static const int OBJECT_FILE = 1;
+static const int NAME_SIZE = 11;
 
 struct boot_record {
     char volume_descriptor[256];               //popis
