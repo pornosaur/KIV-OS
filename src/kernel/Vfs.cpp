@@ -11,20 +11,25 @@ Vfs::~Vfs()
 }
 
 
-void Vfs::init_super_block(
+struct Vfs::super_block *Vfs::init_super_block(
 	unsigned long s_blocksize,
 	bool s_dirt,
 	unsigned long long s_maxbytes,
 	struct Vfs::dentry *s_root,
 	unsigned int s_count,
 	std::string s_id)
-{
-	Vfs::sb.s_blocksize = s_blocksize;
-	Vfs::sb.s_dirt = s_dirt;
-	Vfs::sb.s_maxbytes = s_maxbytes;
-	Vfs::sb.s_root = s_root;
-	Vfs::sb.s_count = s_count;
-	Vfs::sb.s_id = s_id;
+{	
+	struct Vfs::super_block *s_block = new struct Vfs::super_block();
+	s_block -> s_blocksize = s_blocksize;
+	s_block -> s_dirt = s_dirt;
+	s_block -> s_maxbytes = s_maxbytes;
+	s_block -> s_root = s_root;
+	s_block -> s_count = s_count;
+	s_block -> s_id = s_id;
+	s_block -> s_next = Vfs::sb;
+
+	Vfs::sb = s_block;
+	return s_block;
 }
 
 struct Vfs::dentry* Vfs::init_dentry(
@@ -56,8 +61,6 @@ struct Vfs::dentry* Vfs::init_dentry(
 	d_entry->d_dirt = d_dirt;
 	d_entry->d_subdirectories = d_subdirectories;
 	d_entry->d_next_subdir = d_next_subdir;
-
-
 	
 	return d_entry;
 }
@@ -72,6 +75,22 @@ struct Vfs::file *Vfs::init_file(
 	file->f_count = f_count;
 
 	return file;
+}
+
+Vfs::super_block * Vfs::find_super_block_by_name(std::string name)
+{
+	struct Vfs::super_block *sb = Vfs::sb;
+
+	while (sb != NULL) {
+
+		if(sb->s_root->d_name == name)
+		{
+			return sb;
+		}
+		sb = sb->s_next;
+	}
+
+	return NULL;
 }
 
 int Vfs::sb_remove_file(struct Vfs::file **file) {

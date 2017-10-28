@@ -32,4 +32,6 @@ public:
 
 private:
 	struct Vfs::dentry *VfsFat::find_object_in_directory(struct Vfs::dentry *mDentry, const std::string& dentry_name, int type);
+
+	struct Vfs::dentry *VfsFat::find_path(std::string absolute_path, size_t *start, size_t *end);
 };

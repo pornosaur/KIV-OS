@@ -9,19 +9,15 @@ VfsFat::VfsFat()
 	}
 
 
-	Vfs::init_super_block(
+	struct Vfs::super_block * sb = Vfs::init_super_block(
 		get_cluster_size(), 0,
 		get_fat_size_in_bytes(),
 		NULL, 1, "FAT_DISK");
 
-	struct Vfs::dentry *root = Vfs::init_dentry(&(Vfs::sb), NULL, "C:", 1, 1, 0, get_start_of_root_dir(), VFS_OBJECT_DIRECTORY,
+	struct Vfs::dentry *root = Vfs::init_dentry(sb, NULL, "C:", 1, 1, 0, get_start_of_root_dir(), VFS_OBJECT_DIRECTORY,
 		get_dir_size_in_bytes(), get_dir_clusters(), 0, NULL, NULL);
 
-	Vfs::root_file.f_count = 0;
-	Vfs::root_file.f_dentry = root;
-	Vfs::root_file.position = 0;
-
-	Vfs::sb.s_root = root;
+	sb->s_root = root;
 }
 
 
@@ -29,30 +25,28 @@ VfsFat::~VfsFat()
 {
 	close_fat();
 
-	delete Vfs::sb.s_root;
+	struct Vfs::super_block *sb = Vfs::sb;
+	struct Vfs::super_block *next = NULL;
+	Vfs::sb = NULL;
+
+	while (sb != NULL) {
+		delete sb->s_root;
+		next = sb->s_next;
+		delete sb;
+		sb = next;
+	}
 }
 
 struct Vfs::file *VfsFat::create_dir(std::string absolute_path)
 {
-	std::string delimeter = "/";
-	struct Vfs::dentry *mDentry = Vfs::sb.s_root;
+	struct Vfs::dentry *mDentry = NULL;
 	struct Vfs::dentry *fDentry = NULL;
-
 	size_t start = 0;
-	size_t end = absolute_path.find(delimeter);
+	size_t end = 0;
 
-	while (end != std::string::npos)
-	{
-		fDentry = find_object_in_directory(mDentry, absolute_path.substr(start, end - start), VFS_OBJECT_DIRECTORY);
-		if (fDentry == NULL) {
-			Vfs::sb_remove_dentry(mDentry);
-			return NULL;
-		}
-
-		mDentry = fDentry;
-
-		start = end + delimeter.length();
-		end = absolute_path.find(delimeter, start);
+	mDentry = VfsFat::find_path(absolute_path, &start, &end);
+	if (mDentry == NULL) {
+		return NULL;
 	}
 
 	fDentry = find_object_in_directory(mDentry, absolute_path.substr(start, end), VFS_OBJECT_DIRECTORY);
@@ -66,7 +60,7 @@ struct Vfs::file *VfsFat::create_dir(std::string absolute_path)
 			return NULL; // cant create file on physic medium
 		}
 
-		fDentry = Vfs::init_dentry(&(Vfs::sb), mDentry, absolute_path.substr(start, end), 0, 0, dirFile->first_cluster, dir_position, dirFile->file_type,
+		fDentry = Vfs::init_dentry(sb, mDentry, absolute_path.substr(start, end), 0, 0, dirFile->first_cluster, dir_position, dirFile->file_type,
 			dirFile->file_size, (long) ceil((double)dirFile->file_size / get_cluster_size()), 0, NULL, NULL);
 		fDentry->d_next_subdir = mDentry->d_subdirectories;
 		mDentry->d_subdirectories = fDentry;
@@ -106,25 +100,14 @@ int VfsFat::read_dir(struct Vfs::file *file)
 
 struct Vfs::file *VfsFat::create_file(std::string absolute_path)
 {
-	std::string delimeter = "/";
-	struct Vfs::dentry *mDentry = Vfs::sb.s_root;
+	struct Vfs::dentry *mDentry = NULL;
 	struct Vfs::dentry *fDentry = NULL;
-
 	size_t start = 0;
-	size_t end = absolute_path.find(delimeter);
+	size_t end = 0;
 
-	while (end != std::string::npos)
-	{
-		fDentry = find_object_in_directory(mDentry, absolute_path.substr(start, end - start), VFS_OBJECT_DIRECTORY);
-		if (fDentry == NULL) {
-			Vfs::sb_remove_dentry(mDentry);
-			return NULL;
-		}
-
-		mDentry = fDentry;
-
-		start = end + delimeter.length();
-		end = absolute_path.find(delimeter, start);
+	mDentry = VfsFat::find_path(absolute_path, &start, &end);
+	if (mDentry == NULL) {
+		return NULL;
 	}
 
 	fDentry = find_object_in_directory(mDentry, absolute_path.substr(start, end), VFS_OBJECT_FILE);
@@ -142,7 +125,7 @@ struct Vfs::file *VfsFat::create_file(std::string absolute_path)
 		return NULL; // cant create file on physic medium
 	}
 	
-	fDentry = Vfs::init_dentry(&(Vfs::sb), mDentry, absolute_path.substr(start, end), 0, 0, dirFile->first_cluster, dir_position, dirFile->file_type,
+	fDentry = Vfs::init_dentry(sb, mDentry, absolute_path.substr(start, end), 0, 0, dirFile->first_cluster, dir_position, dirFile->file_type,
 	dirFile->file_size, (long) std::ceil((double)dirFile->file_size / get_cluster_size()), 0, NULL, NULL);
 	fDentry->d_next_subdir = mDentry->d_subdirectories;
 	mDentry->d_subdirectories = fDentry;
@@ -155,25 +138,14 @@ struct Vfs::file *VfsFat::create_file(std::string absolute_path)
 
 struct Vfs::file *VfsFat::open_object(std::string absolute_path, int type)
 {
-	std::string delimeter = "/";
-	struct Vfs::dentry *mDentry = Vfs::sb.s_root;
+	struct Vfs::dentry *mDentry = NULL;
 	struct Vfs::dentry *fDentry = NULL;
-	
 	size_t start = 0;
-	size_t end = absolute_path.find(delimeter);
+	size_t end = 0;
 
-	while (end != std::string::npos)
-	{
-		fDentry = find_object_in_directory(mDentry, absolute_path.substr(start, end - start), VFS_OBJECT_DIRECTORY);
-		if (fDentry == NULL) {
-			Vfs::sb_remove_dentry(mDentry);
-			return NULL;
-		}
-
-		mDentry = fDentry;
-		
-		start = end + delimeter.length();
-		end = absolute_path.find(delimeter, start);
+	mDentry = VfsFat::find_path(absolute_path, &start, &end);
+	if (mDentry == NULL) {
+		return NULL;
 	}
 
 	fDentry = find_object_in_directory(mDentry, absolute_path.substr(start, end), type);
@@ -198,7 +170,7 @@ struct Vfs::dentry *VfsFat::find_object_in_directory(struct Vfs::dentry *mDentry
 			return NULL;
 		}
 
-		fDentry = Vfs::init_dentry(&(Vfs::sb), mDentry, dentry_name, 0, 0, dirFile->first_cluster, dir_position, dirFile->file_type,
+		fDentry = Vfs::init_dentry(mDentry->d_sb, mDentry, dentry_name, 0, 0, dirFile->first_cluster, dir_position, dirFile->file_type,
 			dirFile->file_size, (long)ceil((double)dirFile->file_size / get_cluster_size()), 0, NULL, NULL);
 		fDentry->d_next_subdir = mDentry->d_subdirectories;
 		mDentry->d_subdirectories = fDentry;
@@ -206,6 +178,41 @@ struct Vfs::dentry *VfsFat::find_object_in_directory(struct Vfs::dentry *mDentry
 		free(dirFile);
 	}
 	return fDentry;
+}
+
+Vfs::dentry * VfsFat::find_path(std::string absolute_path, size_t * start, size_t * end)
+{
+	std::string delimeter = "/";
+	struct Vfs::dentry *mDentry = NULL;
+	struct Vfs::dentry *fDentry = NULL;
+
+	*start = 0;
+	*end = absolute_path.find(delimeter);
+
+	struct Vfs::super_block *sb = Vfs::find_super_block_by_name(absolute_path.substr(*start, *end - *start));
+	if (sb == NULL) {
+		return NULL;
+	}
+	mDentry = sb->s_root;
+	*start = *end + delimeter.length();
+	*end = absolute_path.find(delimeter, *start);
+
+
+	while (*end != std::string::npos)
+	{
+		fDentry = find_object_in_directory(mDentry, absolute_path.substr(*start, *end - *start), VFS_OBJECT_DIRECTORY);
+		if (fDentry == NULL) {
+			Vfs::sb_remove_dentry(mDentry);
+			return NULL;
+		}
+
+		mDentry = fDentry;
+
+		*start = *end + delimeter.length();
+		*end = absolute_path.find(delimeter, *start);
+	}
+
+	return mDentry;
 }
 
 int VfsFat::write_to_file(struct Vfs::file *file, char *buffer, int buffer_size)

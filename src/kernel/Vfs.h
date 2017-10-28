@@ -16,6 +16,7 @@ public:
 		struct Vfs::dentry		*s_root;			/* directory mount point */
 		unsigned int			s_count;			/* superblock ref count */
 		std::string				s_id;				/* text name */
+		struct super_block		*s_next;			/* next mounted disk */
 	};
 
 	struct dentry {
@@ -68,10 +69,9 @@ public:
 
 
 protected:
-	struct Vfs::super_block sb; // TODO kdyz je static nejde prelozit (linker)
-	struct Vfs::file root_file;
+	struct Vfs::super_block *sb = NULL;
 
-	void init_super_block(
+	struct Vfs::super_block *Vfs::init_super_block(
 		unsigned long s_blocksize,
 		bool s_dirt,
 		unsigned long long s_maxbytes,
@@ -99,6 +99,7 @@ protected:
 		unsigned int f_count,
 		unsigned long position);
 
+	struct Vfs::super_block *find_super_block_by_name(std::string name);
 
 	int sb_remove_file(struct Vfs::file **file);
 
