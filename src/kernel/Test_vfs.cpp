@@ -29,6 +29,8 @@ Test_vfs::Test_vfs()
 	open_normal_dir();
 	open_not_exist_dir();
 	open_dir_with_long_name();
+	write_read_file();
+	read_file_from_exact_position();
 	
 
 
@@ -351,6 +353,9 @@ void Test_vfs::create_dir_in_root()
 	int result = vfs->remove_emtpy_dir(&dir);
 	assert(result == 0);
 
+	dir = vfs->open_object("directory", Vfs::VFS_OBJECT_DIRECTORY);
+	assert(dir == NULL);
+
 	std::cout << "OK\n" << std::endl;
 }
 
@@ -588,6 +593,64 @@ void Test_vfs::open_dir_with_long_name()
 
 	Vfs::file *dir = vfs->open_object("directory_with_very_very_long_name", Vfs::VFS_OBJECT_DIRECTORY);
 	assert(dir == NULL);
+
+	std::cout << "OK\n" << std::endl;
+}
+
+void Test_vfs::write_read_file()
+{
+	std::cout << "reading and writing to file" << std::endl;
+	
+	Vfs::file *file = vfs->create_file("sext.txt");
+	assert(file != NULL);
+	
+	int buff_size = 100;
+	char buffer[100];
+	int count = 0;
+
+	count = vfs->read_file(file, buffer, buff_size);
+	assert(count == 1);
+
+	char text[] = "small textsmall textsmall textsmall textsmall text";
+	count = vfs->write_to_file(file, text, 10);
+	assert(count == 10);
+
+	count = vfs->read_file(file, buffer, buff_size);
+	assert(count == 10);
+	assert(strncmp(buffer, text, 10) == 0);
+
+	int result = vfs->remove_file(&file);
+	assert(result == 0);
+	assert(file == NULL);
+	
+	std::cout << "OK\n" << std::endl;
+}
+
+void Test_vfs::read_file_from_exact_position()
+{
+	std::cout << "reading file from exact position" << std::endl;
+
+	Vfs::file *file = vfs->create_file("text.txt");
+	assert(file != NULL);
+
+	int buff_size = 100;
+	char buffer[100];
+	int count = 0;
+
+	std::cout << "writing text to file" << std::endl;
+	char *text = "text which contains exactly 36 words";
+	count = vfs->write_to_file(file, text, 36);
+	assert(count == 36);
+
+	
+	file->position = 10;	
+	count = vfs->read_file(file, buffer, buff_size);
+	assert(count == 26);
+	assert(strncmp(buffer, text + 10, 26) == 0);
+
+	int result = vfs->remove_file(&file);
+	assert(result == 0);
+	assert(file == NULL);
 
 	std::cout << "OK\n" << std::endl;
 }

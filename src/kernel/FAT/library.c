@@ -119,6 +119,7 @@ struct dir_file *find_file(FILE *p_file, struct boot_record *boot_record, char f
     struct dir_file *object = NULL;
     unsigned int position = start_of_root_dir;
     unsigned int max_entries = max_dir_entries;
+	int32_t object_dir_pos = 0;
 	size_t length = 0;
 
 	length = strlen(file_path);
@@ -128,7 +129,7 @@ struct dir_file *find_file(FILE *p_file, struct boot_record *boot_record, char f
     files = strtok_s(path, "/", &context);
     while (files != NULL) {
         free(object);
-        object = get_object_in_dir(p_file, files, position, max_entries);
+        object = get_object_in_dir(p_file, files, position, max_entries, &object_dir_pos);
         if (object == NULL) {
             break;
         }
@@ -161,17 +162,21 @@ struct dir_file *find_file(FILE *p_file, struct boot_record *boot_record, char f
  * @param max_entries maximalni pocet polozek ve slozce
  * @return
  */
-struct dir_file *get_object_in_dir(FILE *p_file,const char name[], int32_t start_position, unsigned int max_entries) {
+struct dir_file *get_object_in_dir(FILE *p_file,const char name[], int32_t start_position, unsigned int max_entries, int32_t *object_dir_pos) {
     unsigned int i = 0;
+	int read_size;
     struct dir_file *object = (struct dir_file *) malloc(sizeof(struct dir_file));
 
+	*object_dir_pos = start_position;
     fseek(p_file, start_position, SEEK_SET);
+	read_size = sizeof(struct dir_file);
 
     for (i = 0; i < max_entries; i++) {
-        fread(object, sizeof(struct dir_file), 1, p_file);
+        fread(object, read_size, 1, p_file);
         if (strcmp(object->file_name, name) == 0) {
             return object;
         }
+		*object_dir_pos += read_size;
     }
 
     free(object);
@@ -193,6 +198,7 @@ struct dir_file *get_all_in_dir(FILE *p_file, int32_t *number_of_objects, long *
     struct dir_file *files = NULL;
     struct dir_file file;
     long position = 0;
+	int read_size;
 
     if (p_file == NULL) {
         return NULL;
@@ -203,9 +209,11 @@ struct dir_file *get_all_in_dir(FILE *p_file, int32_t *number_of_objects, long *
     files = malloc(sizeof(struct dir_file) * max_entries);
 
     fseek(p_file, start_position, SEEK_SET);
+	position = start_position;
+	read_size = sizeof(struct dir_file);
+
     for(i = 0; i < max_entries; i++){
-        position = ftell(p_file);
-        fread(&file, sizeof(struct dir_file), 1, p_file);
+        fread(&file, read_size, 1, p_file);
         if(file.file_name[0] != '\0'){
             files[*number_of_objects] = file;
             if(positions != NULL){
@@ -213,6 +221,7 @@ struct dir_file *get_all_in_dir(FILE *p_file, int32_t *number_of_objects, long *
             }
             *number_of_objects += 1;
         }
+		position += read_size;
     }
 
     return files;
@@ -259,6 +268,7 @@ int is_dir_empty(FILE *p_file, int32_t max_entries, int32_t start_of_dir) {
 long find_empty_space_in_dir(FILE *p_file, int32_t max_entries, int32_t start_of_dir) {
     int i = 0;
     struct dir_file *file = NULL;
+	long position = 0;
 
     if (p_file == NULL) {
         return -1;
@@ -267,12 +277,14 @@ long find_empty_space_in_dir(FILE *p_file, int32_t max_entries, int32_t start_of
     file = (struct dir_file *) malloc(sizeof(struct dir_file));
 
     fseek(p_file, start_of_dir, SEEK_SET);
+	position = start_of_dir;
     for (i = 0; i < max_entries; i++) {
         fread(file, sizeof(struct dir_file), 1, p_file);
         if(file != NULL && file->file_name[0] == '\0'){
             free(file);
-            return ftell(p_file) - sizeof(struct dir_file);
+			return position;
         }
+		position += sizeof(struct dir_file);
     }
     free(file);
     return -1;
@@ -286,13 +298,13 @@ long find_empty_space_in_dir(FILE *p_file, int32_t max_entries, int32_t start_of
  * @param write_position pozice na kterou se soubor zapise
  * @return -1 pri chybe, jinak 0
  */
-int write_to_dir(FILE *p_file, struct dir_file file, int32_t write_position) {
+int write_to_dir(FILE *p_file, struct dir_file *file, int32_t write_position) {
     if (p_file == NULL) {
         return -1;
     }
 
     fseek(p_file, write_position, SEEK_SET);
-    fwrite(&file, sizeof(struct dir_file), 1, p_file);
+    fwrite(file, sizeof(struct dir_file), 1, p_file);
 
     return 0;
 }
@@ -493,6 +505,7 @@ int rm_from_physic_fat(FILE *p_file, unsigned int fat_record_size, int32_t fat_s
     int i = 0;
     int32_t index = 0;
     int32_t new_value = 0;
+	long position = 0;
 
     if (p_file == NULL || indexes == NULL || number_of_clusters == 0) {
         return -1;
@@ -500,9 +513,10 @@ int rm_from_physic_fat(FILE *p_file, unsigned int fat_record_size, int32_t fat_s
 
     new_value = FAT_UNUSED;
     for (i = 0; i < number_of_clusters; i++) {
-        fseek(p_file, fat_start + (fat_record_size * indexes[i]), SEEK_SET);
+		position = fat_start + (fat_record_size * indexes[i]);
+        fseek(p_file, position, SEEK_SET);
         fread(&index, fat_record_size, 1, p_file);
-        fseek(p_file, ftell(p_file)-fat_record_size, SEEK_SET);
+        fseek(p_file, position, SEEK_SET);
         if (index != FAT_BAD_CLUSTER) {
             fwrite(&new_value, fat_record_size, 1, p_file);
         }

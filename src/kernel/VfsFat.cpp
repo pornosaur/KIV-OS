@@ -247,19 +247,20 @@ int VfsFat::write_to_file(struct Vfs::file *file, char *buffer, int buffer_size)
 		return -1;
 	}
 
-	struct dir_file dirFile;
-	strcpy_s(dirFile.file_name, file->f_dentry->d_name.c_str());
-	dirFile.file_size = file->f_dentry->d_size;
-	dirFile.file_type = file->f_dentry->d_file_type;
-	dirFile.first_cluster = file->f_dentry->d_position;
+	struct dir_file *dirFile = new struct dir_file();
+	strcpy_s(dirFile -> file_name, file->f_dentry->d_name.c_str());
+	dirFile -> file_size = file->f_dentry->d_size;
+	dirFile -> file_type = file->f_dentry->d_file_type;
+	dirFile -> first_cluster = file->f_dentry->d_position;
 
-	long writed_size = fat_write_file(&dirFile, file->f_dentry->d_file_position, buffer, buffer_size, file->position);
+	long writed_size = fat_write_file(dirFile, file->f_dentry->d_file_position, buffer, buffer_size, file->position);
 
 	if (writed_size != 0) {
-		file->f_dentry->d_size = dirFile.file_size;
-		file->f_dentry->d_blocks = (unsigned int) ceil((double)dirFile.file_size / get_cluster_size());
+		file->f_dentry->d_size = dirFile -> file_size;
+		file->f_dentry->d_blocks = (unsigned int) ceil((double)dirFile -> file_size / get_cluster_size());
 	}
 
+	delete dirFile;
 	return writed_size;
 }
 
