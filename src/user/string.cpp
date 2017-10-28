@@ -25,3 +25,16 @@ char *kiv_os_str::copy_string(const std::string& str)
 
 	return new_str;
 }
+
+
+size_t kiv_os_str::Get_Count_Char(std::string& str, const char c)
+{
+	size_t count = 0;
+	for (std::string::iterator it = str.begin(); it != str.end(); ++it) {
+		if (*it == c) {
+			count++;
+		}
+	}
+
+	return count;
+}

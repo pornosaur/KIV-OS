@@ -6,7 +6,8 @@
 #include <cstdlib>
 #include <regex>
 #include <ctype.h>
-#include <string.h> 
+
+
 
 size_t __stdcall shell(const kiv_os::TRegisters &regs) {
 	size_t written, read;
@@ -31,7 +32,9 @@ size_t __stdcall shell(const kiv_os::TRegisters &regs) {
 		
 		/* Input is not empty; 2 because of \r\n */
 		if (read > 2) {
-			cmd_w.Run_Parse(std::string(input));
+			if (!cmd_w.Run_Parse(std::string(input))) {
+				cmd_w.Print_Error();
+			}
 		}
 
 		input = (char *)calloc(MAX_SIZE_BUFFER_IN, sizeof(char));

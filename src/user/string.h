@@ -12,4 +12,6 @@ namespace kiv_os_str {
 	/* Copy std::string to char* */
 	char *copy_string(const std::string& str);
 
+	size_t Get_Count_Char(std::string& str, const char c);
+
 }

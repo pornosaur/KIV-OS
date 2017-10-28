@@ -18,3 +18,4 @@ extern "C" size_t __stdcall shell(const kiv_os::TRegisters &regs);
 
 /* Function prepared for stop shell */
 extern "C" void __stdcall shell_stop();
+
