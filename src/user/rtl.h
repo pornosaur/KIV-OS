@@ -18,4 +18,8 @@ namespace kiv_os_rtl {
 	bool Read_File(const kiv_os::THandle file_handle, void *buffer, const size_t buffer_size, size_t &read);
 	//cte ze souboru do buffer o velikosti buffer_size a vraci pocet precenych dat ve read
 	//vraci true, kdyz vse OK
+	bool Create_Process(const char *program_name, kiv_os::TProcess_Startup_Info *tso, kiv_os::THandle &process_handle);
+	//Vytvoreni procesu podle nazvu programu program_name s prislunymi paramatery a handlery ulozenych v tso.
+	bool Wait_For(const kiv_os::THandle *proc_handles, const size_t count);
+
 }

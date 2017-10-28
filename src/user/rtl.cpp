@@ -65,3 +65,28 @@ bool kiv_os_rtl::Read_File(const kiv_os::THandle file_handle, void *buffer, cons
 	read = regs.rax.r;
 	return result;
 }
+
+bool kiv_os_rtl::Create_Process(const char *program_name, kiv_os::TProcess_Startup_Info *tso, kiv_os::THandle &process_handle) {
+	kiv_os::TRegisters regs = Prepare_SysCall_Context(kiv_os::scProc, kiv_os::scClone);
+	regs.rcx.l = kiv_os::clCreate_Process;
+	regs.rdx.r = reinterpret_cast<decltype(regs.rdx.r)>(program_name);
+	regs.rdi.r = reinterpret_cast<decltype(regs.rdi.r)>(tso);
+	
+	const bool result = Do_SysCall(regs);
+	process_handle = static_cast<kiv_os::THandle>(regs.rax.x);
+	return result;
+
+
+}
+
+bool kiv_os_rtl::Wait_For(const kiv_os::THandle *proc_handles, const size_t count) {
+	kiv_os::TRegisters regs = Prepare_SysCall_Context(kiv_os::scProc, kiv_os::scWait_For);
+	regs.rdx.r = reinterpret_cast<decltype(regs.rdx.r)>(proc_handles);
+	regs.rcx.r = static_cast<decltype(regs.rcx.r)>(count);
+
+	const bool result = Do_SysCall(regs);
+
+	return result;
+
+
+}

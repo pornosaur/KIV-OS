@@ -1,13 +1,11 @@
 #pragma once
 
 #include "kernel.h"
-#include "io.h"
-#include <Windows.h>
 
-HMODULE User_Programs;
+
 
 BinSemaphore interrupt_sem;
-
+HMODULE User_Programs;
 void Set_Error(const bool failed, kiv_os::TRegisters &regs) {
 	if (failed) {
 		regs.flags.carry = true;
@@ -37,13 +35,14 @@ void Shutdown_Kernel() {
 
 void __stdcall Sys_Call(kiv_os::TRegisters &regs) 
 {
-	Lock_Kernel();
+	
 
 	switch (regs.rax.h) {
 		case kiv_os::scIO:		HandleIO(regs);
+		case kiv_os::scProc:	Handle_Proc(regs);
 	}
 
-	Unlock_Kernel();
+	
 }
 
 void __stdcall Run_VM() {

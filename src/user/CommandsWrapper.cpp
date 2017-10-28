@@ -244,5 +244,5 @@ void kiv_os_cmd::CommandsWrapper::Echo(const struct cmd_item_t& cmd_item)
 	char* t = kiv_os_str::copy_string(result_echo);
 	regs.rdx.r = reinterpret_cast<decltype(regs.rdx.r)>(t);
 
-	size_t size = echo(regs);
+	//size_t size = echo(regs);
 }
