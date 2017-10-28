@@ -4,6 +4,7 @@
 
 #include <regex>
 #include <memory>
+#include <cassert>
 
  kiv_os_cmd::CommandsWrapper::cmd_function_t kiv_os_cmd::CommandsWrapper::cmd_fcs_list[] = {
 	/*{ "type", type },
@@ -22,32 +23,31 @@
 
 const std::regex kiv_os_cmd::CommandsWrapper::r_cmd_line("\\s*(\\w+)([^\\|]+)\\s*");
 const std::regex kiv_os_cmd::CommandsWrapper::r_split_pipe("\\s*([^\\|]+)");
-const std::regex r_command("(\\S+)");
-static std::regex r_args("\"([^\"]+)\"|(([-\\/]*)\\S+)");
+const std::regex kiv_os_cmd::CommandsWrapper::r_command("(\\S+)");
+const std::regex kiv_os_cmd::CommandsWrapper::r_args("\"([^\"]+)\"|(([-\\/]*)\\S+)");
 
 
 kiv_os_cmd::CommandsWrapper::CommandsWrapper()
 {
-		//init 
+	error = ""; 
 }
 
 bool kiv_os_cmd::CommandsWrapper::Run_Parse(std::string& line)
 {
 	if (!Parse_Pipe(line)) {
-		Print_Error();
 		return false;
 	}
 
 	for (auto cmd_item : commands)
 	{
 		if (!Call_Cmd_Function(cmd_item)) {
-			Print_Error();
 			return false;
 		}
 	}
 
-	error.clear();
-	commands.clear();
+	assert(error.empty());
+	assert(!commands.empty());
+	clear();
 
 	return true;
 }
@@ -82,20 +82,26 @@ bool kiv_os_cmd::CommandsWrapper::Parse_Pipe(std::string& cmd_line)
 		return false;
 	}
 
+	std::string tmp_pipe = "";
 	while (std::regex_search(check_line, m_cmd, r_split_pipe)) {
-		std::string pipe = std::string(m_cmd[1].str());
+		std::string pipe = tmp_pipe + std::string(m_cmd[1].str());
 		check_line = std::string(m_cmd.suffix().str());
+
+		if ((kiv_os_str::Get_Count_Char(pipe, '"') & 1) == 1) {
+			tmp_pipe += pipe;
+			continue;
+		}
 
 		if ((check_line.size() >= 2) && (*check_line.begin() == PIPE)) {
 			if ((*(check_line.begin() + 1)) != SPACE || (*(pipe.end() - 1) != SPACE)) {
-				error = "Pipe needs left and right side seperated by gaps!";
+				error = "A pipe needs left and right side seperated by gap!";
 				return false;
 			}
 			is_pipe = true;
 		}
 		else {
 			if (is_pipe && !pipe.empty() && (*pipe.begin() == LF)) {
-				error = "Right side of pipe is empty!";
+				error = "The right side of a pipe is empty!";
 				return false;
 			}
 			is_pipe = false;
@@ -114,6 +120,7 @@ bool kiv_os_cmd::CommandsWrapper::Parse_Pipe(std::string& cmd_line)
 		}
 
 		commands.push_back(cmd_item);
+		tmp_pipe.clear();
 	}
 
 	return true;
@@ -183,7 +190,7 @@ bool kiv_os_cmd::CommandsWrapper::Echo_Parse_Args(struct cmd_item_t& cmd_item)
 	std::smatch m_args;
 	static std::regex r_echo("\\s(.*)");
 
-	if ((*(cmd_item.command.end() - 1) == '.') || (*(cmd_item.command.end() - 1) == ':')) {
+	if ((*(cmd_item.command.end() - 1) == DOT) || (*(cmd_item.command.end() - 1) == COLON)) {
 		cmd_item.args_list.push_back(
 			{
 				" ",

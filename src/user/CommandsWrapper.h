@@ -6,11 +6,13 @@
 #include <list>
 #include <regex>
 
-#define SPACE		'\x20'
-#define PIPE		'\x7C'
-#define LF			'\x0A'
-#define DASH		'\x2D'
-#define STROKE		'\x2F'
+#define SPACE		'\x20'	
+#define PIPE		'\x7C'	/* | */
+#define LF			'\x0A'	
+#define DASH		'\x2D'	/* - */
+#define STROKE		'\x2F'  /* / */
+#define DOT			'\x2E'	/* . */
+#define COLON		'\x3A'	/* : */
 
 #define CMD_ARG			0
 #define CMD_INPUT		1
@@ -46,9 +48,10 @@ namespace kiv_os_cmd {
 			bool(CommandsWrapper::*args_fun)(struct cmd_item_t&) = &CommandsWrapper::Default_Parse_Args;	/* Function to parse args - Default_Parse_Args is default */
 		};
 
-		static const std::regex r_cmd_line, r_split_pipe;
+		static const std::regex r_cmd_line, r_split_pipe, r_command, r_args;
 	
 		std::string error;
+
 		std::list<struct cmd_item_t> commands;
 
 		static cmd_function_t cmd_fcs_list[];
@@ -61,15 +64,16 @@ namespace kiv_os_cmd {
 		bool Parse_Redirect(struct cmd_item_t& cmd_item);
 
 		void clear();
-		void Print_Error();
+		
 
 		/* Commands wrapper */
-		void Echo(const struct cmd_item_t&);
+		void Echo(const struct cmd_item_t& cmd_item);
 	
 	public:
 		CommandsWrapper();
 
 		bool Run_Parse(std::string& line);
+		void Print_Error();
 
 	};
 }
