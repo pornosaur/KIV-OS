@@ -153,7 +153,7 @@ struct dir_file *fat_create_file(const char *file_name, int32_t act_fat_position
     position = start_of_root_dir + (act_fat_position * boot_record->cluster_size);
 
     // check if file exists
-	file = get_object_in_dir(p_file, file_name, position, max_dir_entries, &object_dir_pos);
+	file = get_object_in_dir(p_file, file_name, OBJECT_FILE, position, max_dir_entries, &object_dir_pos);
     if (file != NULL) {
         if(file->file_type == OBJECT_FILE) {
             result = fat_delete_file_by_file(file, object_dir_pos);
@@ -205,7 +205,7 @@ struct dir_file *fat_create_file(const char *file_name, int32_t act_fat_position
     return new_local_file;
 }
 
-struct dir_file *fat_get_object_info_by_name(const char *file_name, int32_t act_fat_position, long *dir_position){
+struct dir_file *fat_get_object_info_by_name(const char *file_name, int file_type, int32_t act_fat_position, long *dir_position){
     int32_t position = 0;
 
     if(boot_record == NULL || fat1 == NULL || fat2 == NULL){
@@ -226,11 +226,12 @@ struct dir_file *fat_get_object_info_by_name(const char *file_name, int32_t act_
     position = start_of_root_dir + (act_fat_position * boot_record->cluster_size);
 
     // check if file exists
-    struct dir_file *dirFile = get_object_in_dir(p_file, file_name, position, max_dir_entries, dir_position);
+    struct dir_file *dirFile = get_object_in_dir(p_file, file_name, file_type, position, max_dir_entries, dir_position);
 
     return dirFile;
 }
 
+/*
 struct dir_file *get_file_info(char file_name[], int32_t act_fat_position){
     int32_t position = 0;
 	int32_t object_dir_pos = 0;
@@ -253,7 +254,7 @@ struct dir_file *get_file_info(char file_name[], int32_t act_fat_position){
     position = start_of_root_dir + (act_fat_position * boot_record->cluster_size);
 
     return get_object_in_dir(p_file, file_name, position, max_dir_entries, &object_dir_pos);
-}
+}*/
 /**
  * Podle vstupniho pole clusters udavajici indexy do FAT pro jeden soubor, vytvori pole values predstavujici hodnoty na
  * techto indexech.
@@ -315,7 +316,7 @@ int fat_delete_file_by_name(const char *file_name, int32_t act_fat_position) {
 
     position = start_of_root_dir + (act_fat_position * boot_record->cluster_size);
 
-    file = get_object_in_dir(p_file, file_name, position, max_dir_entries, &object_dir_pos);
+    file = get_object_in_dir(p_file, file_name, OBJECT_FILE, position, max_dir_entries, &object_dir_pos);
     if (file == NULL || file->file_type != OBJECT_FILE) {
         free(file);
         return 3;
@@ -386,7 +387,7 @@ struct dir_file *fat_create_dir(const char *dir_name, int32_t act_fat_position, 
 
     position = start_of_root_dir + (act_fat_position * boot_record->cluster_size);
 
-    file = get_object_in_dir(p_file, dir_name, position, max_dir_entries, &object_dir_pos);
+    file = get_object_in_dir(p_file, dir_name, OBJECT_DIRECTORY, position, max_dir_entries, &object_dir_pos);
     if (file != NULL) {
         free(file);
 //        return 4;
@@ -460,7 +461,7 @@ int fat_delete_empty_dir(const char *dir_name, int32_t act_fat_position) {
 
     parent_position = start_of_root_dir + (act_fat_position * boot_record->cluster_size);
 
-    file = get_object_in_dir(p_file, dir_name, parent_position, max_dir_entries, &position);
+    file = get_object_in_dir(p_file, dir_name, OBJECT_DIRECTORY, parent_position, max_dir_entries, &position);
     if (file == NULL || file->file_type != OBJECT_DIRECTORY) {
         free(file);
         return 3;
@@ -508,6 +509,7 @@ int fat_delete_empty_dir(const char *dir_name, int32_t act_fat_position) {
  * @param act_fat_position pozice adresare ve kterem hledame soubor
  * @return nactena data nebo NULL pri neuspechu
  */
+/*
 char* read_object(int *ret_code, int *data_size,const char file_name[], int32_t act_fat_position) {
     int32_t file_clusters_size = 0;
     struct dir_file *file = NULL;
@@ -574,7 +576,7 @@ char* read_object(int *ret_code, int *data_size,const char file_name[], int32_t 
 
     *ret_code = 0;
     return data;
-}
+}*/
 
 long fat_read_file(struct dir_file file, char *buffer, int buffer_size, long offset) {
     int32_t file_clusters_size = 0;

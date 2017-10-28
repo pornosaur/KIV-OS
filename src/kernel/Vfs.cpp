@@ -126,7 +126,7 @@ int Vfs::sb_remove_dentry(struct Vfs::dentry *mDentry) {
 	return 0;
 }
 
-struct Vfs::dentry *Vfs::sb_find_dentry_in_dentry(struct Vfs::dentry * fDentry, std::string name) {
+struct Vfs::dentry *Vfs::sb_find_dentry_in_dentry(struct Vfs::dentry * fDentry, std::string name, int file_type) {
 	
 	if (fDentry == NULL || fDentry->d_file_type != 0 || fDentry->d_subdirectories == NULL) {
 		return NULL;
@@ -135,7 +135,7 @@ struct Vfs::dentry *Vfs::sb_find_dentry_in_dentry(struct Vfs::dentry * fDentry, 
 	struct Vfs::dentry *mDentry = fDentry->d_subdirectories;
 	while (mDentry != NULL) {
 		
-		if (name.compare(mDentry->d_name) == 0) {
+		if (name.compare(mDentry->d_name) == 0 && mDentry->d_file_type == file_type) {
 			return mDentry;
 		}
 		mDentry = mDentry->d_next_subdir;

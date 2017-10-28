@@ -104,6 +104,6 @@ protected:
 
 	int sb_remove_dentry(struct Vfs::dentry * dentry);
 
-	struct Vfs::dentry *sb_find_dentry_in_dentry(struct Vfs::dentry * dentry, std::string name);
+	struct Vfs::dentry *sb_find_dentry_in_dentry(struct Vfs::dentry * dentry, std::string name, int file_type);
 };
 

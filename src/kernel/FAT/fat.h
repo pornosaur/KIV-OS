@@ -23,7 +23,7 @@ int fat_init(const char *fat_name);
 void close_fat();
 
 struct dir_file *fat_create_file(const char *file_name, int32_t act_fat_position, long *dir_position);
-struct dir_file *fat_get_object_info_by_name(const char *file_name, int32_t act_fat_position, long *dir_position);
+struct dir_file *fat_get_object_info_by_name(const char *file_name, int file_type, int32_t act_fat_position, long *dir_position);
 
 int fat_delete_file_by_name(const char *file_name, int32_t act_fat_position);
 int fat_delete_file_by_file(struct dir_file *file, long position);

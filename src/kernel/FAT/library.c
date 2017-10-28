@@ -109,7 +109,7 @@ int *get_file_clusters(struct dir_file *file, int32_t *clusters_size, int16_t cl
  * @param start_of_data zacatek datoveho segmentu v souboru
  * @param max_dir_entries maximalni pocet polozek v adresari
  * @return nalezeny soubor, neni-li soubor nalezen je vracena hodnota NULL
- */
+ *//*
 struct dir_file *find_file(FILE *p_file, struct boot_record *boot_record, char file_path[], unsigned int start_of_root_dir,
                             unsigned int start_of_data, unsigned int max_dir_entries) {
     char *path = NULL;
@@ -129,7 +129,7 @@ struct dir_file *find_file(FILE *p_file, struct boot_record *boot_record, char f
     files = strtok_s(path, "/", &context);
     while (files != NULL) {
         free(object);
-        object = get_object_in_dir(p_file, files, position, max_entries, &object_dir_pos);
+        object = get_object_in_dir(p_file, files, , position, max_entries, &object_dir_pos);
         if (object == NULL) {
             break;
         }
@@ -152,7 +152,7 @@ struct dir_file *find_file(FILE *p_file, struct boot_record *boot_record, char f
 
     free(path);
     return object;
-}
+}*/
 
 /**
  * Hleda soubor nebo slozku ve slozce zacinajici v souboru na indexu danem hodnotu start_position.
@@ -162,7 +162,7 @@ struct dir_file *find_file(FILE *p_file, struct boot_record *boot_record, char f
  * @param max_entries maximalni pocet polozek ve slozce
  * @return
  */
-struct dir_file *get_object_in_dir(FILE *p_file,const char name[], int32_t start_position, unsigned int max_entries, int32_t *object_dir_pos) {
+struct dir_file *get_object_in_dir(FILE *p_file, const char name[], int file_type, int32_t start_position, unsigned int max_entries, int32_t *object_dir_pos) {
     unsigned int i = 0;
 	int read_size;
     struct dir_file *object = (struct dir_file *) malloc(sizeof(struct dir_file));
@@ -173,7 +173,7 @@ struct dir_file *get_object_in_dir(FILE *p_file,const char name[], int32_t start
 
     for (i = 0; i < max_entries; i++) {
         fread(object, read_size, 1, p_file);
-        if (strcmp(object->file_name, name) == 0) {
+        if (strcmp(object->file_name, name) == 0 && object->file_type == file_type) {
             return object;
         }
 		*object_dir_pos += read_size;

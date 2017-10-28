@@ -37,6 +37,9 @@ Test_vfs::Test_vfs()
 	read_all_file_by_pieces();
 	rewrite_file();
 	write_zero_bytes_to_file();
+	create_file_with_space_in_name();
+	create_dir_with_space_in_name();
+	folder_dir_same_name();
 
 
 	system("pause");
@@ -847,5 +850,100 @@ void Test_vfs::write_zero_bytes_to_file()
 	assert(result == 0);
 	assert(file == NULL);
 
+	std::cout << "OK\n" << std::endl;
+}
+
+void Test_vfs::create_file_with_space_in_name()
+{
+	std::cout << "creating file with space in name" << std::endl;
+
+	Vfs::file *file = vfs->create_file("my file.txt");
+	assert(file != NULL);
+	assert(strcmp("my file.txt", file->f_dentry->d_name.c_str()) == 0);
+
+	int result = vfs->close_file(&file);
+	assert(result == 0);
+	assert(file == NULL);
+
+	file = vfs->open_object("my file.txt", Vfs::VFS_OBJECT_FILE);
+	assert(file != NULL);
+	
+	char text[] = "short text";
+	int count = vfs->write_to_file(file, text, 10);
+	assert(count == 10);
+
+	char buffer[20];
+	count = vfs->read_file(file, buffer, 20);
+	assert(count = 10);
+	assert(strncmp(text, buffer, 10) == 0);
+
+	result = vfs->remove_file(&file);
+	assert(result == 0);
+	assert(file == NULL);
+
+	file = vfs->open_object("my file.txt", Vfs::VFS_OBJECT_FILE);
+	assert(file == NULL);
+
+	std::cout << "OK\n" << std::endl;
+}
+
+void Test_vfs::create_dir_with_space_in_name()
+{
+	std::cout << "creating directory with space in name" << std::endl;
+
+	Vfs::file *dir = vfs->create_dir("my dir");
+	assert(dir != NULL);
+	assert(strcmp("my dir", dir->f_dentry->d_name.c_str()) == 0);
+
+	int result = vfs->close_file(&dir);
+	assert(result == 0);
+	assert(dir == NULL);
+
+	dir = vfs->open_object("my dir", Vfs::VFS_OBJECT_DIRECTORY);
+	assert(dir != NULL);
+
+	result = vfs->remove_emtpy_dir(&dir);
+	assert(result == 0);
+	assert(dir == NULL);
+
+	dir = vfs->open_object("my dir", Vfs::VFS_OBJECT_DIRECTORY);
+	assert(dir == NULL);
+
+	std::cout << "OK\n" << std::endl;
+}
+
+void Test_vfs::folder_dir_same_name()
+{
+	std::cout << "test for same name for folder and file" << std::endl;
+
+	struct Vfs::file *file = vfs->create_file("name");
+	assert(file != NULL);
+	assert(file->f_dentry->d_file_type == Vfs::VFS_OBJECT_FILE);
+	
+	struct Vfs::file *dir = vfs->create_dir("name");
+	assert(dir != NULL);
+	assert(dir->f_dentry->d_file_type == Vfs::VFS_OBJECT_DIRECTORY);
+
+	int result = vfs->close_file(&file);
+	assert(result == 0);
+	result = vfs->close_file(&dir);
+	assert(result == 0);
+
+	dir = vfs->open_object("name", Vfs::VFS_OBJECT_DIRECTORY);
+	assert(dir != NULL);
+	assert(dir->f_dentry->d_file_type == Vfs::VFS_OBJECT_DIRECTORY);
+
+	file = vfs->open_object("name", Vfs::VFS_OBJECT_FILE);
+	assert(file != NULL);
+	assert(file->f_dentry->d_file_type == Vfs::VFS_OBJECT_FILE);
+
+	result = vfs->remove_emtpy_dir(&dir);
+	assert(result == 0);
+	assert(dir == NULL);
+
+	result = vfs->remove_file(&file);
+	assert(result == 0);
+	assert(file == NULL);
+	
 	std::cout << "OK\n" << std::endl;
 }

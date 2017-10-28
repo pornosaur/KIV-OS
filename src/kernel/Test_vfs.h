@@ -63,6 +63,12 @@ class Test_vfs
 		void rewrite_file();
 		void write_zero_bytes_to_file();
 
+		// SPACE IN NAME
+		void create_file_with_space_in_name();
+		void create_dir_with_space_in_name();
+
+		// OTHER
+		void folder_dir_same_name();
 
 
 };
