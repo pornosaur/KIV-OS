@@ -31,7 +31,12 @@ Test_vfs::Test_vfs()
 	open_dir_with_long_name();
 	write_read_file();
 	read_file_from_exact_position();
-	
+	write_read_file_bigger_than_one_cluster();
+	write_read_exactly_one_cluster();
+	read_small_piece_of_file();
+	read_all_file_by_pieces();
+	rewrite_file();
+	write_zero_bytes_to_file();
 
 
 	system("pause");
@@ -601,7 +606,7 @@ void Test_vfs::write_read_file()
 {
 	std::cout << "reading and writing to file" << std::endl;
 	
-	Vfs::file *file = vfs->create_file("sext.txt");
+	Vfs::file *file = vfs->create_file("text.txt");
 	assert(file != NULL);
 	
 	int buff_size = 100;
@@ -611,7 +616,7 @@ void Test_vfs::write_read_file()
 	count = vfs->read_file(file, buffer, buff_size);
 	assert(count == 1);
 
-	char text[] = "small textsmall textsmall textsmall textsmall text";
+	char text[] = "small text";
 	count = vfs->write_to_file(file, text, 10);
 	assert(count == 10);
 
@@ -647,6 +652,196 @@ void Test_vfs::read_file_from_exact_position()
 	count = vfs->read_file(file, buffer, buff_size);
 	assert(count == 26);
 	assert(strncmp(buffer, text + 10, 26) == 0);
+
+	int result = vfs->remove_file(&file);
+	assert(result == 0);
+	assert(file == NULL);
+
+	std::cout << "OK\n" << std::endl;
+}
+
+void Test_vfs::write_read_file_bigger_than_one_cluster()
+{
+	std::cout << "reading and writing to file bigger than one cluster" << std::endl;
+
+	Vfs::file *file = vfs->create_file("text.txt");
+	assert(file != NULL);
+
+	int buff_size = 200;
+	char buffer[200];
+	int count = 0;
+
+	char text[] = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque condimentum diam et urna tincidunt vestibulum malesuada ac dolor. Phasellus vel neque vitae erat ultrices luctus fermentum vitae metus.";
+	count = vfs->write_to_file(file, text, 200);
+	assert(count == 200);
+
+	count = vfs->read_file(file, buffer, buff_size);
+	assert(count == 200);
+	assert(strncmp(buffer, text, 200) == 0);
+
+	int result = vfs->remove_file(&file);
+	assert(result == 0);
+	assert(file == NULL);
+
+	std::cout << "OK\n" << std::endl;
+}
+
+void Test_vfs::write_read_exactly_one_cluster()
+{
+	std::cout << "reading and writing exactly one cluster" << std::endl;
+
+	Vfs::file *file = vfs->create_file("text.txt");
+	assert(file != NULL);
+
+	int buff_size = 200;
+	char buffer[200];
+	int count = 0;
+
+	char text[] = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque condimentum diam et urna tincidunt vestibulum malesuada ac dolor.";
+	count = vfs->write_to_file(file, text, 128);
+	assert(count == 128);
+
+	count = vfs->read_file(file, buffer, buff_size);
+	assert(count == 128);
+	assert(strncmp(buffer, text, 128) == 0);
+
+	int result = vfs->remove_file(&file);
+	assert(result == 0);
+	assert(file == NULL);
+
+	std::cout << "OK\n" << std::endl;
+}
+
+void Test_vfs::read_small_piece_of_file()
+{
+	std::cout << "reading only piece of file" << std::endl;
+
+	Vfs::file *file = vfs->create_file("text.txt");
+	assert(file != NULL);
+
+	int buff_size = 30;
+	char buffer[30];
+	int count = 0;
+
+	char text[] = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque condimentum diam et urna tincidunt vestibulum malesuada ac dolor. Phasellus vel neque vitae erat ultrices luctus fermentum vitae metus.";
+	count = vfs->write_to_file(file, text, 200);
+	assert(count == 200);
+
+	file->position = 120;
+	count = vfs->read_file(file, buffer, buff_size);
+	assert(count == 30);
+	assert(strncmp(buffer, text + 120, 30) == 0);
+
+	int result = vfs->remove_file(&file);
+	assert(result == 0);
+	assert(file == NULL);
+
+	std::cout << "OK\n" << std::endl;
+}
+
+void Test_vfs::read_all_file_by_pieces()
+{
+	std::cout << "reading all file by pieces" << std::endl;
+
+	Vfs::file *file = vfs->create_file("text.txt");
+	assert(file != NULL);
+
+	int buff_size = 31;
+	char buffer[31];
+	int count = 0;
+	int shuld_read = 0;
+
+	char text[] = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque condimentum diam et urna tincidunt vestibulum malesuada ac dolor. Phasellus vel neque vitae erat ultrices luctus fermentum vitae metus.";
+	count = vfs->write_to_file(file, text, 200);
+	assert(count == 200);
+
+
+	shuld_read = 31;
+	for (int i = 0; i < 200; i += 31) {
+		file->position = i;
+		if (200 - i < shuld_read) {
+			shuld_read = 200 - i;
+		}
+
+		count = vfs->read_file(file, buffer, buff_size);
+		assert(count == shuld_read);
+		assert(strncmp(buffer, text + i, shuld_read) == 0);
+	}
+
+	int result = vfs->remove_file(&file);
+	assert(result == 0);
+	assert(file == NULL);
+
+	std::cout << "OK\n" << std::endl;
+}
+
+void Test_vfs::rewrite_file()
+{
+	std::cout << "rewriting file" << std::endl;
+
+	std::cout << "creating empty file" << std::endl;
+	Vfs::file *file = vfs->create_file("text.txt");
+	assert(file != NULL);
+
+	int buff_size = 200;
+	char buffer[200];
+	int count = 0;
+
+	std::cout << "writing short text" << std::endl;
+	char text1[] = "small text";
+	count = vfs->write_to_file(file, text1, 10);
+	assert(count == 10);
+
+	count = vfs->read_file(file, buffer, buff_size);
+	assert(count == 10);
+	assert(strncmp(buffer, text1, 10) == 0);
+
+
+	std::cout << "writing long text" << std::endl;
+	char text[] = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque condimentum diam et urna tincidunt vestibulum malesuada ac dolor. Phasellus vel neque vitae erat ultrices luctus fermentum vitae metus.";
+	count = vfs->write_to_file(file, text, 200);
+	assert(count == 200);
+
+	count = vfs->read_file(file, buffer, buff_size);
+	assert(count == 200);
+	assert(strncmp(buffer, text, 200) == 0);
+
+	std::cout << "writing short text" << std::endl;
+	file->position = 10;
+	count = vfs->write_to_file(file, text1, 10);
+	assert(count == 10);
+	assert(file->f_dentry->d_size == 20);
+
+	file->position = 0;
+	count = vfs->read_file(file, buffer, buff_size);
+	assert(count == 20);
+	assert(strncmp(buffer, text, 10) == 0);
+	assert(strncmp(buffer + 10, text1, 10) == 0);
+
+	int result = vfs->remove_file(&file);
+	assert(result == 0);
+	assert(file == NULL);
+
+	std::cout << "OK\n" << std::endl;
+}
+
+void Test_vfs::write_zero_bytes_to_file()
+{
+	std::cout << "writing zero bytes to file" << std::endl;
+
+	Vfs::file *file = vfs->create_file("text.txt");
+	assert(file != NULL);
+
+	int buff_size = 30;
+	char buffer[30];
+	int count = 0;
+
+	char text[] = "";
+	count = vfs->write_to_file(file, text, 0);
+	assert(count == 0);
+
+	count = vfs->read_file(file, buffer, buff_size);
+	assert(count == 1);
 
 	int result = vfs->remove_file(&file);
 	assert(result == 0);

@@ -58,8 +58,8 @@ class Test_vfs
 		void read_file_from_exact_position();
 		void write_read_file_bigger_than_one_cluster();
 		void write_read_exactly_one_cluster();
-		void read_small_peace_of_file();
-		void read_all_file_by_peaces();
+		void read_small_piece_of_file();
+		void read_all_file_by_pieces();
 		void rewrite_file();
 		void write_zero_bytes_to_file();
 
