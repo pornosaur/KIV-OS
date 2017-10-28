@@ -69,6 +69,7 @@ class Test_vfs
 
 		// OTHER
 		void folder_dir_same_name();
+		void remove_root();
 
 
 };

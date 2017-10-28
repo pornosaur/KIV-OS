@@ -40,6 +40,7 @@ Test_vfs::Test_vfs()
 	create_file_with_space_in_name();
 	create_dir_with_space_in_name();
 	folder_dir_same_name();
+	remove_root();
 
 
 	system("pause");
@@ -945,5 +946,22 @@ void Test_vfs::folder_dir_same_name()
 	assert(result == 0);
 	assert(file == NULL);
 	
+	std::cout << "OK\n" << std::endl;
+}
+
+void Test_vfs::remove_root()
+{
+	std::cout << "removing root" << std::endl;
+
+	struct Vfs::file *root = vfs->open_object("C:", Vfs::VFS_OBJECT_DIRECTORY);
+	assert(root != NULL);
+
+	int result = vfs->remove_emtpy_dir(&root);
+	assert(result == -1);
+
+	result = vfs->close_file(&root);
+	assert(result == 0);
+	assert(result == NULL);
+
 	std::cout << "OK\n" << std::endl;
 }
