@@ -37,16 +37,17 @@ VfsFat::~VfsFat()
 	}
 }
 
-struct Vfs::file *VfsFat::create_dir(std::string absolute_path)
+int VfsFat::create_dir(struct Vfs::file **directory, std::string absolute_path)
 {
 	struct Vfs::dentry *mDentry = NULL;
 	struct Vfs::dentry *fDentry = NULL;
 	size_t start = 0;
 	size_t end = 0;
+	*directory = NULL;
 
 	mDentry = VfsFat::find_path(absolute_path, &start, &end);
 	if (mDentry == NULL) {
-		return NULL;
+		return ERR_INVALID_PATH;
 	}
 
 	if (start == 0 && end == std::string::npos) {
@@ -58,10 +59,22 @@ struct Vfs::file *VfsFat::create_dir(std::string absolute_path)
 
 	if (fDentry == NULL) {
 		long dir_position = 0;
-		struct dir_file *dirFile = fat_create_dir(absolute_path.substr(start, end).c_str(), mDentry->d_position, &dir_position);	
-		if (dirFile == NULL) {
+		struct dir_file *dirFile = NULL;
+		int result = fat_create_dir(&dirFile, absolute_path.substr(start, end).c_str(), mDentry->d_position, &dir_position);	
+		if (dirFile == NULL || result != 0) {
 			Vfs::sb_remove_dentry(mDentry);
-			return NULL; // cant create file on physic medium
+			
+			switch (result) {
+			case 6:
+				return ERR_DIRECTORY_IS_FULL;
+			case 7:
+				return ERR_DISK_IS_FULL;
+			case 2:
+			case 9:
+				return ERR_INVALID_ARGUMENTS;
+			default:
+				return ERR_DISK_ERROR;
+			}
 		}
 
 		fDentry = Vfs::init_dentry(sb, mDentry, absolute_path.substr(start, end), 0, 0, dirFile->first_cluster, dir_position, dirFile->file_type,
@@ -73,27 +86,40 @@ struct Vfs::file *VfsFat::create_dir(std::string absolute_path)
 	}
 
 	fDentry->d_count++;
-	return Vfs::init_file(fDentry, 0, 0);
+	*directory = Vfs::init_file(fDentry, 0, 0);
+	return ERR_SUCCESS;
 }
 
 int VfsFat::remove_emtpy_dir(struct Vfs::file **file)
 {
-	if (*file == NULL || (*file)->f_dentry == NULL || (*file)->f_dentry->d_parent == NULL || (*file)->f_dentry->d_file_type != Vfs::VFS_OBJECT_DIRECTORY || (*file)->f_dentry->d_count > 1) {
-		// TODO mohu vymazat File, protoze f_dentry je NULL
-		return -1;
+	if (*file == NULL || (*file)->f_dentry == NULL || (*file)->f_dentry->d_file_type != Vfs::VFS_OBJECT_DIRECTORY) {
+		return ERR_INVALID_ARGUMENTS;
+	}
+
+	if ((*file)->f_dentry->d_parent == NULL || (*file)->f_dentry->d_mounted == 1) {
+		return ERR_INVALID_PATH;
+	}
+
+	if ((*file)->f_dentry->d_count > 1) {
+		return ERR_FILE_OPEN_BY_OTHER;
 	}
 
 	int result = fat_delete_empty_dir((*file)->f_dentry->d_name.c_str(), (*file)->f_dentry->d_parent->d_position);
 
-	if (result == 0) {
-		Vfs::sb_remove_file(file);
-	} 
-	else
-	{
-		return -1;
+	switch (result) {
+		case 0:
+			Vfs::sb_remove_file(file);
+			return ERR_SUCCESS;
+		case 3:
+			return ERR_FILE_NOT_FOUND;
+		case 5:
+			return ERR_DIRECTORY_IS_NOT_EMPTY;
+		case 2:
+		case 9:
+			return ERR_INVALID_ARGUMENTS;
+		default:
+			return ERR_DISK_ERROR;
 	}
-
-	return 0;
 }
 
 int VfsFat::read_dir(struct Vfs::file *file)
@@ -102,28 +128,29 @@ int VfsFat::read_dir(struct Vfs::file *file)
 	//TODO
 }
 
-struct Vfs::file *VfsFat::create_file(std::string absolute_path)
+int VfsFat::create_file(struct Vfs::file **file, std::string absolute_path)
 {
 	struct Vfs::dentry *mDentry = NULL;
 	struct Vfs::dentry *fDentry = NULL;
 	size_t start = 0;
 	size_t end = 0;
+	*file = NULL;
 
 	mDentry = VfsFat::find_path(absolute_path, &start, &end);
 	if (mDentry == NULL) {
-		return NULL;
+		return ERR_INVALID_PATH;
 	}
 	if (start == 0 && end == std::string::npos)
 	{
 		Vfs::sb_remove_dentry(mDentry);
-		return NULL;
+		return ERR_INVALID_PATH;
 	}
 
 	fDentry = find_object_in_directory(mDentry, absolute_path.substr(start, end), VFS_OBJECT_FILE);
 
 	if (fDentry != NULL) {
 		if (fDentry->d_count > 0) {
-			return NULL;
+			return ERR_FILE_OPEN_BY_OTHER;
 		}
 		fat_delete_file_by_name(fDentry->d_name.c_str(), fDentry->d_parent->d_position);
 		Vfs::sb_remove_dentry(fDentry);
@@ -131,10 +158,23 @@ struct Vfs::file *VfsFat::create_file(std::string absolute_path)
 	}
 
 	long dir_position = 0;
-	struct dir_file *dirFile = fat_create_file(absolute_path.substr(start, end).c_str(), mDentry->d_position, &dir_position);
-	if (dirFile == NULL) {
+	struct dir_file *dirFile = NULL;
+	int result  = fat_create_file(&dirFile, absolute_path.substr(start, end).c_str(), mDentry->d_position, &dir_position);
+
+	if (dirFile == NULL || result != 0) {
 		Vfs::sb_remove_dentry(mDentry);
-		return NULL; // cant create file on physic medium
+		
+		switch (result) {
+		case 6:
+			return ERR_DIRECTORY_IS_FULL;
+		case 7:
+			return ERR_DISK_IS_FULL;
+		case 2:
+		case 9:
+			return ERR_INVALID_ARGUMENTS;
+		default:
+			return ERR_DISK_ERROR;
+		}
 	}
 	
 	fDentry = Vfs::init_dentry(sb, mDentry, absolute_path.substr(start, end), 0, 0, dirFile->first_cluster, dir_position, dirFile->file_type,
@@ -145,26 +185,28 @@ struct Vfs::file *VfsFat::create_file(std::string absolute_path)
 	free(dirFile);
 
 	fDentry->d_count++;
-	return Vfs::init_file(fDentry, 0, 0);
+	*file =  Vfs::init_file(fDentry, 0, 0);
+	return ERR_SUCCESS;
 }
 
-struct Vfs::file *VfsFat::open_object(std::string absolute_path, int type)
+int VfsFat::open_object(struct Vfs::file **object, std::string absolute_path, int type)
 {
 	struct Vfs::dentry *mDentry = NULL;
 	struct Vfs::dentry *fDentry = NULL;
 	size_t start = 0;
 	size_t end = 0;
+	*object = NULL;
 
 	mDentry = VfsFat::find_path(absolute_path, &start, &end);
 	if (mDentry == NULL) {
-		return NULL;
+		return ERR_INVALID_PATH;
 	}
 
 	if (start == 0 && end == std::string::npos){
 		if (type != Vfs::VFS_OBJECT_DIRECTORY)
 		{
 			Vfs::sb_remove_dentry(mDentry);
-			return NULL;
+			return ERR_FILE_NOT_FOUND;
 		}
 		fDentry = mDentry;
 	} 
@@ -173,13 +215,13 @@ struct Vfs::file *VfsFat::open_object(std::string absolute_path, int type)
 		fDentry = find_object_in_directory(mDentry, absolute_path.substr(start, end), type);
 		if (fDentry == NULL) {
 			Vfs::sb_remove_dentry(mDentry);
-			return NULL;
+			return ERR_FILE_NOT_FOUND;
 		}
 	}
 	
-
 	fDentry->d_count++;
-	return Vfs::init_file(fDentry, 0, 0);
+	*object = Vfs::init_file(fDentry, 0, 0);
+	return ERR_SUCCESS;
 }
 
 struct Vfs::dentry *VfsFat::find_object_in_directory(struct Vfs::dentry *mDentry, const std::string& dentry_name, int type) {
@@ -242,8 +284,7 @@ Vfs::dentry * VfsFat::find_path(std::string absolute_path, size_t * start, size_
 int VfsFat::write_to_file(struct Vfs::file *file, char *buffer, int buffer_size)
 {
 	if (file == NULL || file->f_dentry == NULL || file->f_dentry->d_file_type != Vfs::VFS_OBJECT_FILE) {
-		// TODO mohu vymazat File, protoze f_dentry je NULL
-		return -1;
+		return ERR_INVALID_ARGUMENTS;
 	}
 
 	struct dir_file *dirFile = new struct dir_file();
@@ -266,8 +307,7 @@ int VfsFat::write_to_file(struct Vfs::file *file, char *buffer, int buffer_size)
 int VfsFat::read_file(struct Vfs::file *file, char *buffer, int buffer_size)
 {
 	if (file == NULL || file->f_dentry == NULL || file->f_dentry->d_file_type != Vfs::VFS_OBJECT_FILE) {
-		// TODO mohu vymazat File, protoze f_dentry je NULL
-		return -1;
+		return ERR_INVALID_ARGUMENTS;
 	}
 
 	struct dir_file dirFile;
@@ -276,35 +316,47 @@ int VfsFat::read_file(struct Vfs::file *file, char *buffer, int buffer_size)
 	dirFile.file_type = file->f_dentry->d_file_type;
 	dirFile.first_cluster = file->f_dentry->d_position;
 
-	return fat_read_file(dirFile, buffer, buffer_size, file->position);
+	int writed = fat_read_file(dirFile, buffer, buffer_size, file->position);
+	if (writed < 0) {
+		return ERR_INVALID_ARGUMENTS;
+	}
+
+	return writed;
 }
 
 int VfsFat::remove_file(struct Vfs::file **file)
 {
-	if (*file == NULL || (*file)->f_dentry == NULL || (*file)->f_dentry->d_file_type != Vfs::VFS_OBJECT_FILE || (*file)->f_dentry->d_count > 1) {
-		// TODO mohu vymazat File, protoze f_dentry je NULL
-		return -1;
+	if (*file == NULL || (*file)->f_dentry == NULL || (*file)->f_dentry->d_file_type != Vfs::VFS_OBJECT_FILE) {
+		return ERR_INVALID_ARGUMENTS;
+	}
+	if ((*file)->f_dentry->d_count > 1) {
+		return ERR_FILE_OPEN_BY_OTHER;
 	}
 
 	int result = fat_delete_file_by_name((*file)->f_dentry->d_name.c_str(), (*file)->f_dentry->d_parent->d_position);
 
-	if (result == 0) {
-		sb_remove_file(file);
-	}
-	else {
-		return -1;
-	}
 
-	return 0;
+	switch (result) {
+	case 0:
+		Vfs::sb_remove_file(file);
+		return ERR_SUCCESS;
+	case 3:
+		return ERR_FILE_NOT_FOUND;
+	case 2:
+	case 9:
+		return ERR_INVALID_ARGUMENTS;
+	default:
+		return ERR_DISK_ERROR;
+	}
 }
 
 int VfsFat::close_file(struct Vfs::file **file)
 {
 	if (*file == NULL)
 	{
-		return -1;
+		return ERR_INVALID_ARGUMENTS;
 	}
 
 	Vfs::sb_remove_file(file);
-	return 0;
+	return ERR_SUCCESS;
 }

@@ -45,15 +45,26 @@ public:
 	static const int VFS_OBJECT_DIRECTORY = 0;
 	static const int VFS_OBJECT_FILE = 1;
 
+	static const int ERR_SUCCESS = 0;
+
+	static const int ERR_FILE_NOT_FOUND = -1;
+	static const int ERR_INVALID_PATH = -2;
+	static const int ERR_DIRECTORY_IS_NOT_EMPTY = -3;
+	static const int ERR_DIRECTORY_IS_FULL = -4;
+	static const int ERR_DISK_IS_FULL = -5;
+	static const int ERR_FILE_OPEN_BY_OTHER = -6; // should mean also direcotry had some subdirecotries
+	static const int ERR_INVALID_ARGUMENTS = -7;
+	static const int ERR_DISK_ERROR = -8;
+
 	Vfs();
 	~Vfs();
 
-	virtual struct Vfs::file *create_dir(std::string absolute_path) = 0;
+	virtual int create_dir(struct Vfs::file **directory, std::string absolute_path) = 0;
 	virtual int remove_emtpy_dir(struct Vfs::file **file) = 0;
 	virtual int read_dir(struct Vfs::file *file) = 0;
 	
-	virtual struct Vfs::file *open_object(std::string absolute_path, int type) = 0;
-	virtual struct Vfs::file *create_file(std::string absolute_path) = 0; /* smaze jiz existujici soubor, existuje-li*/
+	virtual int open_object(struct Vfs::file **object, std::string absolute_path, int type) = 0;
+	virtual int create_file(struct Vfs::file **file, std::string absolute_path) = 0; /* smaze jiz existujici soubor, existuje-li*/
 	virtual int write_to_file(struct Vfs::file *file, char *buffer, int buffer_size) = 0;
 	virtual int read_file(struct Vfs::file *file, char *buffer, int buffer_size) = 0;
 	virtual int remove_file(struct Vfs::file **file) = 0;

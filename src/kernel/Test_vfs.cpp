@@ -73,19 +73,23 @@ void Test_vfs::open_existing_file()
 {
 	std::cout << "opennig existing file" << std::endl;
 	
-	Vfs::file *file = vfs->create_file("C:/file.text");
+	Vfs::file *file = NULL;
+	int result = vfs->create_file(&file, "C:/file.text");
 	assert(file != NULL);
-	int result = vfs->close_file(&file);
+	assert(result == Vfs::ERR_SUCCESS);
+	result = vfs->close_file(&file);
+	assert(result == Vfs::ERR_SUCCESS);
 
-	file = vfs->open_object("C:/file.text", Vfs::VFS_OBJECT_FILE);
+	result = vfs->open_object(&file, "C:/file.text", Vfs::VFS_OBJECT_FILE);
 	assert(file != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(file->f_dentry != NULL);
 	assert(file->f_dentry->d_file_type == Vfs::VFS_OBJECT_FILE);
 	assert(file->f_dentry->d_count == 1);
 
 	std::cout << "removing file" << std::endl;
 	result = vfs->remove_file(&file);
-	assert(result == 0);
+	assert(result == Vfs::ERR_SUCCESS);
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -94,9 +98,11 @@ void Test_vfs::open_not_exist_file()
 {
 	std::cout << "opennig not existing file" << std::endl;
 
-	Vfs::file *file = vfs->open_object("C:/not.txt", Vfs::VFS_OBJECT_FILE);
+	Vfs::file *file = NULL;
+	int result = vfs->open_object(&file, "C:/not.txt", Vfs::VFS_OBJECT_FILE);
 
 	assert(file == NULL);
+	assert(result == Vfs::ERR_FILE_NOT_FOUND);
 	std::cout << "OK\n" << std::endl;
 }
 
@@ -104,9 +110,11 @@ void Test_vfs::open_file_with_too_long_name()
 {
 	std::cout << "opennig not existing file with long name of file" << std::endl;
 
-	Vfs::file *file = vfs->open_object("C:/not_existing_file_with_very_very_long_name.txt", Vfs::VFS_OBJECT_FILE);
+	Vfs::file *file = NULL;
+	int result = vfs->open_object(&file, "C:/not_existing_file_with_very_very_long_name.txt", Vfs::VFS_OBJECT_FILE);
 
 	assert(file == NULL);
+	assert(result == Vfs::ERR_FILE_NOT_FOUND);
 	std::cout << "OK\n" << std::endl;
 }
 
@@ -114,9 +122,11 @@ void Test_vfs::create_new_file()
 {
 	std::cout << "creating valid file with name new.txt" << std::endl;
 
-	Vfs::file *file = vfs->create_file("C:/new.txt");
+	Vfs::file *file = NULL;
+	int result = vfs->create_file(&file, "C:/new.txt");
 
 	assert(file != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(file->f_dentry != NULL);
 	assert(file->f_dentry->d_file_type == Vfs::VFS_OBJECT_FILE);
 	assert(file->f_dentry->d_count == 1);
@@ -126,13 +136,14 @@ void Test_vfs::create_new_file()
 	assert(file->f_dentry->d_blocks == 1);
 
 	std::cout << "closing new.txt" << std::endl;
-	int result = vfs->close_file(&file);
-	assert(result == 0);
+	result = vfs->close_file(&file);
+	assert(result == Vfs::ERR_SUCCESS);
 	file = NULL;
 
 	std::cout << "opening new.txt" << std::endl;
-	file = vfs->open_object("C:/new.txt", Vfs::VFS_OBJECT_FILE);
+	result = vfs->open_object(&file, "C:/new.txt", Vfs::VFS_OBJECT_FILE);
 	assert(file != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(file->f_dentry != NULL);
 	assert(file->f_dentry->d_name == "new.txt");
 	assert(file->f_dentry->d_mounted != 1);
@@ -141,7 +152,7 @@ void Test_vfs::create_new_file()
 
 	std::cout << "removing new.txt from FAT" << std::endl;
 	result = vfs->remove_file(&file);
-	assert(result == 0);
+	assert(result == Vfs::ERR_SUCCESS);
 	std::cout << "OK\n" << std::endl;
 }
 
@@ -150,13 +161,17 @@ void Test_vfs::create_new_file_not_in_root()
 	std::cout << "creating file with name new.txt in directory dir" << std::endl;
 
 	std::cout << "creating dir" << std::endl;
-	Vfs::file *dir = vfs->create_dir("C:/dir");
+	Vfs::file *dir = NULL;
+	int result = vfs->create_dir(&dir, "C:/dir");
 	assert(dir != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 
 	std::cout << "creating file" << std::endl;
-	Vfs::file *file = vfs->create_file("C:/dir/new.txt");
+	Vfs::file *file = NULL;
+	result = vfs->create_file(&file, "C:/dir/new.txt");
 
 	assert(file != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(file->f_dentry != NULL);
 	assert(file->f_dentry->d_file_type == Vfs::VFS_OBJECT_FILE);
 	assert(file->f_dentry->d_count == 1);
@@ -166,13 +181,14 @@ void Test_vfs::create_new_file_not_in_root()
 	assert(file->f_dentry->d_blocks == 1);
 
 	std::cout << "closing new.txt" << std::endl;
-	int result = vfs->close_file(&file);
-	assert(result == 0);
+	result = vfs->close_file(&file);
+	assert(result == Vfs::ERR_SUCCESS);
 	file = NULL;
 
 	std::cout << "opening new.txt" << std::endl;
-	file = vfs->open_object("C:/dir/new.txt", Vfs::VFS_OBJECT_FILE);
+	result = vfs->open_object(&file, "C:/dir/new.txt", Vfs::VFS_OBJECT_FILE);
 	assert(file != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(file->f_dentry != NULL);
 	assert(file->f_dentry->d_name == "new.txt");
 	assert(file->f_dentry->d_mounted != 1);
@@ -181,9 +197,9 @@ void Test_vfs::create_new_file_not_in_root()
 
 	std::cout << "removing file adn folder" << std::endl;
 	result = vfs->remove_file(&file);
-	assert(result == 0);
+	assert(result == Vfs::ERR_SUCCESS);
 	result = vfs->remove_emtpy_dir(&dir);
-	assert(result == 0);
+	assert(result == Vfs::ERR_SUCCESS);
 	std::cout << "OK\n" << std::endl;
 }
 
@@ -191,8 +207,10 @@ void Test_vfs::create_new_file_with_long_name()
 {
 	std::cout << "creating file with long name" << std::endl;
 
-	Vfs::file *file = vfs->create_file("C:/new_file_with_very_long_name.txt");
+	Vfs::file *file = NULL;
+	int result = vfs->create_file(&file, "C:/new_file_with_very_long_name.txt");
 	assert(file == NULL);
+	assert(result == Vfs::ERR_INVALID_ARGUMENTS);
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -201,8 +219,10 @@ void Test_vfs::create_new_file_with_bad_path()
 {
 	std::cout << "creating file with bad file path" << std::endl;
 
-	Vfs::file *file = vfs->create_file("C:/folder/new.txt");
+	Vfs::file *file = NULL;
+	int result = vfs->create_file(&file, "C:/folder/new.txt");
 	assert(file == NULL);
+	assert(result == Vfs::ERR_INVALID_PATH);
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -211,32 +231,35 @@ void Test_vfs::create_existing_file()
 {
 	std::cout << "creating file over exist file" << std::endl;
 
-	Vfs::file *file = vfs->create_file("C:/new.txt");
+	Vfs::file *file = NULL;
+	int result = vfs->create_file(&file, "C:/new.txt");
 	assert(file != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 
 	char buffer[] = "text of new file with name new.txt";
 	int buff_size = 34;
 
 	std::cout << "write data to file new.txt" << std::endl;
-	int result = vfs->write_to_file(file, buffer, buff_size);
+	result = vfs->write_to_file(file, buffer, buff_size);
 	assert(file->f_dentry->d_size > 1);
 	assert(file->f_dentry->d_blocks == 1);
 	assert(result == buff_size);
 
 	std::cout << "closing file new.txt" << std::endl;
 	result = vfs->close_file(&file);
-	assert(result == 0);
+	assert(result == Vfs::ERR_SUCCESS);
 
 	std::cout << "creating same file again" << std::endl;
-	file = vfs->create_file("C:/new.txt");
+	result = vfs->create_file(&file, "C:/new.txt");
 	assert(file != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(file->f_dentry != NULL);
 	assert(file->f_dentry->d_size == 1);
 	assert(file->f_dentry->d_blocks == 1);
 
 	std::cout << "removing new.txt from FAT" << std::endl;
 	result = vfs->remove_file(&file);
-	assert(result == 0);
+	assert(result == Vfs::ERR_SUCCESS);
 	std::cout << "OK\n" << std::endl;
 }
 
@@ -244,8 +267,10 @@ void Test_vfs::create_file_with_max_name()
 {
 	std::cout << "creating file with maximal name of file filname.txt" << std::endl;
 
-	Vfs::file *file = vfs->create_file("C:/filname.txt");
+	Vfs::file *file = NULL;
+	int result = vfs->create_file(&file, "C:/filname.txt");
 	assert(file != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(file->f_dentry != NULL);
 	assert(file->f_dentry->d_file_type == Vfs::VFS_OBJECT_FILE);
 	assert(file->f_dentry->d_count == 1);
@@ -255,13 +280,14 @@ void Test_vfs::create_file_with_max_name()
 	assert(file->f_dentry->d_blocks == 1);
 
 	std::cout << "closing filname.txt" << std::endl;
-	int result = vfs->close_file(&file);
-	assert(result == 0);
+	result = vfs->close_file(&file);
+	assert(result == Vfs::ERR_SUCCESS);
 	file = NULL;
 
 	std::cout << "opening filname.txt" << std::endl;
-	file = vfs->open_object("C:/filname.txt", Vfs::VFS_OBJECT_FILE);
+	result = vfs->open_object(&file, "C:/filname.txt", Vfs::VFS_OBJECT_FILE);
 	assert(file != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(file->f_dentry != NULL);
 	assert(file->f_dentry->d_name == "filname.txt");
 	assert(file->f_dentry->d_mounted != 1);
@@ -270,7 +296,7 @@ void Test_vfs::create_file_with_max_name()
 
 	std::cout << "removing filname.txt from FAT" << std::endl;
 	result = vfs->remove_file(&file);
-	assert(result == 0);
+	assert(result == Vfs::ERR_SUCCESS);
 	std::cout << "OK\n" << std::endl;
 }
 
@@ -278,25 +304,29 @@ void Test_vfs::remomve_file()
 {
 	std::cout << "test on removing file" << std::endl;
 	std::cout << "creating file file.txt" << std::endl;
-	Vfs::file *file = vfs->create_file("C:/file.txt");
+	Vfs::file *file = NULL;
+	int result = vfs->create_file(&file, "C:/file.txt");
 	assert(file != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 
 	std::cout << "closing file.txt" << std::endl;
-	int result = vfs->close_file(&file);
-	assert(result == 0);
+	result = vfs->close_file(&file);
+	assert(result == Vfs::ERR_SUCCESS);
 	file = NULL;
 
 	std::cout << "opening file.txt" << std::endl;
-	file = vfs->open_object("C:/file.txt", Vfs::VFS_OBJECT_FILE);
+	result = vfs->open_object(&file, "C:/file.txt", Vfs::VFS_OBJECT_FILE);
 	assert(file != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 
 	std::cout << "removing file.txt from FAT" << std::endl;
 	result = vfs->remove_file(&file);
-	assert(result == 0);
+	assert(result == Vfs::ERR_SUCCESS);
 
 	std::cout << "opening file.txt" << std::endl;
-	file = vfs->open_object("C:/file.txt", Vfs::VFS_OBJECT_FILE);
+	result = vfs->open_object(&file, "C:/file.txt", Vfs::VFS_OBJECT_FILE);
 	assert(file == NULL);
+	assert(result == Vfs::ERR_FILE_NOT_FOUND);
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -305,32 +335,36 @@ void Test_vfs::remove_file_bigger_than_cluster()
 {
 	std::cout << "test on removing file which is bigger than one cluster" << std::endl;
 	std::cout << "creating file file.txt" << std::endl;
-	Vfs::file *file = vfs->create_file("C:/file.txt");
+	Vfs::file *file = NULL;
+	int result = vfs->create_file(&file, "C:/file.txt");
 	assert(file != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 
 	char * buffer = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz";
 	int buff_size = 208;
 
-	int result = vfs->write_to_file(file, buffer, buff_size);
+	result = vfs->write_to_file(file, buffer, buff_size);
 	assert(result == buff_size);
 
 	std::cout << "closing file.txt" << std::endl;
 	result = vfs->close_file(&file);
-	assert(result == 0);
-	file = NULL;
+	assert(result == Vfs::ERR_SUCCESS);
+	assert(file == NULL);
 
 	std::cout << "opening file.txt" << std::endl;
-	file = vfs->open_object("C:/file.txt", Vfs::VFS_OBJECT_FILE);
+	result = vfs->open_object(&file, "C:/file.txt", Vfs::VFS_OBJECT_FILE);
 	assert(file != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(file->f_dentry->d_size == buff_size);
 
 	std::cout << "removing file.txt from FAT" << std::endl;
 	result = vfs->remove_file(&file);
-	assert(result == 0);
+	assert(result == Vfs::ERR_SUCCESS);
 
 	std::cout << "opening file.txt" << std::endl;
-	file = vfs->open_object("C:/file.txt", Vfs::VFS_OBJECT_FILE);
+	result = vfs->open_object(&file, "C:/file.txt", Vfs::VFS_OBJECT_FILE);
 	assert(file == NULL);
+	assert(result == Vfs::ERR_FILE_NOT_FOUND);
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -345,10 +379,9 @@ void Test_vfs::try_remove_not_existing_file()
 	file->position = 2342;
 
 	int result = vfs->remove_file(&file);
-	assert(result == -1);
+	assert(result == Vfs::ERR_INVALID_ARGUMENTS);
 
 	vfs->close_file(&file);
-	
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -357,17 +390,20 @@ void Test_vfs::create_dir_in_root()
 {
 	std::cout << "createing normal dir in root with name directory" << std::endl;
 
-	Vfs::file *dir = vfs->create_dir("C:/directory");
+	Vfs::file *dir = NULL;
+	int result = vfs->create_dir(&dir, "C:/directory");
 	assert(dir != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(dir->f_dentry != NULL);
 	assert(dir->f_dentry->d_file_type == Vfs::VFS_OBJECT_DIRECTORY);
 
 	std::cout << "removing direcotry" << std::endl;
-	int result = vfs->remove_emtpy_dir(&dir);
-	assert(result == 0);
+	result = vfs->remove_emtpy_dir(&dir);
+	assert(result == Vfs::ERR_SUCCESS);
 
-	dir = vfs->open_object("C:/directory", Vfs::VFS_OBJECT_DIRECTORY);
+	result = vfs->open_object(&dir, "C:/directory", Vfs::VFS_OBJECT_DIRECTORY);
 	assert(dir == NULL);
+	assert(result == Vfs::ERR_FILE_NOT_FOUND);
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -376,24 +412,27 @@ void Test_vfs::create_dir_with_existing_name()
 {
 	std::cout << "createing normal dir with name directory" << std::endl;
 
-	Vfs::file *dir = vfs->create_dir("C:/directory");
+	Vfs::file *dir = NULL;
+	int result = vfs->create_dir(&dir, "C:/directory");
 	assert(dir != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(dir->f_dentry != NULL);
 	assert(dir->f_dentry->d_file_type == Vfs::VFS_OBJECT_DIRECTORY);
 
 	std::cout << "closing direcotry" << std::endl;
-	int result = vfs->close_file(&dir);
-	assert(result == 0);
+	result = vfs->close_file(&dir);
+	assert(result == Vfs::ERR_SUCCESS);
 
 	std::cout << "createing dir with same name (directory)" << std::endl;
-	dir = vfs->create_dir("C:/directory");
+	result = vfs->create_dir(&dir, "C:/directory");
 	assert(dir != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(dir->f_dentry != NULL);
 	assert(dir->f_dentry->d_file_type == Vfs::VFS_OBJECT_DIRECTORY);
 
 	std::cout << "removing direcotry" << std::endl;
 	result = vfs->remove_emtpy_dir(&dir);
-	assert(result == 0);
+	assert(result == Vfs::ERR_SUCCESS);
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -402,35 +441,50 @@ void Test_vfs::create_dir_in_full_directory()
 {
 	std::cout << "createing dir with name directory1" << std::endl;
 
-	Vfs::file *dir1 = vfs->create_dir("C:/directory1");
+	Vfs::file *dir1 = NULL;
+	int result = vfs->create_dir(&dir1, "C:/directory1");
 	assert(dir1 != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(dir1->f_dentry != NULL);
 	assert(dir1->f_dentry->d_file_type == Vfs::VFS_OBJECT_DIRECTORY);
 
-	Vfs::file *file1 = vfs->create_file("C:/file1");
+	Vfs::file *file1 = NULL;
+	result = vfs->create_file(&file1, "C:/file1");
 	assert(file1 != NULL);
-	Vfs::file *file2 = vfs->create_file("C:/file2");
+	assert(result == Vfs::ERR_SUCCESS);
+
+	Vfs::file *file2 = NULL;
+	result = vfs->create_file(&file2, "C:/file2");
 	assert(file2 != NULL);
-	Vfs::file *file3 = vfs->create_file("C:/file3");
+	assert(result == Vfs::ERR_SUCCESS);
+
+	Vfs::file *file3 = NULL;
+	result = vfs->create_file(&file3, "C:/file3");
 	assert(file3 != NULL);
-	Vfs::file *file4 = vfs->create_file("C:/file4");
+	assert(result == Vfs::ERR_SUCCESS);
+
+	Vfs::file *file4 = NULL;
+	result = vfs->create_file(&file4, "C:/file4");
 	assert(file4 != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 
 	std::cout << "createing another dir with name directory2" << std::endl;
-	Vfs::file *dir2 = vfs->create_dir("C:/directory2");
+	Vfs::file *dir2 = NULL;
+	result = vfs->create_dir(&dir2, "C:/directory2");
 	assert(dir2 == NULL);
+	assert(result == Vfs::ERR_DIRECTORY_IS_FULL);
 
 	std::cout << "removing direcotry1" << std::endl;
-	int result = vfs->remove_emtpy_dir(&dir1);
-	assert(result == 0);
+	result = vfs->remove_emtpy_dir(&dir1);
+	assert(result == Vfs::ERR_SUCCESS);
 	result = vfs->remove_file(&file1);
-	assert(result == 0);
+	assert(result == Vfs::ERR_SUCCESS);
 	result = vfs->remove_file(&file2);
-	assert(result == 0);
+	assert(result == Vfs::ERR_SUCCESS);
 	result = vfs->remove_file(&file3);
-	assert(result == 0);
+	assert(result == Vfs::ERR_SUCCESS);
 	result = vfs->remove_file(&file4);
-	assert(result == 0);
+	assert(result == Vfs::ERR_SUCCESS);
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -439,30 +493,36 @@ void Test_vfs::create_dir_not_in_root()
 {
 	std::cout << "createing normal dir in root with name directory" << std::endl;
 
-	Vfs::file *dir1 = vfs->create_dir("C:/directory");
+	Vfs::file *dir1 = NULL;
+	int result = vfs->create_dir(&dir1, "C:/directory");
 	assert(dir1 != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(dir1->f_dentry != NULL);
 	assert(dir1->f_dentry->d_file_type == Vfs::VFS_OBJECT_DIRECTORY);
 	assert(dir1->f_dentry->d_subdirectories == NULL);
 
-	Vfs::file *dir2 = vfs->create_dir("C:/directory/directory");
+	Vfs::file *dir2 = NULL;
+	result = vfs->create_dir(&dir2, "C:/directory/directory");
 	assert(dir2 != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(dir2->f_dentry != NULL);
 	assert(dir2->f_dentry->d_file_type == Vfs::VFS_OBJECT_DIRECTORY);
 	assert(dir2->f_dentry->d_parent != NULL);
 
 	assert(dir1->f_dentry->d_subdirectories != NULL);
 
-	int result = vfs->close_file(&dir1);
+	result = vfs->close_file(&dir1);
 	assert(result == 0);
 	result = vfs->close_file(&dir2);
 	assert(result == 0);
 
-	dir2 = vfs->open_object("C:/directory/directory", Vfs::VFS_OBJECT_DIRECTORY);
+	result = vfs->open_object(&dir2, "C:/directory/directory", Vfs::VFS_OBJECT_DIRECTORY);
 	assert(dir2 != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(dir2->f_dentry->d_parent != NULL);
-	dir1 = vfs->open_object("C:/directory", Vfs::VFS_OBJECT_DIRECTORY);
+	result = vfs->open_object(&dir1, "C:/directory", Vfs::VFS_OBJECT_DIRECTORY);
 	assert(dir1 != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(dir1->f_dentry->d_subdirectories != NULL);
 
 	std::cout << "removing dir2" << std::endl;
@@ -480,8 +540,10 @@ void Test_vfs::create_dir_with_too_long_name()
 {
 	std::cout << "createing dir with too long name" << std::endl;
 
-	Vfs::file *dir = vfs->create_dir("C:/very_very_long_name_for_simple_direcotry");
+	Vfs::file *dir = NULL;
+	int result = vfs->create_dir(&dir, "C:/very_very_long_name_for_simple_direcotry");
 	assert(dir == NULL);
+	assert(result == Vfs::ERR_INVALID_ARGUMENTS);
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -490,8 +552,10 @@ void Test_vfs::create_dir_in_not_exist_path()
 {
 	std::cout << "createing dir with too long name" << std::endl;
 
-	Vfs::file *dir = vfs->create_dir("C:/direcotry/direcotry/dir");
+	Vfs::file *dir = NULL;
+	int result = vfs->create_dir(&dir, "C:/direcotry/direcotry/dir");
 	assert(dir == NULL);
+	assert(result == Vfs::ERR_INVALID_PATH);
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -500,18 +564,20 @@ void Test_vfs::remove_dir()
 {
 	std::cout << "test for remove dir in root with name directory" << std::endl;
 
-	Vfs::file *dir = vfs->create_dir("C:/directory");
+	Vfs::file *dir = NULL;
+	int result = vfs->create_dir(&dir, "C:/directory");
 	assert(dir != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(dir->f_dentry != NULL);
 	assert(dir->f_dentry->d_file_type == Vfs::VFS_OBJECT_DIRECTORY);
 
 	std::cout << "removing direcotry" << std::endl;
-	int result = vfs->remove_emtpy_dir(&dir);
-	assert(result == 0);
+	result = vfs->remove_emtpy_dir(&dir);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(dir == NULL);
 
-	dir = vfs->open_object("C:/directory", Vfs::VFS_OBJECT_DIRECTORY);
-	assert(result == 0);
+	result = vfs->open_object(&dir, "C:/directory", Vfs::VFS_OBJECT_DIRECTORY);
+	assert(result == Vfs::ERR_FILE_NOT_FOUND);
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -520,25 +586,38 @@ void Test_vfs::try_delete_not_empty_dir()
 {
 	std::cout << "test for remove not empty dir" << std::endl;
 
-	Vfs::file *dir1 = vfs->create_dir("C:/directory");
+	Vfs::file *dir1 = NULL;
+	int result = vfs->create_dir(&dir1, "C:/directory");
 	assert(dir1 != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(dir1->f_dentry != NULL);
 
-	Vfs::file *dir2 = vfs->create_dir("C:/directory/directory");
+	Vfs::file *dir2 = NULL;
+	result = vfs->create_dir(&dir2, "C:/directory/directory");
 	assert(dir2 != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(dir2->f_dentry != NULL);
 
 	std::cout << "removing direcotry" << std::endl;
-	int result = vfs->remove_emtpy_dir(&dir1);
-	assert(result == -1);
+	result = vfs->remove_emtpy_dir(&dir1);
+	assert(result == Vfs::ERR_FILE_OPEN_BY_OTHER);
+
+	result = vfs->close_file(&dir2);
+	assert(result == Vfs::ERR_SUCCESS);
+
+	result = vfs->remove_emtpy_dir(&dir1);
+	assert(result == Vfs::ERR_DIRECTORY_IS_NOT_EMPTY);
+
+	result = vfs->open_object(&dir2, "C:/directory/directory", Vfs::VFS_OBJECT_DIRECTORY);
+	assert(result == Vfs::ERR_SUCCESS);
 
 	std::cout << "removing direcotry" << std::endl;
 	result = vfs->remove_emtpy_dir(&dir2);
-	assert(result == 0);
+	assert(result == Vfs::ERR_SUCCESS);
 	
 	std::cout << "removing direcotry" << std::endl;
 	result = vfs->remove_emtpy_dir(&dir1);
-	assert(result == 0);
+	assert(result == Vfs::ERR_SUCCESS);
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -553,7 +632,7 @@ void Test_vfs::try_delete_not_exist_dir()
 	dir->position = 2342;
 
 	int result = vfs->remove_emtpy_dir(&dir);
-	assert(result == -1);
+	assert(result == Vfs::ERR_INVALID_ARGUMENTS);
 
 	vfs->close_file(&dir);
 
@@ -570,22 +649,25 @@ void Test_vfs::open_normal_dir()
 {
 	std::cout << "testing dir open" << std::endl;
 
-	Vfs::file *dir = vfs->create_dir("C:/directory");
+	Vfs::file *dir = NULL;
+	int result = vfs->create_dir(&dir, "C:/directory");
 	assert(dir != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(dir->f_dentry != NULL);
 	assert(dir->f_dentry->d_file_type == Vfs::VFS_OBJECT_DIRECTORY);
 
-	int result = vfs->close_file(&dir);
-	assert(result == 0);
+	result = vfs->close_file(&dir);
+	assert(result == Vfs::ERR_SUCCESS);
 
-	dir = vfs->open_object("C:/directory", Vfs::VFS_OBJECT_DIRECTORY);
+	result = vfs->open_object(&dir, "C:/directory", Vfs::VFS_OBJECT_DIRECTORY);
 	assert(dir != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(dir->f_dentry != NULL);
 	assert(dir->f_dentry->d_file_type == Vfs::VFS_OBJECT_DIRECTORY);
 
 	std::cout << "removing direcotry" << std::endl;
 	result = vfs->remove_emtpy_dir(&dir);
-	assert(result == 0);
+	assert(result == Vfs::ERR_SUCCESS);
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -594,8 +676,10 @@ void Test_vfs::open_not_exist_dir()
 {
 	std::cout << "testing open not existing dir" << std::endl;
 
-	Vfs::file *dir = vfs->open_object("C:/directory", Vfs::VFS_OBJECT_DIRECTORY);
+	Vfs::file *dir = NULL;
+	int result = vfs->open_object(&dir, "C:/directory", Vfs::VFS_OBJECT_DIRECTORY);
 	assert(dir == NULL);
+	assert(result == Vfs::ERR_FILE_NOT_FOUND);
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -604,8 +688,10 @@ void Test_vfs::open_dir_with_long_name()
 {
 	std::cout << "testing open dir with long name" << std::endl;
 
-	Vfs::file *dir = vfs->open_object("C:/directory_with_very_very_long_name", Vfs::VFS_OBJECT_DIRECTORY);
+	Vfs::file *dir = NULL;
+	int result = vfs->open_object(&dir, "C:/directory_with_very_very_long_name", Vfs::VFS_OBJECT_DIRECTORY);
 	assert(dir == NULL);
+	assert(result == Vfs::ERR_FILE_NOT_FOUND);
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -614,8 +700,10 @@ void Test_vfs::write_read_file()
 {
 	std::cout << "reading and writing to file" << std::endl;
 	
-	Vfs::file *file = vfs->create_file("C:/text.txt");
+	Vfs::file *file = NULL;
+	int result = vfs->create_file(&file, "C:/text.txt");
 	assert(file != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 	
 	int buff_size = 100;
 	char buffer[100];
@@ -632,8 +720,8 @@ void Test_vfs::write_read_file()
 	assert(count == 10);
 	assert(strncmp(buffer, text, 10) == 0);
 
-	int result = vfs->remove_file(&file);
-	assert(result == 0);
+	result = vfs->remove_file(&file);
+	assert(result == Vfs::ERR_SUCCESS);;
 	assert(file == NULL);
 	
 	std::cout << "OK\n" << std::endl;
@@ -643,8 +731,10 @@ void Test_vfs::read_file_from_exact_position()
 {
 	std::cout << "reading file from exact position" << std::endl;
 
-	Vfs::file *file = vfs->create_file("C:/text.txt");
+	Vfs::file *file = NULL;
+	int result = vfs->create_file(&file, "C:/text.txt");
 	assert(file != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 
 	int buff_size = 100;
 	char buffer[100];
@@ -661,8 +751,8 @@ void Test_vfs::read_file_from_exact_position()
 	assert(count == 26);
 	assert(strncmp(buffer, text + 10, 26) == 0);
 
-	int result = vfs->remove_file(&file);
-	assert(result == 0);
+	result = vfs->remove_file(&file);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(file == NULL);
 
 	std::cout << "OK\n" << std::endl;
@@ -672,8 +762,10 @@ void Test_vfs::write_read_file_bigger_than_one_cluster()
 {
 	std::cout << "reading and writing to file bigger than one cluster" << std::endl;
 
-	Vfs::file *file = vfs->create_file("C:/text.txt");
+	Vfs::file *file = NULL;
+	int result = vfs->create_file(&file, "C:/text.txt");
 	assert(file != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 
 	int buff_size = 200;
 	char buffer[200];
@@ -687,8 +779,8 @@ void Test_vfs::write_read_file_bigger_than_one_cluster()
 	assert(count == 200);
 	assert(strncmp(buffer, text, 200) == 0);
 
-	int result = vfs->remove_file(&file);
-	assert(result == 0);
+	result = vfs->remove_file(&file);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(file == NULL);
 
 	std::cout << "OK\n" << std::endl;
@@ -698,8 +790,10 @@ void Test_vfs::write_read_exactly_one_cluster()
 {
 	std::cout << "reading and writing exactly one cluster" << std::endl;
 
-	Vfs::file *file = vfs->create_file("C:/text.txt");
+	Vfs::file *file = NULL;
+	int result = vfs->create_file(&file, "C:/text.txt");
 	assert(file != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 
 	int buff_size = 200;
 	char buffer[200];
@@ -713,8 +807,8 @@ void Test_vfs::write_read_exactly_one_cluster()
 	assert(count == 128);
 	assert(strncmp(buffer, text, 128) == 0);
 
-	int result = vfs->remove_file(&file);
-	assert(result == 0);
+	result = vfs->remove_file(&file);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(file == NULL);
 
 	std::cout << "OK\n" << std::endl;
@@ -724,8 +818,10 @@ void Test_vfs::read_small_piece_of_file()
 {
 	std::cout << "reading only piece of file" << std::endl;
 
-	Vfs::file *file = vfs->create_file("C:/text.txt");
+	Vfs::file *file = NULL;
+	int result = vfs->create_file(&file, "C:/text.txt");
 	assert(file != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 
 	int buff_size = 30;
 	char buffer[30];
@@ -740,8 +836,8 @@ void Test_vfs::read_small_piece_of_file()
 	assert(count == 30);
 	assert(strncmp(buffer, text + 120, 30) == 0);
 
-	int result = vfs->remove_file(&file);
-	assert(result == 0);
+	result = vfs->remove_file(&file);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(file == NULL);
 
 	std::cout << "OK\n" << std::endl;
@@ -751,8 +847,10 @@ void Test_vfs::read_all_file_by_pieces()
 {
 	std::cout << "reading all file by pieces" << std::endl;
 
-	Vfs::file *file = vfs->create_file("C:/text.txt");
+	Vfs::file *file = NULL;
+	int result = vfs->create_file(&file, "C:/text.txt");
 	assert(file != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 
 	int buff_size = 31;
 	char buffer[31];
@@ -776,8 +874,8 @@ void Test_vfs::read_all_file_by_pieces()
 		assert(strncmp(buffer, text + i, shuld_read) == 0);
 	}
 
-	int result = vfs->remove_file(&file);
-	assert(result == 0);
+	result = vfs->remove_file(&file);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(file == NULL);
 
 	std::cout << "OK\n" << std::endl;
@@ -788,8 +886,10 @@ void Test_vfs::rewrite_file()
 	std::cout << "rewriting file" << std::endl;
 
 	std::cout << "creating empty file" << std::endl;
-	Vfs::file *file = vfs->create_file("C:/text.txt");
+	Vfs::file *file = NULL;
+	int result = vfs->create_file(&file, "C:/text.txt");
 	assert(file != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 
 	int buff_size = 200;
 	char buffer[200];
@@ -826,8 +926,8 @@ void Test_vfs::rewrite_file()
 	assert(strncmp(buffer, text, 10) == 0);
 	assert(strncmp(buffer + 10, text1, 10) == 0);
 
-	int result = vfs->remove_file(&file);
-	assert(result == 0);
+	result = vfs->remove_file(&file);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(file == NULL);
 
 	std::cout << "OK\n" << std::endl;
@@ -837,8 +937,10 @@ void Test_vfs::write_zero_bytes_to_file()
 {
 	std::cout << "writing zero bytes to file" << std::endl;
 
-	Vfs::file *file = vfs->create_file("C:/text.txt");
+	Vfs::file *file = NULL;
+	int result = vfs->create_file(&file, "C:/text.txt");
 	assert(file != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 
 	int buff_size = 30;
 	char buffer[30];
@@ -851,8 +953,8 @@ void Test_vfs::write_zero_bytes_to_file()
 	count = vfs->read_file(file, buffer, buff_size);
 	assert(count == 1);
 
-	int result = vfs->remove_file(&file);
-	assert(result == 0);
+	result = vfs->remove_file(&file);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(file == NULL);
 
 	std::cout << "OK\n" << std::endl;
@@ -862,16 +964,19 @@ void Test_vfs::create_file_with_space_in_name()
 {
 	std::cout << "creating file with space in name" << std::endl;
 
-	Vfs::file *file = vfs->create_file("C:/my file.txt");
+	Vfs::file *file = NULL;
+	int result = vfs->create_file(&file, "C:/my file.txt");
 	assert(file != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(strcmp("my file.txt", file->f_dentry->d_name.c_str()) == 0);
 
-	int result = vfs->close_file(&file);
+	result = vfs->close_file(&file);
 	assert(result == 0);
 	assert(file == NULL);
 
-	file = vfs->open_object("C:/my file.txt", Vfs::VFS_OBJECT_FILE);
+	result = vfs->open_object(&file, "C:/my file.txt", Vfs::VFS_OBJECT_FILE);
 	assert(file != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 	
 	char text[] = "short text";
 	int count = vfs->write_to_file(file, text, 10);
@@ -883,11 +988,12 @@ void Test_vfs::create_file_with_space_in_name()
 	assert(strncmp(text, buffer, 10) == 0);
 
 	result = vfs->remove_file(&file);
-	assert(result == 0);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(file == NULL);
 
-	file = vfs->open_object("C:/my file.txt", Vfs::VFS_OBJECT_FILE);
+	result = vfs->open_object(&file, "C:/my file.txt", Vfs::VFS_OBJECT_FILE);
 	assert(file == NULL);
+	assert(result == Vfs::ERR_FILE_NOT_FOUND);
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -896,23 +1002,27 @@ void Test_vfs::create_dir_with_space_in_name()
 {
 	std::cout << "creating directory with space in name" << std::endl;
 
-	Vfs::file *dir = vfs->create_dir("C:/my dir");
+	Vfs::file *dir = NULL;
+	int result = vfs->create_dir(&dir, "C:/my dir");
 	assert(dir != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(strcmp("my dir", dir->f_dentry->d_name.c_str()) == 0);
 
-	int result = vfs->close_file(&dir);
-	assert(result == 0);
+	result = vfs->close_file(&dir);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(dir == NULL);
 
-	dir = vfs->open_object("C:/my dir", Vfs::VFS_OBJECT_DIRECTORY);
+	result = vfs->open_object(&dir, "C:/my dir", Vfs::VFS_OBJECT_DIRECTORY);
 	assert(dir != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 
 	result = vfs->remove_emtpy_dir(&dir);
-	assert(result == 0);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(dir == NULL);
 
-	dir = vfs->open_object("C:/my dir", Vfs::VFS_OBJECT_DIRECTORY);
+	result = vfs->open_object(&dir, "C:/my dir", Vfs::VFS_OBJECT_DIRECTORY);
 	assert(dir == NULL);
+	assert(result == Vfs::ERR_FILE_NOT_FOUND);
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -921,33 +1031,39 @@ void Test_vfs::folder_dir_same_name()
 {
 	std::cout << "test for same name for folder and file" << std::endl;
 
-	struct Vfs::file *file = vfs->create_file("C:/name");
+	struct Vfs::file *file = NULL;
+	int result = vfs->create_file(&file, "C:/name");
 	assert(file != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(file->f_dentry->d_file_type == Vfs::VFS_OBJECT_FILE);
 	
-	struct Vfs::file *dir = vfs->create_dir("C:/name");
+	struct Vfs::file *dir = NULL;
+	result = vfs->create_dir(&dir, "C:/name");
 	assert(dir != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(dir->f_dentry->d_file_type == Vfs::VFS_OBJECT_DIRECTORY);
 
-	int result = vfs->close_file(&file);
-	assert(result == 0);
+	result = vfs->close_file(&file);
+	assert(result == Vfs::ERR_SUCCESS);
 	result = vfs->close_file(&dir);
-	assert(result == 0);
+	assert(result == Vfs::ERR_SUCCESS);
 
-	dir = vfs->open_object("C:/name", Vfs::VFS_OBJECT_DIRECTORY);
+	result = vfs->open_object(&dir, "C:/name", Vfs::VFS_OBJECT_DIRECTORY);
 	assert(dir != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(dir->f_dentry->d_file_type == Vfs::VFS_OBJECT_DIRECTORY);
 
-	file = vfs->open_object("C:/name", Vfs::VFS_OBJECT_FILE);
+	result = vfs->open_object(&file, "C:/name", Vfs::VFS_OBJECT_FILE);
 	assert(file != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(file->f_dentry->d_file_type == Vfs::VFS_OBJECT_FILE);
 
 	result = vfs->remove_emtpy_dir(&dir);
-	assert(result == 0);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(dir == NULL);
 
 	result = vfs->remove_file(&file);
-	assert(result == 0);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(file == NULL);
 	
 	std::cout << "OK\n" << std::endl;
@@ -957,14 +1073,16 @@ void Test_vfs::remove_root()
 {
 	std::cout << "removing root" << std::endl;
 
-	struct Vfs::file *root = vfs->open_object("C:", Vfs::VFS_OBJECT_DIRECTORY);
+	struct Vfs::file *root = NULL;
+	int result = vfs->open_object(&root, "C:", Vfs::VFS_OBJECT_DIRECTORY);
 	assert(root != NULL);
+	assert(result == Vfs::ERR_SUCCESS);
 
-	int result = vfs->remove_emtpy_dir(&root);
-	assert(result == -1);
+	result = vfs->remove_emtpy_dir(&root);
+	assert(result == Vfs::ERR_INVALID_PATH);
 
 	result = vfs->close_file(&root);
-	assert(result == 0);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(result == NULL);
 
 	std::cout << "OK\n" << std::endl;
@@ -974,8 +1092,13 @@ void Test_vfs::write_to_twice_open_file()
 {
 	std::cout << "opening same file twice" << std::endl;
 
-	struct Vfs::file *file1 = vfs->create_file("C:/file.txt");
-	struct Vfs::file *file2 = vfs->open_object("C:/file.txt", Vfs::VFS_OBJECT_FILE);
+	struct Vfs::file *file1 = NULL;
+	struct Vfs::file *file2 = NULL;
+
+	int result = vfs->create_file(&file1, "C:/file.txt");
+	assert(result == Vfs::ERR_SUCCESS);
+	result = vfs->open_object(&file2, "C:/file.txt", Vfs::VFS_OBJECT_FILE);
+	assert(result == Vfs::ERR_SUCCESS);
 
 	assert(file1 != NULL);
 	assert(file1->f_dentry != NULL);
@@ -994,12 +1117,12 @@ void Test_vfs::write_to_twice_open_file()
 	assert(count == 34);
 	assert(strncmp(buffer, text, 34) == 0);
 
-	int result = vfs->close_file(&file1);
-	assert(result == 0);
+	result = vfs->close_file(&file1);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(file1 == NULL);
 
 	result = vfs->remove_file(&file2);
-	assert(result == 0);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(file2 == NULL);
 
 	std::cout << "OK\n" << std::endl;
@@ -1009,8 +1132,13 @@ void Test_vfs::open_dir_twice()
 {
 	std::cout << "opening same directory twice" << std::endl;
 
-	struct Vfs::file *dir1 = vfs->create_dir("C:/directory");
-	struct Vfs::file *dir2 = vfs->create_dir("C:/directory");
+	struct Vfs::file *dir1 = NULL;
+	int result = vfs->create_dir(&dir1, "C:/directory");
+	assert(result == Vfs::ERR_SUCCESS);
+
+	struct Vfs::file *dir2 = NULL;
+	result = vfs->create_dir(&dir2, "C:/directory");
+	assert(result == Vfs::ERR_SUCCESS);
 
 	assert(dir1 != NULL);
 	assert(dir1->f_dentry != NULL);
@@ -1019,14 +1147,14 @@ void Test_vfs::open_dir_twice()
 	assert(dir1->f_dentry == dir2->f_dentry);
 	assert(dir1->f_dentry->d_count = 2);
 
-	int result = vfs->close_file(&dir1);
-	assert(result == 0);
+	result = vfs->close_file(&dir1);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(dir1 == NULL);
 	assert(dir2 != NULL);
 	assert(dir2->f_dentry != NULL);
 
 	result = vfs->remove_emtpy_dir(&dir2);
-	assert(result == 0);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(dir2 == NULL);
 
 	std::cout << "OK\n" << std::endl;
@@ -1036,8 +1164,13 @@ void Test_vfs::remove_twice_open_file()
 {
 	std::cout << "test remove twice open file" << std::endl;
 
-	struct Vfs::file *file1 = vfs->create_file("C:/file.txt");
-	struct Vfs::file *file2 = vfs->open_object("C:/file.txt", Vfs::VFS_OBJECT_FILE);
+	struct Vfs::file *file1 = NULL;
+	int result = vfs->create_file(&file1, "C:/file.txt");
+	assert(result == Vfs::ERR_SUCCESS);
+
+	struct Vfs::file *file2 = NULL;
+	result = vfs->open_object(&file2, "C:/file.txt", Vfs::VFS_OBJECT_FILE);
+	assert(result == Vfs::ERR_SUCCESS);
 
 	assert(file1 != NULL);
 	assert(file1->f_dentry != NULL);
@@ -1046,20 +1179,20 @@ void Test_vfs::remove_twice_open_file()
 	assert(file1->f_dentry == file2->f_dentry);
 	assert(file1->f_dentry->d_count == 2);
 
-	int result = vfs->remove_file(&file1);
-	assert(result == -1);
+	result = vfs->remove_file(&file1);
+	assert(result == Vfs::ERR_FILE_OPEN_BY_OTHER);
 	assert(file1 != NULL);
 
 	result = vfs->remove_file(&file2);
-	assert(result == -1);
+	assert(result == Vfs::ERR_FILE_OPEN_BY_OTHER);
 	assert(file2 != NULL);
 
 	result = vfs->close_file(&file2);
-	assert(result == 0);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(file2 == NULL);
 
 	result = vfs->remove_file(&file1);
-	assert(result == 0);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(file1 == NULL);
 
 	std::cout << "OK\n" << std::endl;
@@ -1069,8 +1202,13 @@ void Test_vfs::remove_twice_open_dir()
 {
 	std::cout << "test for remove twice open dir" << std::endl;
 
-	struct Vfs::file *dir1 = vfs->create_dir("C:/directory");
-	struct Vfs::file *dir2 = vfs->create_dir("C:/directory");
+	struct Vfs::file *dir1 = NULL;
+	int result = vfs->create_dir(&dir1, "C:/directory");
+	assert(result == Vfs::ERR_SUCCESS);
+	
+	struct Vfs::file *dir2 = NULL;
+	result = vfs->create_dir(&dir2, "C:/directory");
+	assert(result == Vfs::ERR_SUCCESS);
 
 	assert(dir1 != NULL);
 	assert(dir1->f_dentry != NULL);
@@ -1079,24 +1217,24 @@ void Test_vfs::remove_twice_open_dir()
 	assert(dir1->f_dentry == dir2->f_dentry);
 	assert(dir1->f_dentry->d_count = 2);
 
-	int result = vfs->remove_file(&dir1);
-	assert(result == -1);
+	result = vfs->remove_emtpy_dir(&dir1);
+	assert(result == Vfs::ERR_FILE_OPEN_BY_OTHER);
 	assert(dir1 != NULL);
 	assert(dir1->f_dentry != NULL);
 
-	result = vfs->remove_file(&dir2);
-	assert(result == -1);
+	result = vfs->remove_emtpy_dir(&dir2);
+	assert(result == Vfs::ERR_FILE_OPEN_BY_OTHER);
 	assert(dir2 != NULL);
 	assert(dir2->f_dentry != NULL);
 
 	result = vfs->close_file(&dir1);
-	assert(result == 0);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(dir1 == NULL);
 	assert(dir2 != NULL);
 	assert(dir2->f_dentry != NULL);
 
 	result = vfs->remove_emtpy_dir(&dir2);
-	assert(result == 0);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(dir2 == NULL);
 
 	std::cout << "OK\n" << std::endl;
@@ -1106,8 +1244,13 @@ void Test_vfs::create_file_over_open_file()
 {
 	std::cout << "test for create twice same file" << std::endl;
 
-	struct Vfs::file *file1 = vfs->create_file("C:/file.txt");
-	struct Vfs::file *file2 = vfs->create_file("C:/file.txt");
+	struct Vfs::file *file1 = NULL;
+	struct Vfs::file *file2 = NULL;
+
+	int result = vfs->create_file(&file1, "C:/file.txt");
+	assert(result == Vfs::ERR_SUCCESS);
+	result = vfs->create_file(&file2, "C:/file.txt");
+	assert(result == Vfs::ERR_FILE_OPEN_BY_OTHER);
 
 	assert(file1 != NULL);
 	assert(file1->f_dentry != NULL);
@@ -1115,8 +1258,8 @@ void Test_vfs::create_file_over_open_file()
 
 	assert(file2 == NULL);
 
-	int result = vfs->remove_file(&file1);
-	assert(result == 0);
+	result = vfs->remove_file(&file1);
+	assert(result == Vfs::ERR_SUCCESS);
 	assert(file1 == NULL);
 
 	std::cout << "OK\n" << std::endl;

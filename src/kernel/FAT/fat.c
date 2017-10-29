@@ -125,9 +125,8 @@ void close_fat(){
  * @param act_fat_position pozice adresare ve kterem vytvarime soubor
  * @return chybovy kod nebo 0 pri uspechu
  */
-struct dir_file *fat_create_file(const char *file_name, int32_t act_fat_position, long *dir_position) {
+int fat_create_file(struct dir_file **new_file, const char *file_name, int32_t act_fat_position, long *dir_position) {
     struct dir_file *file = NULL;
-    struct dir_file *new_local_file;
     int32_t *clusters = NULL;
     int32_t *values = NULL;
     int32_t position = 0;
@@ -136,18 +135,15 @@ struct dir_file *fat_create_file(const char *file_name, int32_t act_fat_position
     int result = 0;
 
     if(boot_record == NULL || fat1 == NULL || fat2 == NULL){
-        //return 1;
-        return NULL;
+        return 1; // NOT INITIALIZE
     }
 
     if(strlen(file_name) > NAME_SIZE){
-        //return 2;
-        return NULL;
+        return 2; // NAME IS TOO LONG
     }
 
     if(act_fat_position < 0 || act_fat_position >= boot_record->usable_cluster_count){
-        //return 9;
-        return NULL;
+        return 9; // POSITION OUT OF RANGE
     }
 
     position = start_of_root_dir + (act_fat_position * boot_record->cluster_size);
@@ -158,20 +154,17 @@ struct dir_file *fat_create_file(const char *file_name, int32_t act_fat_position
         if(file->file_type == OBJECT_FILE) {
             result = fat_delete_file_by_file(file, object_dir_pos);
             if (result) {
-                //return result;
-                return NULL;
+                return result;
             }
         } else {
-            //return -1; /* Cant delete directory when i want create file */
-            return NULL;
+            return 8;
         }
     }
 
     // check empty space in dir
     *dir_position = find_empty_space_in_dir(p_file, max_dir_entries, position);
     if (*dir_position == -1) {
-        //return 6;
-        return NULL;
+        return 6; // DIRECTORY IS FULL
     }
 
     // number of clusters of new file
@@ -181,14 +174,13 @@ struct dir_file *fat_create_file(const char *file_name, int32_t act_fat_position
     clusters = malloc(sizeof(int32_t) * file_cluster_count);
     if(find_empty_clusters(boot_record->usable_cluster_count, fat1, clusters, file_cluster_count) == -1){
         free(clusters);
-        //return 7;
-        return NULL;
+        return 7; // FAT IS FULL
     }
 
-    new_local_file = malloc(sizeof(struct dir_file));
-    init_object(new_local_file, file_name, 1, OBJECT_FILE, clusters[0]);
+    *(new_file) = malloc(sizeof(struct dir_file));
+    init_object(*new_file, file_name, 1, OBJECT_FILE, clusters[0]);
 
-    write_to_dir(p_file, new_local_file, (int32_t) *dir_position);
+    write_to_dir(p_file, *new_file, (int32_t) *dir_position);
 
     values = malloc(sizeof(int32_t) * file_cluster_count);
     create_values_from_clusters(clusters, values, file_cluster_count);
@@ -202,7 +194,7 @@ struct dir_file *fat_create_file(const char *file_name, int32_t act_fat_position
     free(clusters);
     free(values);
 
-    return new_local_file;
+    return 0; // SUCCESS
 }
 
 struct dir_file *fat_get_object_info_by_name(const char *file_name, int file_type, int32_t act_fat_position, long *dir_position){
@@ -303,15 +295,15 @@ int fat_delete_file_by_name(const char *file_name, int32_t act_fat_position) {
 	int32_t object_dir_pos = 0;
 
     if(boot_record == NULL || fat1 == NULL || fat2 == NULL){
-        return 1;
+        return 1; // NOT INITIALIZE
     }
 
     if(strlen(file_name) > NAME_SIZE){
-        return 2;
+        return 2; // NAME IS TOO LONG
     }
 
     if(act_fat_position < 0 || act_fat_position >= boot_record->usable_cluster_count){
-        return 9;
+        return 9; // POSITION OUT OF RANGE
     }
 
     position = start_of_root_dir + (act_fat_position * boot_record->cluster_size);
@@ -319,7 +311,7 @@ int fat_delete_file_by_name(const char *file_name, int32_t act_fat_position) {
     file = get_object_in_dir(p_file, file_name, OBJECT_FILE, position, max_dir_entries, &object_dir_pos);
     if (file == NULL || file->file_type != OBJECT_FILE) {
         free(file);
-        return 3;
+        return 3; // PATH NOT FOUND
     }
 
     return fat_delete_file_by_file(file, object_dir_pos);
@@ -335,7 +327,7 @@ int fat_delete_file_by_file(struct dir_file *file, long position){
                                  boot_record->dir_clusters);
     if (clusters == NULL) {
         free(file);
-        return 11;
+        return 11; // CANT GET CLUSTERS
     }
 
 	fseek(p_file, position, SEEK_SET);
@@ -351,7 +343,7 @@ int fat_delete_file_by_file(struct dir_file *file, long position){
     free(file);
     free(clusters);
 
-    return 0;
+    return 0; // SUCCESS
 }
 
 /**
@@ -361,9 +353,8 @@ int fat_delete_file_by_file(struct dir_file *file, long position){
  * @param act_fat_position pozice adresare ve kterem hledame adresar
  * @return chybovy kod nebo 0 pri uspechu
  */
-struct dir_file *fat_create_dir(const char *dir_name, int32_t act_fat_position, long *dir_position) {
+int fat_create_dir(struct dir_file **new_dir, const char *dir_name, int32_t act_fat_position, long *dir_position) {
     struct dir_file *file = NULL;
-    struct dir_file *new_local_file;
     int32_t *clusters = NULL;
     int32_t *values = NULL;
     int32_t position = 0;
@@ -371,18 +362,15 @@ struct dir_file *fat_create_dir(const char *dir_name, int32_t act_fat_position, 
     long file_cluster_count = 0;
 
     if(boot_record == NULL || fat1 == NULL || fat2 == NULL){
-//        return 1;
-        return NULL;
+        return 1; // NOT_INITIALIZE
     }
 
     if(strlen(dir_name) > NAME_SIZE){
-//        return 2;
-        return NULL;
+        return 2; // NAME IS TOO LONG
     }
 
     if(act_fat_position < 0 || act_fat_position >= boot_record->usable_cluster_count){
-//        return 9;
-        return NULL;
+        return 9; // POSITION OUT OF RANGE
     }
 
     position = start_of_root_dir + (act_fat_position * boot_record->cluster_size);
@@ -390,30 +378,27 @@ struct dir_file *fat_create_dir(const char *dir_name, int32_t act_fat_position, 
     file = get_object_in_dir(p_file, dir_name, OBJECT_DIRECTORY, position, max_dir_entries, &object_dir_pos);
     if (file != NULL) {
         free(file);
-//        return 4;
-        return NULL;
+        return 4; // PATH EXISTS
     }
 
     *dir_position = find_empty_space_in_dir(p_file, max_dir_entries, position);
     if (*dir_position == -1) {
-//        return 6;
-        return NULL;
+        return 6; // DIRECTORY IS FULL
     }
 
     file_cluster_count = boot_record->dir_clusters;
     clusters = malloc(sizeof(int32_t) * file_cluster_count);
     if(find_empty_clusters(boot_record->usable_cluster_count, fat1, clusters, file_cluster_count) == -1){
         free(clusters);
-//        return 7;
-        return NULL;
+        return 7; // FAT IS FULL
     }
 
 
-    new_local_file = malloc(sizeof(struct dir_file));
-    init_object(new_local_file, dir_name, 0, OBJECT_DIRECTORY, clusters[0]);
+    *new_dir = malloc(sizeof(struct dir_file));
+    init_object(*new_dir, dir_name, 0, OBJECT_DIRECTORY, clusters[0]);
 
     write_empty_dir_to_fat(p_file, clusters, (int32_t) file_cluster_count, start_of_root_dir, boot_record->cluster_size);
-    write_to_dir(p_file, new_local_file, (int32_t) *dir_position);
+    write_to_dir(p_file, *new_dir, (int32_t) *dir_position);
 
     values = malloc(sizeof(int32_t) * file_cluster_count);
     create_values_from_clusters(clusters, values, file_cluster_count);
@@ -427,7 +412,7 @@ struct dir_file *fat_create_dir(const char *dir_name, int32_t act_fat_position, 
     free(clusters);
     free(values);
 
-    return new_local_file;
+    return 0;
 }
 
 /**
@@ -448,15 +433,15 @@ int fat_delete_empty_dir(const char *dir_name, int32_t act_fat_position) {
     unsigned int new_value = 0;
 
     if(boot_record == NULL || fat1 == NULL || fat2 == NULL){
-        return 1;
+        return 1; // NOT INITIALIZE
     }
 
     if(strlen(dir_name) > NAME_SIZE){
-        return 2;
+        return 2; // NAME IS TOO LONG
     }
 
     if(act_fat_position < 0 || act_fat_position >= boot_record->usable_cluster_count){
-        return 9;
+        return 9; // POSITION OUT OF RANGE
     }
 
     parent_position = start_of_root_dir + (act_fat_position * boot_record->cluster_size);
@@ -464,23 +449,23 @@ int fat_delete_empty_dir(const char *dir_name, int32_t act_fat_position) {
     file = get_object_in_dir(p_file, dir_name, OBJECT_DIRECTORY, parent_position, max_dir_entries, &position);
     if (file == NULL || file->file_type != OBJECT_DIRECTORY) {
         free(file);
-        return 3;
+        return 3; // PAHT NOT FOUND
     }
 
     result = is_dir_empty(p_file, max_dir_entries, start_of_root_dir + (file->first_cluster * boot_record->cluster_size));
     if (result == 0) {
         free(file);
-        return 5;
+        return 5; // DIR NOT EMPTY
     } else if (result == -1) {
         free(file);
-        return 8;
+        return 8; // ERROR
     }
 
     clusters = get_file_clusters(file, &file_clusters_size, boot_record->cluster_size, fat1,
                                  boot_record->dir_clusters);
     if (clusters == NULL) {
         free(file);
-        return 11;
+        return 11; // CANT GET CLUSTERS
     }
 
     rm_from_fat(fat1, clusters, file_clusters_size);
@@ -497,7 +482,7 @@ int fat_delete_empty_dir(const char *dir_name, int32_t act_fat_position) {
     free(file);
     free(clusters);
 
-    return 0;
+    return 0; // SUCCES
 }
 
 /**
@@ -602,7 +587,7 @@ long fat_read_file(struct dir_file file, char *buffer, int buffer_size, long off
             file.file_size == 0
             ){
 
-        return 0;
+        return -1;
     }
 
     clusters = get_file_clusters(&file, &file_clusters_size, boot_record->cluster_size, fat1, boot_record->dir_clusters);
@@ -713,8 +698,7 @@ long write_bigger_file(int32_t *old_clusters, long new_file_clusters_size, int32
     new_clusters = malloc(sizeof(int32_t) * (new_file_clusters_size - old_file_clusters_size));
     if(find_empty_clusters(boot_record->usable_cluster_count, fat1, new_clusters, new_file_clusters_size - old_file_clusters_size) == -1){
         free(new_clusters);
-        //return 7;
-        return -1;
+        return 0;
     }
 
     //write data =======================================================================================================
