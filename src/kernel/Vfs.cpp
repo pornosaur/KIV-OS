@@ -8,6 +8,16 @@ Vfs::Vfs()
 
 Vfs::~Vfs()
 {
+	struct Vfs::super_block *sb = Vfs::sb;
+	struct Vfs::super_block *next = NULL;
+	Vfs::sb = NULL;
+
+	while (sb != NULL) {
+		Vfs::sb_remove_all_dentry(&(sb->s_root));
+		next = sb->s_next;
+		delete sb;
+		sb = next;
+	}
 }
 
 
@@ -36,32 +46,33 @@ struct Vfs::dentry* Vfs::init_dentry(
 	struct Vfs::super_block *d_sb,
 	struct Vfs::dentry *d_parent,
 	std::string d_name,
-	unsigned int d_count,
-	bool d_mounted,
 	unsigned long d_position,
 	unsigned long d_file_position,
 	unsigned int d_file_type,
 	unsigned long d_size,
-	unsigned int d_blocks,
-	unsigned char d_dirt,
-	struct Vfs::dentry *d_subdirectories,
-	struct Vfs::dentry *d_next_subdir)
+	unsigned int d_blocks)
 {
 	struct Vfs::dentry *d_entry = new struct Vfs::dentry();
 	d_entry->d_sb = d_sb;
 	d_entry->d_parent = d_parent;
 	d_entry->d_name = d_name;
-	d_entry->d_count = d_count;
-	d_entry->d_mounted = d_mounted;
+	d_entry->d_count = 0;
+	d_entry->d_mounted = 0;
 	d_entry->d_position = d_position;
 	d_entry->d_file_position = d_file_position;
 	d_entry->d_file_type = d_file_type;
 	d_entry->d_size = d_size;
 	d_entry->d_blocks = d_blocks;
-	d_entry->d_dirt = d_dirt;
-	d_entry->d_subdirectories = d_subdirectories;
-	d_entry->d_next_subdir = d_next_subdir;
+	d_entry->d_dirt = 0;
+	d_entry->d_subdirectories = NULL;
+	d_entry->d_next_subdir = NULL;
 	
+	if (d_parent != NULL) {
+		d_parent->d_count++;
+		d_entry->d_next_subdir = d_parent->d_subdirectories;
+		d_parent->d_subdirectories = d_entry;
+	}
+
 	return d_entry;
 }
 
@@ -118,6 +129,13 @@ int Vfs::sb_remove_dentry(struct Vfs::dentry *mDentry) {
 	}
 
 	struct Vfs::dentry *parent = mDentry->d_parent;
+
+	if (mDentry->d_next_subdir != NULL) {
+		parent->d_subdirectories = mDentry->d_next_subdir;
+		delete mDentry;
+		parent->d_count--;
+		return 0;
+	}
 	
 	if (parent->d_count > 1)
 	{
@@ -143,6 +161,19 @@ int Vfs::sb_remove_dentry(struct Vfs::dentry *mDentry) {
 	parent->d_count--;
 	Vfs::sb_remove_dentry(parent);
 	return 0;
+}
+
+void Vfs::sb_remove_all_dentry(struct Vfs::dentry **d_entry) {
+
+	if (*d_entry == NULL) {
+		return;
+	}
+		
+	Vfs::sb_remove_all_dentry(&((*d_entry)->d_subdirectories));
+	Vfs::sb_remove_all_dentry(&((*d_entry)->d_next_subdir));
+
+	delete *d_entry;
+	*d_entry = NULL;
 }
 
 struct Vfs::dentry *Vfs::sb_find_dentry_in_dentry(struct Vfs::dentry * fDentry, std::string name, int file_type) {

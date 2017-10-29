@@ -20,66 +20,6 @@ void init_object(struct dir_file *object,const char name[], int32_t file_size, i
 void print_all();
 
 
-
-//int main(){
-//    fat_init("../output.fat");
-
-//    fat_delete_file_by_name("pokus", 0);
-
-
-//    print_all();
-
-//    long dir_position = 0;
-//    struct dir_file* new_file;
-//    long red = 0;
-//
-//    new_file = fat_create_file("pokus", 0, &dir_position);
-//    printf("%s  %d  %d\n",new_file->file_name, new_file->file_size, new_file->file_type);
-//
-//    print_all();
-//
-//    fat_write_file(new_file, dir_position, "textik, ktery se ma zapsat aaaaaaaaaa bbbbbbbbbb ccccccccccc dddddddddd eeeeeeeeee ffffffffff gggggggggg hhhhhhhhhh jjjjjjjjjj kkkkkkkkkk llllllllll", 148, 0);
-//
-//    print_all();
-//
-//    char *buffer = malloc(sizeof(char) * 100);
-//    red = fat_read_file(*new_file, buffer, 100, 0);
-//    printf("%li - %.*s\n", red, (int) red, buffer);
-//    red = fat_read_file(*new_file, buffer, 100, 100);
-//    printf("%li - %.*s\n", red, (int) red, buffer);
-
-//    int data_size = 0;
-//    int ret_code = 0;
-//    printf("%d - %.*s\n",data_size,data_size, read_object(&ret_code,&data_size, "b.txt", 0));
-
-
-
-//    int ret_code = 0;
-//    int data_size = 0;
-//
-//    char * data = read_object(&ret_code, &data_size, "pokus", 0);
-//    printf("%d\n", ret_code);
-//    print_all();
-//    printf("size: %d\n", data_size);
-//    printf("data: %s\n", data);
-//
-//    result = delete_file("pokus",0);
-//    print_all();
-//    printf("%d\n", result);
-//
-//    result = fat_create_dir("dir_pokus", 0);
-//    print_all();
-//    printf("%d\n", result);
-//
-//    result = fat_delete_empty_dir("dir_pokus", 0);
-//    print_all();
-//    printf("%d\n", result);
-
-
-//    close_fat();
-    //pause();
-//}
-
 int fat_init(const char * fat_path){
 
 	errno_t err;

@@ -41,6 +41,8 @@ Test_vfs::Test_vfs()
 	create_dir_with_space_in_name();
 	folder_dir_same_name();
 	remove_root();
+	test_more_subfiles();
+	test_close_all_dentry_memory_leak();
 	write_to_twice_open_file();
 	open_dir_twice();
 	remove_twice_open_file();
@@ -1084,6 +1086,199 @@ void Test_vfs::remove_root()
 	result = vfs->close_file(&root);
 	assert(result == Vfs::ERR_SUCCESS);
 	assert(result == NULL);
+
+	std::cout << "OK\n" << std::endl;
+}
+
+void Test_vfs::test_more_subfiles()
+{
+	std::cout << "test with more subdirectories" << std::endl;
+
+	struct Vfs::file *dir1 = NULL;
+	int result = vfs->create_dir(&dir1, "C:/dir1");
+	assert(result == Vfs::ERR_SUCCESS);
+
+	struct Vfs::file *dir2 = NULL;
+	result = vfs->create_dir(&dir2, "C:/dir2");
+	assert(result == Vfs::ERR_SUCCESS);
+
+	struct Vfs::file *dir3 = NULL;
+	result = vfs->create_dir(&dir3, "C:/dir1/dir3");
+	assert(result == Vfs::ERR_SUCCESS);
+
+	struct Vfs::file *dir4 = NULL;
+	result = vfs->create_dir(&dir4, "C:/dir2/dir4");
+	assert(result == Vfs::ERR_SUCCESS);
+
+	struct Vfs::file *dir5 = NULL;
+	result = vfs->create_dir(&dir5, "C:/dir2/dir5");
+	assert(result == Vfs::ERR_SUCCESS);
+
+	struct Vfs::file *dir6 = NULL;
+	result = vfs->create_dir(&dir6, "C:/dir2/dir6");
+	assert(result == Vfs::ERR_SUCCESS);
+
+	struct Vfs::file *dir7 = NULL;
+	result = vfs->create_dir(&dir7, "C:/dir2/dir5/dir7");
+	assert(result == Vfs::ERR_SUCCESS);
+
+	struct Vfs::file *dir8 = NULL;
+	result = vfs->create_dir(&dir8, "C:/dir2/dir5/dir7/dir8");
+	assert(result == Vfs::ERR_SUCCESS);
+
+	struct Vfs::file *dir9 = NULL;
+	result = vfs->create_dir(&dir9, "C:/dir2/dir5/dir9");
+	assert(result == Vfs::ERR_SUCCESS);
+
+	struct Vfs::file *dir10 = NULL;
+	result = vfs->create_dir(&dir10, "C:/dir10");
+	assert(result == Vfs::ERR_SUCCESS);
+
+	struct Vfs::file *dir11 = NULL;
+	result = vfs->create_dir(&dir11, "C:/dir10/dir11");
+	assert(result == Vfs::ERR_SUCCESS);
+
+	result = vfs->close_file(&dir1);
+	assert(result == Vfs::ERR_SUCCESS);
+	result = vfs->close_file(&dir2);
+	assert(result == Vfs::ERR_SUCCESS);
+	result = vfs->close_file(&dir3);
+	assert(result == Vfs::ERR_SUCCESS);
+	result = vfs->close_file(&dir4);
+	assert(result == Vfs::ERR_SUCCESS);
+	result = vfs->close_file(&dir5);
+	assert(result == Vfs::ERR_SUCCESS);
+	result = vfs->close_file(&dir6);
+	assert(result == Vfs::ERR_SUCCESS);
+	result = vfs->close_file(&dir7);
+	assert(result == Vfs::ERR_SUCCESS);
+	result = vfs->close_file(&dir8);
+	assert(result == Vfs::ERR_SUCCESS);
+	result = vfs->close_file(&dir9);
+	assert(result == Vfs::ERR_SUCCESS);
+	result = vfs->close_file(&dir10);
+	assert(result == Vfs::ERR_SUCCESS);
+	result = vfs->close_file(&dir11);
+	assert(result == Vfs::ERR_SUCCESS);
+
+	result = vfs->open_object(&dir8, "C:/dir2/dir5/dir7/dir8", Vfs::VFS_OBJECT_DIRECTORY);
+	assert(result == Vfs::ERR_SUCCESS);
+	result = vfs->remove_emtpy_dir(&dir8);
+	assert(result == Vfs::ERR_SUCCESS);
+
+	result = vfs->open_object(&dir2, "C:/dir2", Vfs::VFS_OBJECT_DIRECTORY);
+	assert(result == Vfs::ERR_SUCCESS);
+	result = vfs->open_object(&dir10, "C:/dir10", Vfs::VFS_OBJECT_DIRECTORY);
+	assert(result == Vfs::ERR_SUCCESS);
+
+	result = vfs->open_object(&dir7, "C:/dir2/dir5/dir7", Vfs::VFS_OBJECT_DIRECTORY);
+	assert(result == Vfs::ERR_SUCCESS);
+	result = vfs->remove_emtpy_dir(&dir7);
+	assert(result == Vfs::ERR_SUCCESS);
+
+	result = vfs->open_object(&dir9, "C:/dir2/dir5/dir9", Vfs::VFS_OBJECT_DIRECTORY);
+	assert(result == Vfs::ERR_SUCCESS);
+	result = vfs->remove_emtpy_dir(&dir9);
+	assert(result == Vfs::ERR_SUCCESS);
+
+	result = vfs->open_object(&dir11, "C:/dir10/dir11", Vfs::VFS_OBJECT_DIRECTORY);
+	assert(result == Vfs::ERR_SUCCESS);
+	result = vfs->remove_emtpy_dir(&dir11);
+	assert(result == Vfs::ERR_SUCCESS);
+
+	result = vfs->open_object(&dir3, "C:/dir1/dir3", Vfs::VFS_OBJECT_DIRECTORY);
+	assert(result == Vfs::ERR_SUCCESS);
+	result = vfs->remove_emtpy_dir(&dir3);
+	assert(result == Vfs::ERR_SUCCESS);
+
+	result = vfs->open_object(&dir4, "C:/dir2/dir4", Vfs::VFS_OBJECT_DIRECTORY);
+	assert(result == Vfs::ERR_SUCCESS);
+	result = vfs->remove_emtpy_dir(&dir4);
+	assert(result == Vfs::ERR_SUCCESS);
+
+	result = vfs->open_object(&dir1, "C:/dir1", Vfs::VFS_OBJECT_DIRECTORY);
+	assert(result == Vfs::ERR_SUCCESS);
+	result = vfs->remove_emtpy_dir(&dir1);
+	assert(result == Vfs::ERR_SUCCESS);
+
+	result = vfs->open_object(&dir5, "C:/dir2/dir5", Vfs::VFS_OBJECT_DIRECTORY);
+	assert(result == Vfs::ERR_SUCCESS);
+	result = vfs->remove_emtpy_dir(&dir5);
+	assert(result == Vfs::ERR_SUCCESS);
+
+	result = vfs->open_object(&dir6, "C:/dir2/dir6", Vfs::VFS_OBJECT_DIRECTORY);
+	assert(result == Vfs::ERR_SUCCESS);
+	result = vfs->remove_emtpy_dir(&dir6);
+	assert(result == Vfs::ERR_SUCCESS);
+
+	result = vfs->remove_emtpy_dir(&dir2);
+	assert(result == Vfs::ERR_SUCCESS);
+
+	result = vfs->remove_emtpy_dir(&dir10);
+	assert(result == Vfs::ERR_SUCCESS);
+
+	std::cout << "OK\n" << std::endl;
+}
+
+void Test_vfs::test_close_all_dentry_memory_leak()
+{
+	std::cout << "test for close all open dentry (memory leak)" << std::endl;
+
+	struct Vfs::file *dir1 = NULL;
+	int result = vfs->create_dir(&dir1, "C:/dir1");
+	assert(result == Vfs::ERR_SUCCESS);
+
+	struct Vfs::file *dir2 = NULL;
+	result = vfs->create_dir(&dir2, "C:/dir2");
+	assert(result == Vfs::ERR_SUCCESS);
+
+	struct Vfs::file *dir3 = NULL;
+	result = vfs->create_dir(&dir3, "C:/dir1/dir3");
+	assert(result == Vfs::ERR_SUCCESS);
+
+	struct Vfs::file *dir4 = NULL;
+	result = vfs->create_dir(&dir4, "C:/dir2/dir4");
+	assert(result == Vfs::ERR_SUCCESS);
+
+	struct Vfs::file *dir5 = NULL;
+	result = vfs->create_dir(&dir5, "C:/dir2/dir5");
+	assert(result == Vfs::ERR_SUCCESS);
+
+	struct Vfs::file *dir6 = NULL;
+	result = vfs->create_dir(&dir6, "C:/dir2/dir6");
+	assert(result == Vfs::ERR_SUCCESS);
+
+	struct Vfs::file *dir7 = NULL;
+	result = vfs->create_dir(&dir7, "C:/dir2/dir5/dir7");
+	assert(result == Vfs::ERR_SUCCESS);
+
+	struct Vfs::file *dir8 = NULL;
+	result = vfs->create_dir(&dir8, "C:/dir2/dir5/dir7/dir8");
+	assert(result == Vfs::ERR_SUCCESS);
+
+	struct Vfs::file *dir9 = NULL;
+	result = vfs->create_dir(&dir9, "C:/dir2/dir5/dir9");
+	assert(result == Vfs::ERR_SUCCESS);
+
+	struct Vfs::file *dir10 = NULL;
+	result = vfs->create_dir(&dir10, "C:/dir10");
+	assert(result == Vfs::ERR_SUCCESS);
+
+	struct Vfs::file *dir11 = NULL;
+	result = vfs->create_dir(&dir11, "C:/dir10/dir11");
+	assert(result == Vfs::ERR_SUCCESS);
+
+	delete dir1;
+	delete dir2;
+	delete dir3;
+	delete dir4;
+	delete dir5;
+	delete dir6;
+	delete dir7;
+	delete dir8;
+	delete dir9;
+	delete dir10;
+	delete dir11;
 
 	std::cout << "OK\n" << std::endl;
 }

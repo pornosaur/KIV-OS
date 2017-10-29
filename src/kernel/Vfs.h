@@ -64,7 +64,7 @@ public:
 	virtual int read_dir(struct Vfs::file *file) = 0;
 	
 	virtual int open_object(struct Vfs::file **object, std::string absolute_path, int type) = 0;
-	virtual int create_file(struct Vfs::file **file, std::string absolute_path) = 0; /* smaze jiz existujici soubor, existuje-li*/
+	virtual int create_file(struct Vfs::file **file, std::string absolute_path) = 0;
 	virtual int write_to_file(struct Vfs::file *file, char *buffer, int buffer_size) = 0;
 	virtual int read_file(struct Vfs::file *file, char *buffer, int buffer_size) = 0;
 	virtual int remove_file(struct Vfs::file **file) = 0;
@@ -94,16 +94,11 @@ protected:
 		struct Vfs::super_block *d_sb,
 		struct Vfs::dentry *d_parent,
 		std::string d_name,
-		unsigned int d_count,
-		bool d_mounted,
 		unsigned long d_position,
 		unsigned long d_file_position,
 		unsigned int d_file_type,
 		unsigned long d_size,
-		unsigned int d_blocks,
-		unsigned char d_dirt,
-		struct Vfs::dentry *d_subdirectories,
-		struct Vfs::dentry *d_next_subdir);
+		unsigned int d_blocks);
 
 	struct Vfs::file *init_file(
 		struct Vfs::dentry *f_dentry,
@@ -115,6 +110,8 @@ protected:
 	int sb_remove_file(struct Vfs::file **file);
 
 	int sb_remove_dentry(struct Vfs::dentry * dentry);
+
+	void Vfs::sb_remove_all_dentry(struct Vfs::dentry **d_entry);
 
 	struct Vfs::dentry *sb_find_dentry_in_dentry(struct Vfs::dentry * dentry, std::string name, int file_type);
 };

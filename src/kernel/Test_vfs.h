@@ -70,6 +70,8 @@ class Test_vfs
 		// OTHER
 		void folder_dir_same_name();
 		void remove_root();
+		void test_more_subfiles();
+		void test_close_all_dentry_memory_leak();
 
 		// WORKS ON SAME FILE/DIRECTORY
 		void write_to_twice_open_file();
