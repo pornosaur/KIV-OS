@@ -71,5 +71,10 @@ class Test_vfs
 		void folder_dir_same_name();
 		void remove_root();
 
-
+		// WORKS ON SAME FILE/DIRECTORY
+		void write_to_twice_open_file();
+		void open_dir_twice();
+		void remove_twice_open_file();
+		void remove_twice_open_dir();
+		void create_file_over_open_file();
 };

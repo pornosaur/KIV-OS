@@ -78,7 +78,7 @@ struct Vfs::file *VfsFat::create_dir(std::string absolute_path)
 
 int VfsFat::remove_emtpy_dir(struct Vfs::file **file)
 {
-	if (*file == NULL || (*file)->f_dentry == NULL || (*file)->f_dentry->d_parent == NULL || (*file)->f_dentry->d_file_type != Vfs::VFS_OBJECT_DIRECTORY) {
+	if (*file == NULL || (*file)->f_dentry == NULL || (*file)->f_dentry->d_parent == NULL || (*file)->f_dentry->d_file_type != Vfs::VFS_OBJECT_DIRECTORY || (*file)->f_dentry->d_count > 1) {
 		// TODO mohu vymazat File, protoze f_dentry je NULL
 		return -1;
 	}
@@ -122,6 +122,9 @@ struct Vfs::file *VfsFat::create_file(std::string absolute_path)
 	fDentry = find_object_in_directory(mDentry, absolute_path.substr(start, end), VFS_OBJECT_FILE);
 
 	if (fDentry != NULL) {
+		if (fDentry->d_count > 0) {
+			return NULL;
+		}
 		fat_delete_file_by_name(fDentry->d_name.c_str(), fDentry->d_parent->d_position);
 		Vfs::sb_remove_dentry(fDentry);
 		fDentry = NULL;
@@ -278,7 +281,7 @@ int VfsFat::read_file(struct Vfs::file *file, char *buffer, int buffer_size)
 
 int VfsFat::remove_file(struct Vfs::file **file)
 {
-	if (*file == NULL || (*file)->f_dentry == NULL || (*file)->f_dentry->d_file_type != Vfs::VFS_OBJECT_FILE) {
+	if (*file == NULL || (*file)->f_dentry == NULL || (*file)->f_dentry->d_file_type != Vfs::VFS_OBJECT_FILE || (*file)->f_dentry->d_count > 1) {
 		// TODO mohu vymazat File, protoze f_dentry je NULL
 		return -1;
 	}

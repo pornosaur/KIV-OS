@@ -41,7 +41,11 @@ Test_vfs::Test_vfs()
 	create_dir_with_space_in_name();
 	folder_dir_same_name();
 	remove_root();
-
+	write_to_twice_open_file();
+	open_dir_twice();
+	remove_twice_open_file();
+	remove_twice_open_dir();
+	create_file_over_open_file();
 
 	system("pause");
 }
@@ -962,6 +966,158 @@ void Test_vfs::remove_root()
 	result = vfs->close_file(&root);
 	assert(result == 0);
 	assert(result == NULL);
+
+	std::cout << "OK\n" << std::endl;
+}
+
+void Test_vfs::write_to_twice_open_file()
+{
+	std::cout << "opening same file twice" << std::endl;
+
+	struct Vfs::file *file1 = vfs->create_file("C:/file.txt");
+	struct Vfs::file *file2 = vfs->open_object("C:/file.txt", Vfs::VFS_OBJECT_FILE);
+
+	assert(file1 != NULL);
+	assert(file1->f_dentry != NULL);
+	assert(file2 != NULL);
+	assert(file2->f_dentry != NULL);
+	assert(file1->f_dentry == file2->f_dentry);
+	assert(file1->f_dentry->d_count == 2);
+
+	char buffer[200];
+	char text[] = "text which will be written to file";
+
+	int count = vfs->write_to_file(file1, text, 34);
+	assert(count == 34);
+
+	count = vfs->read_file(file2, buffer, 200);
+	assert(count == 34);
+	assert(strncmp(buffer, text, 34) == 0);
+
+	int result = vfs->close_file(&file1);
+	assert(result == 0);
+	assert(file1 == NULL);
+
+	result = vfs->remove_file(&file2);
+	assert(result == 0);
+	assert(file2 == NULL);
+
+	std::cout << "OK\n" << std::endl;
+}
+
+void Test_vfs::open_dir_twice()
+{
+	std::cout << "opening same directory twice" << std::endl;
+
+	struct Vfs::file *dir1 = vfs->create_dir("C:/directory");
+	struct Vfs::file *dir2 = vfs->create_dir("C:/directory");
+
+	assert(dir1 != NULL);
+	assert(dir1->f_dentry != NULL);
+	assert(dir2 != NULL);
+	assert(dir2->f_dentry != NULL);
+	assert(dir1->f_dentry == dir2->f_dentry);
+	assert(dir1->f_dentry->d_count = 2);
+
+	int result = vfs->close_file(&dir1);
+	assert(result == 0);
+	assert(dir1 == NULL);
+	assert(dir2 != NULL);
+	assert(dir2->f_dentry != NULL);
+
+	result = vfs->remove_emtpy_dir(&dir2);
+	assert(result == 0);
+	assert(dir2 == NULL);
+
+	std::cout << "OK\n" << std::endl;
+}
+
+void Test_vfs::remove_twice_open_file()
+{
+	std::cout << "test remove twice open file" << std::endl;
+
+	struct Vfs::file *file1 = vfs->create_file("C:/file.txt");
+	struct Vfs::file *file2 = vfs->open_object("C:/file.txt", Vfs::VFS_OBJECT_FILE);
+
+	assert(file1 != NULL);
+	assert(file1->f_dentry != NULL);
+	assert(file2 != NULL);
+	assert(file2->f_dentry != NULL);
+	assert(file1->f_dentry == file2->f_dentry);
+	assert(file1->f_dentry->d_count == 2);
+
+	int result = vfs->remove_file(&file1);
+	assert(result == -1);
+	assert(file1 != NULL);
+
+	result = vfs->remove_file(&file2);
+	assert(result == -1);
+	assert(file2 != NULL);
+
+	result = vfs->close_file(&file2);
+	assert(result == 0);
+	assert(file2 == NULL);
+
+	result = vfs->remove_file(&file1);
+	assert(result == 0);
+	assert(file1 == NULL);
+
+	std::cout << "OK\n" << std::endl;
+}
+
+void Test_vfs::remove_twice_open_dir()
+{
+	std::cout << "test for remove twice open dir" << std::endl;
+
+	struct Vfs::file *dir1 = vfs->create_dir("C:/directory");
+	struct Vfs::file *dir2 = vfs->create_dir("C:/directory");
+
+	assert(dir1 != NULL);
+	assert(dir1->f_dentry != NULL);
+	assert(dir2 != NULL);
+	assert(dir2->f_dentry != NULL);
+	assert(dir1->f_dentry == dir2->f_dentry);
+	assert(dir1->f_dentry->d_count = 2);
+
+	int result = vfs->remove_file(&dir1);
+	assert(result == -1);
+	assert(dir1 != NULL);
+	assert(dir1->f_dentry != NULL);
+
+	result = vfs->remove_file(&dir2);
+	assert(result == -1);
+	assert(dir2 != NULL);
+	assert(dir2->f_dentry != NULL);
+
+	result = vfs->close_file(&dir1);
+	assert(result == 0);
+	assert(dir1 == NULL);
+	assert(dir2 != NULL);
+	assert(dir2->f_dentry != NULL);
+
+	result = vfs->remove_emtpy_dir(&dir2);
+	assert(result == 0);
+	assert(dir2 == NULL);
+
+	std::cout << "OK\n" << std::endl;
+}
+
+void Test_vfs::create_file_over_open_file()
+{
+	std::cout << "test for create twice same file" << std::endl;
+
+	struct Vfs::file *file1 = vfs->create_file("C:/file.txt");
+	struct Vfs::file *file2 = vfs->create_file("C:/file.txt");
+
+	assert(file1 != NULL);
+	assert(file1->f_dentry != NULL);
+	assert(file1->f_dentry->d_count == 1);
+
+	assert(file2 == NULL);
+
+	int result = vfs->remove_file(&file1);
+	assert(result == 0);
+	assert(file1 == NULL);
 
 	std::cout << "OK\n" << std::endl;
 }
