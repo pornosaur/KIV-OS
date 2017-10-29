@@ -60,8 +60,8 @@ public:
 
 	virtual int close_file(struct Vfs::file **file) = 0;
 
-	//virtual int set_file_position(struct Vfs::file *file) = 0;
-	//virtual int get_file_position(struct Vfs::file *file) = 0;
+	void set_file_position(struct Vfs::file *file, unsigned long position);
+	unsigned long get_file_position(struct Vfs::file *file);
 	
 
 	//virtual int get_current_dir() = 0;

@@ -162,3 +162,28 @@ struct Vfs::dentry *Vfs::sb_find_dentry_in_dentry(struct Vfs::dentry * fDentry, 
 
 	return NULL;
 }
+
+void Vfs::set_file_position(struct Vfs::file * file, unsigned long position)
+{
+	if (file != NULL || file->f_dentry == NULL) {
+		if (file->f_dentry->d_size < position) {
+			file->position = file->f_dentry->d_size;
+		}
+		else if (position < 0) {
+			file->position = 0;
+		} 
+		else {
+			file->position = position;
+		}
+	}
+}
+
+unsigned long Vfs::get_file_position(Vfs::file * file)
+{
+	if (file == NULL) {
+		return -1;
+	}
+	else {
+		return file->position;
+	}
+}
