@@ -24,7 +24,7 @@ Vfs::~Vfs()
 struct Vfs::super_block *Vfs::init_super_block(
 	unsigned long s_blocksize,
 	bool s_dirt,
-	unsigned long long s_maxbytes,
+	unsigned long s_maxbytes,
 	struct Vfs::dentry *s_root,
 	unsigned int s_count,
 	std::string s_id)
@@ -47,10 +47,10 @@ struct Vfs::dentry* Vfs::init_dentry(
 	struct Vfs::dentry *d_parent,
 	std::string d_name,
 	unsigned long d_position,
-	unsigned long d_file_position,
+	unsigned long d_dentry_position,
 	unsigned int d_file_type,
 	unsigned long d_size,
-	unsigned int d_blocks)
+	unsigned long d_blocks)
 {
 	struct Vfs::dentry *d_entry = new struct Vfs::dentry();
 	d_entry->d_sb = d_sb;
@@ -59,7 +59,7 @@ struct Vfs::dentry* Vfs::init_dentry(
 	d_entry->d_count = 0;
 	d_entry->d_mounted = 0;
 	d_entry->d_position = d_position;
-	d_entry->d_file_position = d_file_position;
+	d_entry->d_dentry_position = d_dentry_position;
 	d_entry->d_file_type = d_file_type;
 	d_entry->d_size = d_size;
 	d_entry->d_blocks = d_blocks;
@@ -176,7 +176,7 @@ void Vfs::sb_remove_all_dentry(struct Vfs::dentry **d_entry) {
 	*d_entry = NULL;
 }
 
-struct Vfs::dentry *Vfs::sb_find_dentry_in_dentry(struct Vfs::dentry * fDentry, std::string name, int file_type) {
+struct Vfs::dentry *Vfs::sb_find_dentry_in_dentry(struct Vfs::dentry * fDentry, std::string name, unsigned int file_type) {
 	
 	if (fDentry == NULL || fDentry->d_file_type != 0 || fDentry->d_subdirectories == NULL) {
 		return NULL;

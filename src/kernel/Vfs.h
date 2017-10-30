@@ -12,7 +12,7 @@ public:
 	struct super_block {
 		unsigned long			s_blocksize;		/* block size in bytes */
 		bool					s_dirt;				/* dirty flag */
-		unsigned long long		s_maxbytes;			/* max file size */
+		unsigned long			s_maxbytes;			/* max file size */
 		struct Vfs::dentry		*s_root;			/* directory mount point */
 		unsigned int			s_count;			/* superblock ref count */
 		std::string				s_id;				/* text name */
@@ -27,11 +27,11 @@ public:
 		unsigned int 				d_count;			/* reference counter */
 		bool						d_mounted;			/* is this a mount point? */
 		unsigned long				d_position;			/* file position (cluster) */
-		unsigned long				d_file_position;	/* dir entry position (record in parent dir) */
+		unsigned long				d_dentry_position;	/* dir entry position (record in parent dir) */
 		unsigned int				d_file_type;		/* dir = 0, file = 1*/
 		unsigned long				d_size;				/* file size in bytes */
-		unsigned int				d_blocks;			/* file size in blocks */
-		unsigned char				d_dirt;				/* dirty flag */
+		unsigned long				d_blocks;			/* file size in blocks */
+		bool						d_dirt;				/* dirty flag */
 		struct Vfs::dentry			*d_subdirectories;	/* list of open sudirectories */
 		struct Vfs::dentry			*d_next_subdir;		/* next onpen dentry in the same folder */
 	};
@@ -63,10 +63,10 @@ public:
 	virtual int remove_emtpy_dir(struct Vfs::file **file) = 0;
 	virtual int read_dir(struct Vfs::file *file) = 0;
 	
-	virtual int open_object(struct Vfs::file **object, std::string absolute_path, int type) = 0;
+	virtual int open_object(struct Vfs::file **object, std::string absolute_path, unsigned int type) = 0;
 	virtual int create_file(struct Vfs::file **file, std::string absolute_path) = 0;
-	virtual int write_to_file(struct Vfs::file *file, char *buffer, int buffer_size) = 0;
-	virtual int read_file(struct Vfs::file *file, char *buffer, int buffer_size) = 0;
+	virtual int write_to_file(struct Vfs::file *file, size_t *writed_bytes, char *buffer, size_t buffer_size) = 0;
+	virtual int read_file(struct Vfs::file *file, size_t *read_bytes, char *buffer, size_t buffer_size) = 0;
 	virtual int remove_file(struct Vfs::file **file) = 0;
 
 	virtual int close_file(struct Vfs::file **file) = 0;
@@ -85,7 +85,7 @@ protected:
 	struct Vfs::super_block *Vfs::init_super_block(
 		unsigned long s_blocksize,
 		bool s_dirt,
-		unsigned long long s_maxbytes,
+		unsigned long s_maxbytes,
 		struct Vfs::dentry *s_root,
 		unsigned int s_count,
 		std::string s_id);
@@ -95,10 +95,10 @@ protected:
 		struct Vfs::dentry *d_parent,
 		std::string d_name,
 		unsigned long d_position,
-		unsigned long d_file_position,
+		unsigned long d_dentry_position,
 		unsigned int d_file_type,
 		unsigned long d_size,
-		unsigned int d_blocks);
+		unsigned long d_blocks);
 
 	struct Vfs::file *init_file(
 		struct Vfs::dentry *f_dentry,
@@ -113,6 +113,6 @@ protected:
 
 	void Vfs::sb_remove_all_dentry(struct Vfs::dentry **d_entry);
 
-	struct Vfs::dentry *sb_find_dentry_in_dentry(struct Vfs::dentry * dentry, std::string name, int file_type);
+	struct Vfs::dentry *sb_find_dentry_in_dentry(struct Vfs::dentry * dentry, std::string name, unsigned int file_type);
 };
 
