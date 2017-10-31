@@ -158,9 +158,9 @@ struct dir_file *fat_get_object_info_by_name(const char *file_name, unsigned int
     position = start_of_root_dir + (act_fat_position * boot_record->cluster_size);
 
     // check if file exists
-    struct dir_file *dirFile = get_object_in_dir(p_file, file_name, file_type, position, max_dir_entries, dir_position);
+    struct dir_file *dir_file = get_object_in_dir(p_file, file_name, file_type, position, max_dir_entries, dir_position);
 
-    return dirFile;
+    return dir_file;
 }
 
 /*

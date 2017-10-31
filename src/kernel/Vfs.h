@@ -59,12 +59,12 @@ public:
 	Vfs();
 	~Vfs();
 
-	virtual int create_dir(struct Vfs::file **directory, std::string absolute_path) = 0;
+	virtual int create_dir(struct Vfs::file **directory, const std::string absolute_path) = 0;
 	virtual int remove_emtpy_dir(struct Vfs::file **file) = 0;
 	virtual int read_dir(struct Vfs::file *file) = 0;
 	
-	virtual int open_object(struct Vfs::file **object, std::string absolute_path, unsigned int type) = 0;
-	virtual int create_file(struct Vfs::file **file, std::string absolute_path) = 0;
+	virtual int open_object(struct Vfs::file **object, const std::string absolute_path, unsigned int type) = 0;
+	virtual int create_file(struct Vfs::file **file, const std::string absolute_path) = 0;
 	virtual int write_to_file(struct Vfs::file *file, size_t *writed_bytes, char *buffer, size_t buffer_size) = 0;
 	virtual int read_file(struct Vfs::file *file, size_t *read_bytes, char *buffer, size_t buffer_size) = 0;
 	virtual int remove_file(struct Vfs::file **file) = 0;
@@ -88,12 +88,12 @@ protected:
 		unsigned long s_maxbytes,
 		struct Vfs::dentry *s_root,
 		unsigned int s_count,
-		std::string s_id);
+		const std::string s_id);
 
 	struct Vfs::dentry* init_dentry(
 		struct Vfs::super_block *d_sb,
 		struct Vfs::dentry *d_parent,
-		std::string d_name,
+		const std::string d_name,
 		unsigned long d_position,
 		unsigned long d_dentry_position,
 		unsigned int d_file_type,
@@ -105,7 +105,7 @@ protected:
 		unsigned int f_count,
 		unsigned long position);
 
-	struct Vfs::super_block *find_super_block_by_name(std::string name);
+	struct Vfs::super_block *find_super_block_by_name(const std::string name);
 
 	int sb_remove_file(struct Vfs::file **file);
 
@@ -113,6 +113,6 @@ protected:
 
 	void Vfs::sb_remove_all_dentry(struct Vfs::dentry **d_entry);
 
-	struct Vfs::dentry *sb_find_dentry_in_dentry(struct Vfs::dentry * dentry, std::string name, unsigned int file_type);
+	struct Vfs::dentry *sb_find_dentry_in_dentry(struct Vfs::dentry * dentry, const std::string name, unsigned int file_type);
 };
 
