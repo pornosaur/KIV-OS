@@ -8,10 +8,15 @@
  * @param p_file soubor obsahujici fat
  * @return vyplnenou strukturu boot_record
  */
-struct boot_record *get_boot_record(FILE *p_file) {
+struct boot_record *get_boot_record(char *memory, size_t memory_size) {
+
+	if (memory_size < sizeof(struct boot_record)) {
+		return NULL;
+	}
 
     struct boot_record *boot_record = (struct boot_record *) malloc(sizeof(struct boot_record));
-    fread(boot_record, sizeof(struct boot_record), 1, p_file);
+
+	memcpy(boot_record, memory, sizeof(struct boot_record));
 
     return boot_record;
 }
@@ -24,12 +29,20 @@ struct boot_record *get_boot_record(FILE *p_file) {
  * @param fat_size velikost fat tabulky v bitech
  * @return pole obsahujici fat tabulku
  */
-int32_t *get_fat(FILE *p_file, unsigned int fat_record_size, unsigned long cluster_count, unsigned long fat_size) {
-    uint32_t *fat = (uint32_t *) malloc(fat_size);
+int32_t *get_fat(char *memory, size_t memory_size, size_t start_of_fat, unsigned int fat_record_size, unsigned long cluster_count, unsigned long fat_size) {
+	uint32_t *fat = NULL;
+
+	if (memory_size < start_of_fat + fat_size) {
+		return NULL;
+	}
+
+	fat = (uint32_t *)malloc(fat_size);
 
     size_t i = 0;
+	size_t memory_shift = start_of_fat;
     for (i = 0; i < cluster_count; i++) {
-        fread(fat + i, fat_record_size, 1, p_file);
+		memcpy(fat + i, memory + memory_shift, fat_record_size);
+		memory_shift += fat_record_size;
     }
     return fat;
 }
@@ -40,13 +53,17 @@ int32_t *get_fat(FILE *p_file, unsigned int fat_record_size, unsigned long clust
  * @param start_of_cluster zacatek clusteru, pocitan on zacatku souboru
  * @param cluster_size velikost jednoho clusteru
  */
-void delete_cluster(FILE *p_file, unsigned int start_of_cluster, uint16_t cluster_size) {
+void delete_cluster(char *memory, size_t memory_size, unsigned int start_of_cluster, uint16_t cluster_size) {
     size_t i = 0;
     char new_value = 0;
+	size_t cpy_size = sizeof(new_value);
 
-    fseek(p_file, start_of_cluster, SEEK_SET);
+	if (memory_size < start_of_cluster + cluster_size) {
+		return;
+	}
+
     for (i = 0; i < cluster_size; i++) {
-        fwrite(&new_value, sizeof(new_value), 1, p_file);
+		memcpy(memory + start_of_cluster + (i * cpy_size), &new_value, cpy_size);
     }
 }
 
@@ -162,17 +179,24 @@ struct dir_file *find_file(FILE *p_file, struct boot_record *boot_record, char f
  * @param max_entries maximalni pocet polozek ve slozce
  * @return
  */
-struct dir_file *get_object_in_dir(FILE *p_file, const char name[], unsigned int file_type, uint32_t start_position, unsigned int max_entries, uint32_t *object_dir_pos) {
+struct dir_file *get_object_in_dir(char *memory, size_t memory_size, const char name[], unsigned int file_type, uint32_t start_position, unsigned int max_entries, uint32_t *object_dir_pos) {
     size_t i = 0;
 	unsigned int read_size;
-    struct dir_file *object = (struct dir_file *) malloc(sizeof(struct dir_file));
-
-	*object_dir_pos = start_position;
-    fseek(p_file, start_position, SEEK_SET);
+	struct dir_file *object = NULL;
 	read_size = sizeof(struct dir_file);
 
+	if (memory_size < start_position + (max_entries * read_size)) {
+		return NULL;
+	}
+
+	object = (struct dir_file *) malloc(sizeof(struct dir_file));
+
+	*object_dir_pos = start_position;
+	
+
     for (i = 0; i < max_entries; i++) {
-        fread(object, read_size, 1, p_file);
+		memcpy(object, memory + start_position + (i * read_size), read_size);
+
         if (strcmp(object->file_name, name) == 0 && object->file_type == file_type) {
             return object;
         }
@@ -193,14 +217,14 @@ struct dir_file *get_object_in_dir(FILE *p_file, const char name[], unsigned int
  * @param max_entries maximalni pocet polozek v adresari
  * @return pole obsahujici polozky adresare, nebo NULL pri chybe
  */
-struct dir_file *get_all_in_dir(FILE *p_file, uint32_t *number_of_objects, unsigned long * positions, unsigned long start_position, unsigned int max_entries) {
+struct dir_file *get_all_in_dir(char *memory, size_t memory_size, uint32_t *number_of_objects, unsigned long * positions, unsigned long start_position, unsigned int max_entries) {
     size_t i = 0;
     struct dir_file *files = NULL;
     struct dir_file file;
     unsigned long position = 0;
-	unsigned long read_size;
+	unsigned long read_size = sizeof(struct dir_file);
 
-    if (p_file == NULL) {
+    if (memory == NULL || memory_size < start_position + (max_entries * read_size)) {
         return NULL;
     }
 
@@ -208,12 +232,11 @@ struct dir_file *get_all_in_dir(FILE *p_file, uint32_t *number_of_objects, unsig
 
     files = malloc(sizeof(struct dir_file) * max_entries);
 
-    fseek(p_file, start_position, SEEK_SET);
 	position = start_position;
-	read_size = sizeof(struct dir_file);
 
     for(i = 0; i < max_entries; i++){
-        fread(&file, read_size, 1, p_file);
+		memcpy(&file, memory + start_position + (i * read_size), read_size);
+
         if(file.file_name[0] != '\0'){
             files[*number_of_objects] = file;
             if(positions != NULL){
@@ -235,19 +258,20 @@ struct dir_file *get_all_in_dir(FILE *p_file, uint32_t *number_of_objects, unsig
  * @param start_of_dir zacatek adresare v souboru
  * @return -1 pri chybe, 1 je-li prazdny, 0 obsahuje-li data
  */
-int is_dir_empty(FILE *p_file, uint32_t max_entries, uint32_t start_of_dir) {
+int is_dir_empty(char *memory, size_t memory_size, uint32_t max_entries, uint32_t start_of_dir) {
     size_t i = 0;
     struct dir_file *file = NULL;
+	size_t read_size = sizeof(struct dir_file);
 
-    if (p_file == NULL) {
+    if (memory == NULL || memory_size < start_of_dir + (max_entries * read_size)) {
         return -1;
     }
 
     file = (struct dir_file *) malloc(sizeof(struct dir_file));
 
-    fseek(p_file, start_of_dir, SEEK_SET);
     for (i = 0; i < max_entries; i++) {
-        fread(file, sizeof(struct dir_file), 1, p_file);
+		memcpy(file, memory + start_of_dir + (i * read_size), read_size);
+
         if (file != NULL && file->file_name[0] != '\0') {
             free(file);
             return 0;
@@ -266,25 +290,26 @@ int is_dir_empty(FILE *p_file, uint32_t max_entries, uint32_t start_of_dir) {
  * @param position pozici volneho mista
  * @return -1 pri chybe jinak 0
  */
-int find_empty_space_in_dir(FILE *p_file, unsigned long *position, uint32_t max_entries, uint32_t start_of_dir) {
+int find_empty_space_in_dir(char *memory, size_t memory_size, unsigned long *position, uint32_t max_entries, uint32_t start_of_dir) {
     size_t i = 0;
     struct dir_file *file = NULL;
+	unsigned long read_size = sizeof(struct dir_file);
 
-    if (p_file == NULL) {
+    if (memory == NULL || memory_size < *position + (max_entries * read_size)) {
         return -1;
     }
 
     file = (struct dir_file *) malloc(sizeof(struct dir_file));
 
-    fseek(p_file, start_of_dir, SEEK_SET);
 	*position = start_of_dir;
     for (i = 0; i < max_entries; i++) {
-        fread(file, sizeof(struct dir_file), 1, p_file);
+		memcpy(file, memory + *position, read_size);
+
         if(file != NULL && file->file_name[0] == '\0'){
             free(file);
 			return 0;
         }
-		*position += sizeof(struct dir_file);
+		*position += read_size;
     }
     free(file);
     return -1;
@@ -298,13 +323,12 @@ int find_empty_space_in_dir(FILE *p_file, unsigned long *position, uint32_t max_
  * @param write_position pozice na kterou se soubor zapise
  * @return -1 pri chybe, jinak 0
  */
-int write_to_dir(FILE *p_file, struct dir_file *file, uint32_t write_position) {
-    if (p_file == NULL) {
+int write_to_dir(char *memory, size_t memory_size, struct dir_file *file, uint32_t write_position) {
+    if (memory == NULL || memory_size < write_position + sizeof(struct dir_file)) {
         return -1;
     }
 
-    fseek(p_file, write_position, SEEK_SET);
-    fwrite(file, sizeof(struct dir_file), 1, p_file);
+	memcpy(memory + write_position, file, sizeof(struct dir_file));
 
     return 0;
 }
@@ -320,12 +344,12 @@ int write_to_dir(FILE *p_file, struct dir_file *file, uint32_t write_position) {
  * @param cluster_size velikost jednoho clusteru
  * @return -1 pri chybe, jinak 0
  */
-int write_file_to_fat(FILE *fat_file, char *file, unsigned int file_size, const uint32_t *clusters, uint32_t clusters_size, unsigned int start_of_data, uint16_t cluster_size){
+int write_file_to_fat(char *memory, size_t memory_size, char *file, unsigned int file_size, const uint32_t *clusters, uint32_t clusters_size, unsigned int start_of_data, uint16_t cluster_size){
     unsigned long cluster_position = 0;
     size_t u_cluster_size = 0;
     size_t i = 0;
     char *data = NULL;
-    if(fat_file == NULL || file == NULL || clusters == NULL || cluster_size < 0){
+	if (memory == NULL || memory_size < start_of_data + (clusters_size * cluster_size) || file == NULL || clusters == NULL || cluster_size < 0) {
         return -1;
     }
     u_cluster_size = cluster_size;
@@ -334,18 +358,17 @@ int write_file_to_fat(FILE *fat_file, char *file, unsigned int file_size, const 
         data = &file[i * cluster_size];
 
         cluster_position = start_of_data + (clusters[i] * cluster_size);
-        fseek(fat_file, cluster_position, SEEK_SET);
 
         if((i+1) * cluster_size < file_size){
             u_cluster_size = file_size - i * cluster_size;
         }
 
-        fwrite(data, u_cluster_size, 1, fat_file);
+		memcpy(memory + cluster_position, data, u_cluster_size);
     }
 
     return 0;
 }
-size_t write_bytes_to_fat(FILE *fat_file, char *bytes, unsigned long bytes_size, unsigned long offset, const uint32_t *clusters, uint32_t clusters_size, unsigned int start_of_data, uint16_t cluster_size){
+size_t write_bytes_to_fat(char *memory, size_t memory_size, char *bytes, unsigned long bytes_size, unsigned long offset, const uint32_t *clusters, uint32_t clusters_size, unsigned int start_of_data, uint16_t cluster_size){
     uint16_t first_cluster = 0;
     unsigned int cluster_offset = 0;
     size_t i = 0;
@@ -353,7 +376,7 @@ size_t write_bytes_to_fat(FILE *fat_file, char *bytes, unsigned long bytes_size,
     size_t write_size = 0;
     unsigned long write_position = 0;
 
-    if(fat_file == NULL || bytes == NULL || clusters == NULL || cluster_size < 0){
+    if(memory == NULL || memory_size < start_of_data + (clusters_size * cluster_size) || bytes == NULL || clusters == NULL || cluster_size < 0){
         return 0;
     }
 
@@ -366,13 +389,11 @@ size_t write_bytes_to_fat(FILE *fat_file, char *bytes, unsigned long bytes_size,
         write_size = cluster_size - cluster_offset;
         write_position = start_of_data + (clusters[i] * cluster_size) + cluster_offset;
 
-        fseek(fat_file, write_position, SEEK_SET);
-
         if (writed_bytes + write_size > bytes_size){
             write_size = bytes_size - writed_bytes;
         }
 
-        fwrite(&bytes[writed_bytes], write_size, 1, fat_file);
+		memcpy(memory + write_position, &bytes[writed_bytes], write_size);
 
         writed_bytes += write_size;
         cluster_offset = 0;
@@ -391,13 +412,13 @@ size_t write_bytes_to_fat(FILE *fat_file, char *bytes, unsigned long bytes_size,
  * @param cluster_size velikost jednoho clusteru
  * @return -1 pri chybe, jinak 0.
  */
-int write_empty_dir_to_fat(FILE *fat_file, const uint32_t *clusters, uint32_t clusters_size, unsigned int start_of_data, uint16_t cluster_size){
+int write_empty_dir_to_fat(char *memory, size_t memory_size, const uint32_t *clusters, uint32_t clusters_size, unsigned int start_of_data, uint16_t cluster_size){
     size_t i = 0;
     unsigned long cluster_position = 0;
     char *data = NULL;
     uint16_t u_cluster_size = 0;
 
-    if(fat_file == NULL || clusters == NULL){
+    if(memory == NULL || memory_size < start_of_data + (clusters_size * cluster_size) || clusters == NULL){
         return -1;
     }
 
@@ -408,9 +429,8 @@ int write_empty_dir_to_fat(FILE *fat_file, const uint32_t *clusters, uint32_t cl
 
     for(i = 0; i < clusters_size; i++){
         cluster_position = start_of_data + (clusters[i] * cluster_size);
-        fseek(fat_file, cluster_position, SEEK_SET);
 
-        fwrite(data, u_cluster_size, 1, fat_file);
+		memcpy(memory + cluster_position, data, u_cluster_size);
     }
 
     free(data);
@@ -475,13 +495,13 @@ int rm_from_fat(uint32_t *fat, const uint32_t *indexes, uint32_t number_of_clust
  * @param number_of_fat pocet fat kopii
  * @return -1 pri chybe jinak 0
  */
-int rm_from_all_physic_fat(FILE *p_file, unsigned int fat_record_size, uint32_t fat_start, uint32_t *indexes,
+int rm_from_all_physic_fat(char *memory, size_t memory_size, unsigned int fat_record_size, uint32_t fat_start, uint32_t *indexes,
                            uint32_t number_of_clusters, unsigned int fat_size, uint8_t number_of_fat){
     size_t i = 0;
     int result = 0;
 
     for(i = 0; i < number_of_fat; i++){
-        result = rm_from_physic_fat(p_file, fat_record_size, fat_start + ((uint32_t)i * fat_size), indexes, number_of_clusters);
+        result = rm_from_physic_fat(memory, memory_size, fat_record_size, fat_start + ((uint32_t)i * fat_size), indexes, number_of_clusters);
         if(result == -1){
             return -1;
         }
@@ -499,25 +519,24 @@ int rm_from_all_physic_fat(FILE *p_file, unsigned int fat_record_size, uint32_t 
  * @param number_of_clusters velikost pole indexes
  * @return  -1 pri chybe jinak 0
  */
-int rm_from_physic_fat(FILE *p_file, unsigned int fat_record_size, uint32_t fat_start, const uint32_t *indexes,
+int rm_from_physic_fat(char *memory, size_t memory_size, unsigned int fat_record_size, uint32_t fat_start, const uint32_t *indexes,
                        uint32_t number_of_clusters) {
     size_t i = 0;
     uint32_t index = 0;
     uint32_t new_value = 0;
 	unsigned long position = 0;
 
-    if (p_file == NULL || indexes == NULL || number_of_clusters == 0) {
+    if (memory == NULL || memory_size < fat_start + (number_of_clusters * fat_record_size) || indexes == NULL || number_of_clusters == 0) {
         return -1;
     }
 
     new_value = FAT_UNUSED;
     for (i = 0; i < number_of_clusters; i++) {
 		position = fat_start + (fat_record_size * indexes[i]);
-        fseek(p_file, position, SEEK_SET);
-        fread(&index, fat_record_size, 1, p_file);
-        fseek(p_file, position, SEEK_SET);
+
+		memcpy(&index, memory + position, fat_record_size);
         if (index != FAT_BAD_CLUSTER) {
-            fwrite(&new_value, fat_record_size, 1, p_file);
+			memcpy(memory + position, &new_value, fat_record_size);
         }
     }
 
@@ -557,17 +576,16 @@ int change_fat(uint32_t *fat, const uint32_t *indexes, const uint32_t *values, u
  * @param number_of_clusters velikost poli indexes a values
  * @return  -1 pri chybe jinak 0
  */
-int change_physic_fat(FILE *p_file, unsigned int fat_record_size, uint32_t fat_start, const uint32_t *indexes, uint32_t *values,
+int change_physic_fat(char *memory, size_t memory_size, unsigned int fat_record_size, uint32_t fat_start, const uint32_t *indexes, uint32_t *values,
                       uint32_t number_of_clusters) {
     size_t i = 0;
 
-    if (p_file == NULL || indexes == NULL || values == NULL || number_of_clusters == 0) {
+    if (memory == NULL || memory_size < fat_start + (number_of_clusters * fat_record_size) || indexes == NULL || values == NULL || number_of_clusters == 0) {
         return -1;
     }
 
     for (i = 0; i < number_of_clusters; i++) {
-        fseek(p_file, fat_start + (fat_record_size * indexes[i]), SEEK_SET);
-        fwrite(&values[i], fat_record_size, 1, p_file);
+		memcpy(memory + fat_start + (fat_record_size * indexes[i]), &values[i], fat_record_size);
     }
 
     return 0;
@@ -586,13 +604,13 @@ int change_physic_fat(FILE *p_file, unsigned int fat_record_size, uint32_t fat_s
  * @param number_of_fat pocet fat kopii
  * @return -1 pri chybe jinak 0
  */
-int change_all_physic_fat(FILE *p_file, unsigned int fat_record_size, uint32_t fat_start, uint32_t *indexes, uint32_t *values,
+int change_all_physic_fat(char *memory, size_t memory_size, unsigned int fat_record_size, uint32_t fat_start, uint32_t *indexes, uint32_t *values,
                           uint32_t number_of_clusters, unsigned int fat_size, uint8_t number_of_fat){
     size_t i = 0;
     int result = 0;
 
     for(i = 0; i < number_of_fat; i++){
-        result = change_physic_fat(p_file, fat_record_size, fat_start + ((uint32_t)i * fat_size), indexes, values,
+        result = change_physic_fat(memory, memory_size, fat_record_size, fat_start + ((uint32_t)i * fat_size), indexes, values,
                                    number_of_clusters);
         if(result == -1){
             return -1;
@@ -613,12 +631,16 @@ int change_all_physic_fat(FILE *p_file, unsigned int fat_record_size, uint32_t f
  * @param max_dir_entries maximalni pocet polozek ve slozce
  * @param level level vnoreni podadresare
  */
-void print_directory(FILE *p_file, struct dir_file *files, unsigned int number_of_objects, uint16_t cluster_size, unsigned int start_of_data, unsigned int max_dir_entries, unsigned int level){
+void print_directory(char *memory, size_t memory_size, struct dir_file *files, unsigned int number_of_objects, uint16_t cluster_size, unsigned int start_of_data, unsigned int max_dir_entries, unsigned int level){
     size_t i = 0;
     unsigned int number_of_clusters = 0;
     struct dir_file *next_files = NULL;
     unsigned int next_number_of_objects = 0;
-    char *space = malloc(sizeof(char) * (level+1));
+	char *space = NULL;
+
+	if(memory == NULL)
+
+	space = malloc(sizeof(char) * (level + 1));
 
     for(i = 0; i < level; i++){
         space[i] = '\t';
@@ -634,12 +656,70 @@ void print_directory(FILE *p_file, struct dir_file *files, unsigned int number_o
             printf("%s-%s %d %d\n", space, files[i].file_name, files[i].first_cluster, number_of_clusters);
         }else if(files[i].file_type == OBJECT_DIRECTORY){
             printf("%s+%s\n", space, files[i].file_name);
-            next_files = get_all_in_dir(p_file, &next_number_of_objects, NULL, start_of_data + (files[i].first_cluster * cluster_size), max_dir_entries);
-            print_directory(p_file, next_files, next_number_of_objects, cluster_size, start_of_data, max_dir_entries, level + 1);
+            next_files = get_all_in_dir(memory, memory_size, &next_number_of_objects, NULL, start_of_data + (files[i].first_cluster * cluster_size), max_dir_entries);
+            print_directory(memory, memory_size, next_files, next_number_of_objects, cluster_size, start_of_data, max_dir_entries, level + 1);
         }
     }
 
     space[level-1] = '\0';
     printf("%s--\n", space);
     free(space);
+}
+
+void remove_record_in_dir(char *memory, size_t memory_size, unsigned long position) {
+	size_t i = 0;
+	size_t write_size = sizeof(char);
+
+	if (memory == NULL || memory_size < position + sizeof(struct dir_file)) {
+		return;
+	}
+
+	for (i = 0; i < sizeof(struct dir_file); i++) {
+		memset(memory + position + (i * write_size), '\0', write_size);
+	}
+}
+
+size_t read_file(char *memory, size_t memory_size, char *buffer, unsigned int buffer_size, unsigned long offset, uint32_t file_size, uint16_t cluster_size, uint32_t *clusters, unsigned int start_of_root_dir, uint32_t file_clusters_size) {
+	char *cluster = NULL;
+	uint32_t read_size = 0;
+	size_t act_read_size = 0;
+	size_t writed_size = 0;
+	size_t i = 0;
+	unsigned long first_cluster = 0;
+	unsigned int cluster_offset = 0;
+
+	if (memory == NULL || memory_size < start_of_root_dir + (file_clusters_size * cluster_size)) {
+		return writed_size;
+	}
+
+	cluster = malloc(sizeof(char) * cluster_size);
+	read_size = sizeof(char) * cluster_size;
+
+	first_cluster = offset / cluster_size;
+	cluster_offset = offset % cluster_size;
+
+	writed_size = 0;
+	for (i = first_cluster; i < file_clusters_size; i++) {
+
+		act_read_size = read_size - cluster_offset;
+		if (writed_size + act_read_size > buffer_size) {
+			act_read_size = buffer_size - writed_size;
+		}
+		if (offset + writed_size + act_read_size > file_size) {
+			act_read_size = file_size - writed_size - offset;
+		}
+
+		if (act_read_size == 0) {
+			break;
+		}
+
+		memcpy(buffer + writed_size, memory + clusters[i] * cluster_size + start_of_root_dir + cluster_offset, act_read_size);
+
+		writed_size += act_read_size;
+		cluster_offset = 0;
+	}
+
+	free(cluster);
+
+	return writed_size;
 }

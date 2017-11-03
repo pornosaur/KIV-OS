@@ -60,7 +60,11 @@ Test_vfs::~Test_vfs()
 
 void Test_vfs::init() {
 	std::cout << "initialize fat" << std::endl;
-	vfs = new VfsFat();
+	memory_size = 4096;
+	memory = new char[memory_size];
+
+	VfsFat::init_fat_disk(memory, memory_size, 128u);
+	vfs = new VfsFat(memory, memory_size);
 	
 	assert(vfs != NULL);
 }
@@ -68,6 +72,8 @@ void Test_vfs::init() {
 void Test_vfs::term()
 {
 	std::cout << "terminate fat" << std::endl;
+
+	delete[] memory;
 	delete vfs;
 }
 

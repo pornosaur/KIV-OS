@@ -7,7 +7,8 @@
 
 #include "fat_structure.h"
 
-static FILE *p_file;
+static char *memory;
+static size_t memory_size;
 
 static unsigned int start_of_fat = 0;
 static unsigned int fat_record_size = 0;
@@ -19,7 +20,7 @@ static struct boot_record *boot_record = NULL;
 static uint32_t *fat1 = NULL;
 static uint32_t *fat2 = NULL;
 
-int fat_init(const char *fat_name);
+int fat_init(char *memory, size_t memory_size);
 void close_fat();
 
 int fat_create_file(struct dir_file **new_file, const char *file_name, uint32_t act_fat_position, unsigned long *dir_position);

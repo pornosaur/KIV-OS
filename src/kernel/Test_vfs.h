@@ -12,6 +12,8 @@ class Test_vfs
 		~Test_vfs();
 	private:
 		VfsFat *vfs;
+		size_t memory_size;
+		char * memory;
 
 		void init();
 		void term();

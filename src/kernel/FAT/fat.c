@@ -20,19 +20,12 @@ void init_object(struct dir_file *object,const char name[], uint32_t file_size, 
 void print_all();
 
 
-int fat_init(const char * fat_path){
+int fat_init(char *mem, size_t mem_size) {
 
-	errno_t err;
+	memory = mem;
+	memory_size = mem_size;
 
-    err = fopen_s(&p_file, fat_path, "r+");
-    if (err != 0) {
-        printf("%d", err);
-        printf("Can't open file\n");
-        return -1;
-    }
-    fseek(p_file, 0, SEEK_SET);
-
-    boot_record = get_boot_record(p_file);
+	boot_record = get_boot_record(memory, memory_size);
 
     start_of_fat = boot_record->reserved_cluster_count * boot_record->cluster_size;
     fat_record_size = sizeof(uint32_t);
@@ -40,10 +33,8 @@ int fat_init(const char * fat_path){
     start_of_root_dir = start_of_fat + (boot_record->fat_copies * fat_size);
     max_dir_entries = boot_record->cluster_size / sizeof(struct dir_file);
 
-
-    fseek(p_file, start_of_fat, SEEK_SET);
-    fat1 = get_fat(p_file, fat_record_size, boot_record->usable_cluster_count, fat_size);
-    fat2 = get_fat(p_file, fat_record_size, boot_record->usable_cluster_count, fat_size);
+    fat1 = get_fat(memory, memory_size, start_of_fat, fat_record_size, boot_record->usable_cluster_count, fat_size);
+    fat2 = get_fat(memory, memory_size, start_of_fat + fat_size, fat_record_size, boot_record->usable_cluster_count, fat_size);
 	
 	return 0;
 }
@@ -52,8 +43,6 @@ void close_fat(){
     free(boot_record);
     free(fat1);
     free(fat2);
-
-    fclose(p_file);
 }
 
 /**
@@ -89,7 +78,7 @@ int fat_create_file(struct dir_file **new_file, const char *file_name, uint32_t 
     position = start_of_root_dir + (act_fat_position * boot_record->cluster_size);
 
     // check if file exists
-	file = get_object_in_dir(p_file, file_name, OBJECT_FILE, position, max_dir_entries, &object_dir_pos);
+	file = get_object_in_dir(memory, memory_size, file_name, OBJECT_FILE, position, max_dir_entries, &object_dir_pos);
     if (file != NULL) {
         if(file->file_type == OBJECT_FILE) {
             result = fat_delete_file_by_file(file, object_dir_pos);
@@ -102,7 +91,7 @@ int fat_create_file(struct dir_file **new_file, const char *file_name, uint32_t 
     }
 
     // check empty space in dir
-    result = find_empty_space_in_dir(p_file, dir_position, max_dir_entries, position);
+    result = find_empty_space_in_dir(memory, memory_size, dir_position, max_dir_entries, position);
     if (result == -1) {
         return 6; // DIRECTORY IS FULL
     }
@@ -120,7 +109,7 @@ int fat_create_file(struct dir_file **new_file, const char *file_name, uint32_t 
     *(new_file) = malloc(sizeof(struct dir_file));
     init_object(*new_file, file_name, 1, OBJECT_FILE, clusters[0]);
 
-    write_to_dir(p_file, *new_file, (uint32_t) *dir_position);
+    write_to_dir(memory, memory_size, *new_file, (uint32_t) *dir_position);
 
     values = malloc(sizeof(uint32_t) * file_cluster_count);
     create_values_from_clusters(clusters, values, file_cluster_count);
@@ -128,7 +117,7 @@ int fat_create_file(struct dir_file **new_file, const char *file_name, uint32_t 
     change_fat(fat1, clusters, values, (uint32_t)file_cluster_count);
     change_fat(fat2, clusters, values, (uint32_t)file_cluster_count);
 
-    change_all_physic_fat(p_file, fat_record_size, start_of_fat, clusters, values, (uint32_t) file_cluster_count,
+    change_all_physic_fat(memory, memory_size, fat_record_size, start_of_fat, clusters, values, (uint32_t) file_cluster_count,
                           fat_size, boot_record->fat_copies);
 
     free(clusters);
@@ -158,7 +147,7 @@ struct dir_file *fat_get_object_info_by_name(const char *file_name, unsigned int
     position = start_of_root_dir + (act_fat_position * boot_record->cluster_size);
 
     // check if file exists
-    struct dir_file *dir_file = get_object_in_dir(p_file, file_name, file_type, position, max_dir_entries, dir_position);
+    struct dir_file *dir_file = get_object_in_dir(memory, memory_size, file_name, file_type, position, max_dir_entries, dir_position);
 
     return dir_file;
 }
@@ -248,7 +237,7 @@ int fat_delete_file_by_name(const char *file_name, uint32_t act_fat_position) {
 
     position = start_of_root_dir + (act_fat_position * boot_record->cluster_size);
 
-    file = get_object_in_dir(p_file, file_name, OBJECT_FILE, position, max_dir_entries, &object_dir_pos);
+    file = get_object_in_dir(memory, memory_size, file_name, OBJECT_FILE, position, max_dir_entries, &object_dir_pos);
     if (file == NULL || file->file_type != OBJECT_FILE) {
         free(file);
         return 3; // PATH NOT FOUND
@@ -260,8 +249,6 @@ int fat_delete_file_by_name(const char *file_name, uint32_t act_fat_position) {
 int fat_delete_file_by_file(struct dir_file *file, unsigned long position){
     uint32_t *clusters = NULL;
     uint32_t file_clusters_size = 0;
-    size_t i;
-    char new_value = '\0';
 
     clusters = get_file_clusters(file, &file_clusters_size, boot_record->cluster_size, fat1,
                                  boot_record->dir_clusters);
@@ -270,14 +257,11 @@ int fat_delete_file_by_file(struct dir_file *file, unsigned long position){
         return 11; // CANT GET CLUSTERS
     }
 
-	fseek(p_file, position, SEEK_SET);
-	for (i = 0; i < sizeof(struct dir_file); i++) {
-		fputc(new_value, p_file);
-	}
+	remove_record_in_dir(memory, memory_size, position);
 
     rm_from_fat(fat1, clusters, file_clusters_size);
     rm_from_fat(fat2, clusters, file_clusters_size);
-    rm_from_all_physic_fat(p_file, fat_record_size, start_of_fat, clusters, file_clusters_size, fat_size,
+    rm_from_all_physic_fat(memory, memory_size, fat_record_size, start_of_fat, clusters, file_clusters_size, fat_size,
                            boot_record->fat_copies);
 
     free(file);
@@ -316,13 +300,13 @@ int fat_create_dir(struct dir_file **new_dir, const char *dir_name, uint32_t act
 
     position = start_of_root_dir + (act_fat_position * boot_record->cluster_size);
 
-    file = get_object_in_dir(p_file, dir_name, OBJECT_DIRECTORY, position, max_dir_entries, &object_dir_pos);
+    file = get_object_in_dir(memory, memory_size, dir_name, OBJECT_DIRECTORY, position, max_dir_entries, &object_dir_pos);
     if (file != NULL) {
         free(file);
         return 4; // PATH EXISTS
     }
 
-    result = find_empty_space_in_dir(p_file, dir_position, max_dir_entries, position);
+    result = find_empty_space_in_dir(memory, memory_size, dir_position, max_dir_entries, position);
     if (result == -1) {
         return 6; // DIRECTORY IS FULL
     }
@@ -338,8 +322,8 @@ int fat_create_dir(struct dir_file **new_dir, const char *dir_name, uint32_t act
     *new_dir = malloc(sizeof(struct dir_file));
     init_object(*new_dir, dir_name, 0, OBJECT_DIRECTORY, clusters[0]);
 
-    write_empty_dir_to_fat(p_file, clusters, (uint32_t) file_cluster_count, start_of_root_dir, boot_record->cluster_size);
-    write_to_dir(p_file, *new_dir, (uint32_t) *dir_position);
+    write_empty_dir_to_fat(memory, memory_size, clusters, (uint32_t) file_cluster_count, start_of_root_dir, boot_record->cluster_size);
+    write_to_dir(memory, memory_size, *new_dir, (uint32_t) *dir_position);
 
     values = malloc(sizeof(uint32_t) * file_cluster_count);
     create_values_from_clusters(clusters, values, file_cluster_count);
@@ -347,7 +331,7 @@ int fat_create_dir(struct dir_file **new_dir, const char *dir_name, uint32_t act
     change_fat(fat1, clusters, values, (uint32_t)file_cluster_count);
     change_fat(fat2, clusters, values, (uint32_t)file_cluster_count);
 
-    change_all_physic_fat(p_file, fat_record_size, start_of_fat, clusters, values, (uint32_t) file_cluster_count,
+    change_all_physic_fat(memory, memory_size, fat_record_size, start_of_fat, clusters, values, (uint32_t) file_cluster_count,
                           fat_size, boot_record->fat_copies);
 
     free(clusters);
@@ -370,8 +354,6 @@ int fat_delete_empty_dir(const char *dir_name, uint32_t act_fat_position) {
     struct dir_file *file = NULL;
     uint32_t *clusters = NULL;
     int result = 0;
-    size_t i = 0;
-    unsigned int new_value = 0;
 
     if(boot_record == NULL || fat1 == NULL || fat2 == NULL){
         return 1; // NOT INITIALIZE
@@ -387,13 +369,13 @@ int fat_delete_empty_dir(const char *dir_name, uint32_t act_fat_position) {
 
     parent_position = start_of_root_dir + (act_fat_position * boot_record->cluster_size);
 
-    file = get_object_in_dir(p_file, dir_name, OBJECT_DIRECTORY, parent_position, max_dir_entries, &position);
+    file = get_object_in_dir(memory, memory_size, dir_name, OBJECT_DIRECTORY, parent_position, max_dir_entries, &position);
     if (file == NULL || file->file_type != OBJECT_DIRECTORY) {
         free(file);
         return 3; // PAHT NOT FOUND
     }
 
-    result = is_dir_empty(p_file, max_dir_entries, start_of_root_dir + (file->first_cluster * boot_record->cluster_size));
+    result = is_dir_empty(memory, memory_size, max_dir_entries, start_of_root_dir + (file->first_cluster * boot_record->cluster_size));
     if (result == 0) {
         free(file);
         return 5; // DIR NOT EMPTY
@@ -412,13 +394,10 @@ int fat_delete_empty_dir(const char *dir_name, uint32_t act_fat_position) {
     rm_from_fat(fat1, clusters, file_clusters_size);
     rm_from_fat(fat2, clusters, file_clusters_size);
 
-    rm_from_all_physic_fat(p_file, fat_record_size, start_of_fat, clusters, file_clusters_size, fat_size,
+    rm_from_all_physic_fat(memory, memory_size, fat_record_size, start_of_fat, clusters, file_clusters_size, fat_size,
                            boot_record->fat_copies);
 
-    fseek(p_file, position, SEEK_SET);
-    for (i = 0; i < sizeof(struct dir_file); i++) {
-        fwrite(&new_value, sizeof(char), 1, p_file);
-    }
+	remove_record_in_dir(memory, memory_size, position);
 
     free(file);
     free(clusters);
@@ -507,14 +486,7 @@ char* read_object(int *ret_code, int *data_size,const char file_name[], int32_t 
 size_t fat_read_file(struct dir_file file, char *buffer, unsigned int buffer_size, unsigned long offset) {
     uint32_t file_clusters_size = 0;
     uint32_t *clusters = NULL;
-    char *cluster = NULL;
-    uint32_t read_size = 0;
-    size_t act_read_size = 0;
-    size_t writed_size = 0;
-    size_t i = 0;
-    unsigned long first_cluster = 0;
-    unsigned int cluster_offset = 0;
-
+	size_t writed_size = 0;
 
     if(
             boot_record == NULL ||
@@ -536,38 +508,9 @@ size_t fat_read_file(struct dir_file file, char *buffer, unsigned int buffer_siz
         return 0;
     }
 
-
-    cluster = malloc(sizeof(char) * boot_record->cluster_size);
-    read_size = sizeof(char) * boot_record->cluster_size;
-
-    first_cluster = offset / boot_record->cluster_size;
-    cluster_offset = offset % boot_record->cluster_size;
-
-    writed_size = 0;
-    for (i = first_cluster; i < file_clusters_size; i++) {
-
-        fseek(p_file, clusters[i] * boot_record->cluster_size + start_of_root_dir + cluster_offset, SEEK_SET);
-
-        act_read_size = read_size - cluster_offset;
-        if(writed_size + act_read_size > buffer_size){
-            act_read_size = buffer_size - writed_size;
-        }
-        if(offset + writed_size + act_read_size > file.file_size){
-            act_read_size = file.file_size - writed_size - offset;
-        }
-
-        if(act_read_size == 0){
-            break;
-        }
-
-        fread(buffer + writed_size, act_read_size, 1, p_file);
-
-        writed_size += act_read_size;
-        cluster_offset = 0;
-    }
+	writed_size = read_file(memory, memory_size, buffer, buffer_size, offset, file.file_size, boot_record->cluster_size, clusters, start_of_root_dir, file_clusters_size);
 
     free(clusters);
-    free(cluster);
 
     return writed_size;
 }
@@ -619,7 +562,7 @@ size_t fat_write_file(struct dir_file *file, unsigned long dir_position, char *b
     file -> file_size = (uint32_t) (writed_bytes + offset);
 
     if(writed_bytes >= 0){
-        write_to_dir(p_file, file, (uint32_t) dir_position);
+        write_to_dir(memory, memory_size, file, (uint32_t) dir_position);
     }
 
     free(old_clusters);
@@ -652,7 +595,7 @@ size_t write_bigger_file(uint32_t *old_clusters, uint32_t new_file_clusters_size
             clusters[i] = new_clusters[i - old_file_clusters_size];
         }
     }
-    writed_bytes = write_bytes_to_fat(p_file, buffer, buffer_size, offset, clusters, new_file_clusters_size, start_of_root_dir, boot_record->cluster_size);
+    writed_bytes = write_bytes_to_fat(memory, memory_size, buffer, buffer_size, offset, clusters, new_file_clusters_size, start_of_root_dir, boot_record->cluster_size);
     free(clusters);
 
 
@@ -666,7 +609,7 @@ size_t write_bigger_file(uint32_t *old_clusters, uint32_t new_file_clusters_size
     change_fat(fat1, new_clusters, values, (uint32_t)number_of_new_clusters);
     change_fat(fat2, new_clusters, values, (uint32_t)number_of_new_clusters);
 
-    change_all_physic_fat(p_file, fat_record_size, start_of_fat, new_clusters, values,
+    change_all_physic_fat(memory, memory_size, fat_record_size, start_of_fat, new_clusters, values,
                           (uint32_t) number_of_new_clusters, fat_size, boot_record->fat_copies);
 
     // redirect last old cluster to new clusters
@@ -674,7 +617,7 @@ size_t write_bigger_file(uint32_t *old_clusters, uint32_t new_file_clusters_size
     change_fat(fat1, old_clusters + old_file_clusters_size - 1, values, 1);
     change_fat(fat2, old_clusters + old_file_clusters_size - 1, values, 1);
 
-    change_all_physic_fat(p_file, fat_record_size, start_of_fat, old_clusters + old_file_clusters_size - 1,
+    change_all_physic_fat(memory, memory_size, fat_record_size, start_of_fat, old_clusters + old_file_clusters_size - 1,
                           values, 1, fat_size, boot_record->fat_copies);
 
     // free pointers ===================================================================================================
@@ -690,7 +633,7 @@ size_t write_smaller_file(uint32_t *old_clusters, uint32_t new_file_clusters_siz
 	size_t writed_bytes = 0;
 	unsigned int clusters_to_remove = 0;
 
-    writed_bytes = write_bytes_to_fat(p_file, buffer, buffer_size, offset, old_clusters, new_file_clusters_size, start_of_root_dir, boot_record->cluster_size);
+    writed_bytes = write_bytes_to_fat(memory, memory_size, buffer, buffer_size, offset, old_clusters, new_file_clusters_size, start_of_root_dir, boot_record->cluster_size);
 
     // change FAT table
     clusters_to_remove = (unsigned int)(old_file_clusters_size - new_file_clusters_size);
@@ -698,7 +641,7 @@ size_t write_smaller_file(uint32_t *old_clusters, uint32_t new_file_clusters_siz
     // free unused fat clusters
     rm_from_fat(fat1, old_clusters + new_file_clusters_size, clusters_to_remove);
     rm_from_fat(fat2, old_clusters + new_file_clusters_size, clusters_to_remove);
-    rm_from_all_physic_fat(p_file, fat_record_size, start_of_fat, old_clusters + new_file_clusters_size,
+    rm_from_all_physic_fat(memory, memory_size, fat_record_size, start_of_fat, old_clusters + new_file_clusters_size,
                            clusters_to_remove, fat_size, boot_record->fat_copies);
 
     // mark last cluster as last
@@ -707,7 +650,7 @@ size_t write_smaller_file(uint32_t *old_clusters, uint32_t new_file_clusters_siz
     change_fat(fat1, old_clusters + new_file_clusters_size - 1, values, 1);
     change_fat(fat2, old_clusters + new_file_clusters_size - 1, values, 1);
 
-    change_all_physic_fat(p_file, fat_record_size, start_of_fat, old_clusters + new_file_clusters_size - 1,
+    change_all_physic_fat(memory, memory_size, fat_record_size, start_of_fat, old_clusters + new_file_clusters_size - 1,
                           values, 1, fat_size, boot_record->fat_copies);
 
     free(values);
@@ -715,7 +658,7 @@ size_t write_smaller_file(uint32_t *old_clusters, uint32_t new_file_clusters_siz
 }
 
 size_t write_same_file(uint32_t *old_clusters, uint32_t new_file_clusters_size, char *buffer, unsigned int buffer_size, unsigned long offset){
-    return write_bytes_to_fat(p_file, buffer, buffer_size, offset, old_clusters,  new_file_clusters_size, start_of_root_dir, boot_record->cluster_size);
+    return write_bytes_to_fat(memory, memory_size, buffer, buffer_size, offset, old_clusters,  new_file_clusters_size, start_of_root_dir, boot_record->cluster_size);
 }
 
 struct dir_file *fat_read_dir(uint32_t act_fat_position, uint32_t *files) {
@@ -727,7 +670,7 @@ struct dir_file *fat_read_dir(uint32_t act_fat_position, uint32_t *files) {
         return NULL;
     }
 
-    return get_all_in_dir(p_file, files, NULL, act_fat_position, max_dir_entries);
+    return get_all_in_dir(memory, memory_size, files, NULL, act_fat_position, max_dir_entries);
 }
 
 /**
@@ -752,7 +695,7 @@ void print_all() {
         return;
     }
 
-    files = get_all_in_dir(p_file, &number_of_objects, NULL , start_of_root_dir, max_dir_entries);
+    files = get_all_in_dir(memory, memory_size, &number_of_objects, NULL , start_of_root_dir, max_dir_entries);
 
     if (number_of_objects == 0) {
         printf("EMPTY\n");
@@ -762,7 +705,7 @@ void print_all() {
 
     printf("+ROOT\n");
 
-    print_directory(p_file, files, number_of_objects, boot_record->cluster_size, start_of_root_dir, max_dir_entries, 1);
+    print_directory(memory, memory_size, files, number_of_objects, boot_record->cluster_size, start_of_root_dir, max_dir_entries, 1);
 }
 
 

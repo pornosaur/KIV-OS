@@ -1,8 +1,9 @@
 #include "VfsFat.h"
 
-VfsFat::VfsFat()
+VfsFat::VfsFat(char *memory, size_t memory_size)
 {
-	fat_init("output.fat");
+	int result = fat_init(memory, memory_size);
+
 	if (result != 0 || !is_boot_record_init())
 	{
 		return; // TODO rict systemu ze nelze pracovat s FAT
@@ -26,6 +27,51 @@ VfsFat::VfsFat()
 VfsFat::~VfsFat()
 {
 	close_fat();
+}
+
+int VfsFat::init_fat_disk(char *memory, size_t memory_size, uint16_t cluster_size) {
+
+	uint8_t fat_copies = (uint8_t)2u;
+	uint16_t b_record_size = sizeof(struct boot_record);
+	uint16_t reserved_cluster_count = (b_record_size / cluster_size) + ((b_record_size % cluster_size) ? 1 : 0);
+	uint16_t reserved_size = reserved_cluster_count * cluster_size;
+	
+	uint32_t usable_size = (uint32_t)(memory_size - reserved_size);
+	uint32_t usable_cluster_count = usable_size / (cluster_size + (sizeof(uint32_t) * fat_copies)); // uint32_t size of record in fat table
+
+	// create boot_record
+	struct boot_record b_record;
+	strncpy_s(b_record.volume_descriptor, "Virtual fat disk", 256);
+	b_record.fat_type = (uint8_t)4096u;
+	b_record.fat_copies = fat_copies;
+	b_record.cluster_size = cluster_size;
+	b_record.usable_cluster_count = usable_cluster_count;
+	b_record.reserved_cluster_count = reserved_cluster_count;
+	b_record.dir_clusters = 1;
+	strncpy_s(b_record.signature, "OK", 9);
+
+	// create FAT table
+	int32_t *fat_table = new int32_t[usable_cluster_count];
+	for (size_t i = 0; i < usable_cluster_count; i++) {
+		fat_table[i] = FAT_UNUSED;
+	}
+	fat_table[0] = FAT_FILE_END;
+
+	// write to memory
+	size_t shift = 0;
+	memcpy_s(memory, memory_size, &b_record, b_record_size);
+	shift = reserved_size;
+	memcpy_s(memory + shift, memory_size - shift, fat_table, sizeof(int32_t) * usable_cluster_count);
+	shift += sizeof(int32_t) * usable_cluster_count;
+	memcpy_s(memory + shift, memory_size - shift, fat_table, sizeof(int32_t) * usable_cluster_count);
+	shift += sizeof(int32_t) * usable_cluster_count;
+	for (size_t i = 0; i < cluster_size; i++) {
+		memset(memory + shift + (i * sizeof(char)), '\0', sizeof(char));
+	}
+
+	delete[] fat_table;
+
+	return 0;
 }
 
 int VfsFat::create_dir(struct Vfs::file **directory, const std::string absolute_path)
