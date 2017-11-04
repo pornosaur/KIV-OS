@@ -47,11 +47,14 @@ bool kiv_os_cmd::CommandsWrapper::Parse_Pipe(const std::string& cmd_line)
 	}
 
 	std::string tmp_pipe = "";
+	size_t count_char = 0;
 	while (std::regex_search(check_line, m_cmd, r_split_pipe)) {
-		std::string pipe = tmp_pipe + std::string(m_cmd[1].str());
+		std::string pipe = tmp_pipe + std::string(m_cmd[1].str());	
 		check_line = std::string(m_cmd.suffix().str());
 
-		if ((kiv_os_str::Get_Count_Char(pipe, '"') & 1) == 1) {
+		size_t tmp_count = kiv_os_str::Get_Count_Char(pipe, '"');
+		count_char = tmp_count;
+		if ((tmp_count & 1) == 1) {
 			tmp_pipe += pipe;
 			continue;
 		}
@@ -88,6 +91,12 @@ bool kiv_os_cmd::CommandsWrapper::Parse_Pipe(const std::string& cmd_line)
 		tmp_pipe.clear();
 	}
 
+	if ((count_char & 1) == 1) {
+		error = ERR_INCORRECT_CMD;
+		return false;
+	}
+
+	assert((count_char & 1) != 1);
 	return true;
 }
 
@@ -115,8 +124,18 @@ bool kiv_os_cmd::CommandsWrapper::Parse_Redirect(struct cmd_item_t& cmd_item)
 	struct redirect_t tmp_redir;
 	bool redirect = false;
 
+	std::string tmp_redirect = "";
 	assert(!cmd_item.command.empty());
 	while (std::regex_search(parse_args, m_redirect, r_redirect)) {
+		std::string r = tmp_redirect + std::string(m_redirect[1].str());
+		
+
+		if ((kiv_os_str::Get_Count_Char(r, '"') & 1) == 1) {
+			tmp_redirect += r;
+			parse_args = std::string(m_redirect[4].str() + m_redirect.suffix().str());
+			continue;
+		}
+
 		if (m_redirect[1].str().empty() || m_redirect[2].str().empty() || m_redirect[4].str().empty()) {
 			return false;
 		}
@@ -147,10 +166,12 @@ bool kiv_os_cmd::CommandsWrapper::Parse_Redirect(struct cmd_item_t& cmd_item)
 		}
 		redirect = true;
 		parse_args = m_redirect.suffix();
+		tmp_redirect.clear();
 	}
 
 	cmd_item.redirect = tmp_redir;
 	cmd_item.is_redirect = redirect;
+
 
 	return true;
 }
