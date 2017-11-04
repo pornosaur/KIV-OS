@@ -49,12 +49,10 @@ namespace kiv_os_cmd {
 		};
 
 		static const std::regex r_cmd_line, r_split_pipe, r_command, r_args;
+		static const cmd_function_t cmd_fcs_list[];
 	
 		std::string error;
-
 		std::list<struct cmd_item_t> commands;
-
-		static cmd_function_t cmd_fcs_list[];
 
 		bool Call_Cmd_Function(cmd_item_t& cmd_item);
 		bool Parse_Pipe(std::string& cmd_line);
@@ -75,5 +73,6 @@ namespace kiv_os_cmd {
 		bool Run_Parse(std::string& line);
 		void Print_Error();
 
-	};
-}
+	}; //class CommandsWrapper
+
+} //namespace kiv_os_cmd

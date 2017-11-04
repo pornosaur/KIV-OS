@@ -6,7 +6,7 @@
 #include <memory>
 #include <cassert>
 
- kiv_os_cmd::CommandsWrapper::cmd_function_t kiv_os_cmd::CommandsWrapper::cmd_fcs_list[] = {
+ const kiv_os_cmd::CommandsWrapper::cmd_function_t kiv_os_cmd::CommandsWrapper::cmd_fcs_list[] = {
 	/*{ "type", type },
 	{ "md",  md },
 	{ "rd",  rd },*/
@@ -250,6 +250,5 @@ void kiv_os_cmd::CommandsWrapper::Echo(const struct cmd_item_t& cmd_item)
 	kiv_os::TRegisters regs;
 	char* t = kiv_os_str::copy_string(result_echo);
 	regs.rdx.r = reinterpret_cast<decltype(regs.rdx.r)>(t);
-
 	//size_t size = echo(regs);
 }
