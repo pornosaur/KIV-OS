@@ -18,22 +18,27 @@
 #define CMD_INPUT		1
 
 
+#define ERR_INCORRECT_CMD	"The syntax of the command is incorrect!"
+#define ERR_UNKNOWN_CMD		"The command was not found!"
+#define ERR_UNXPECTED		"It was unexpected at this time!"
+
 namespace kiv_os_cmd {
 
-	struct arg_t {
-		std::string element;
-		int type;
+	enum redirect_type
+	{
+		redirect_to_file, 
+		redirect_to_file_append,
+		redirect_to_command
 	};
 
 	struct redirect_t {
 		std::string dest = "";				/* Writes the command output to a file or a device. */
-		bool append = false;				/* If was typped >> for append the output to the end of a file. */
+		redirect_type type;
 	};
 
 	struct cmd_item_t {
 		std::string command = "";
 		std::string args_line = "";
-		std::list<struct arg_t> args_list;
 		bool is_redirect = false;
 		struct redirect_t redirect;
 	};
@@ -41,31 +46,18 @@ namespace kiv_os_cmd {
 	class CommandsWrapper {
 	private:
 
-		/* Tabulka muze byt max. velikosti uint8_t => 256 - pro nase ucely postacujici */
-		struct cmd_function_t {
-			const char* name;
-			void(CommandsWrapper::*cmd_fun)(const struct cmd_item_t&) = NULL;	 /* Function to handle a command */
-			bool(CommandsWrapper::*args_fun)(struct cmd_item_t&) = &CommandsWrapper::Default_Parse_Args;	/* Function to parse args - Default_Parse_Args is default */
-		};
-
 		static const std::regex r_cmd_line, r_split_pipe, r_command, r_args;
-		static const cmd_function_t cmd_fcs_list[];
 	
 		std::string error;
 		std::list<struct cmd_item_t> commands;
 
-		bool Call_Cmd_Function(cmd_item_t& cmd_item);
-		bool Parse_Pipe(std::string& cmd_line);
+		bool Parse_Pipe(const std::string& cmd_line);
 		bool Default_Parse_Args(struct cmd_item_t& cmd_item);
 		bool Echo_Parse_Args(struct cmd_item_t& cmd_item);
 		bool Parse_Command(struct cmd_item_t& cmd_item);
 		bool Parse_Redirect(struct cmd_item_t& cmd_item);
 
 		void clear();
-		
-
-		/* Commands wrapper */
-		void Echo(const struct cmd_item_t& cmd_item);
 	
 	public:
 		CommandsWrapper();
