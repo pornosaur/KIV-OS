@@ -144,8 +144,6 @@ bool kiv_os_cmd::CommandsWrapper::Parse_Redirect(struct cmd_item_t& cmd_item)
 			return false;
 		}
 
-		//TODO: multiple redirect !!!
-
 		char redir_first = *m_redirect[3].str().begin();
 		char redir_last = *(m_redirect[3].str().end() - 1);
 
@@ -171,7 +169,6 @@ bool kiv_os_cmd::CommandsWrapper::Parse_Redirect(struct cmd_item_t& cmd_item)
 
 	cmd_item.redirect = tmp_redir;
 	cmd_item.is_redirect = redirect;
-
 
 	return true;
 }
