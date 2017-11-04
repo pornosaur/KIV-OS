@@ -1,8 +1,7 @@
 #include "io.h"
 #include "kernel.h"
-#include "handles.h"
-#include "ConsoleInputStream.h"
-#include "ConsoleOutputStream.h"
+#include "Handles.h"
+#include "IHandleObject.h"
 #include <memory>
 
 
@@ -49,11 +48,10 @@ void create_file(kiv_os::TRegisters &regs) {
 void write_file(kiv_os::TRegisters &regs) {
 	DWORD written;
 
-	if (regs.rdx.x == kiv_os::stdOutput || regs.rdx.x == kiv_os::stdError) { //Output or stdError
-		std::shared_ptr<ConsoleOutputStream> cos = std::make_shared<ConsoleOutputStream>(regs.rdx.x == kiv_os::stdError);
-		written = cos->write(reinterpret_cast<char*>(regs.rdi.r), (size_t)regs.rcx.r); //TODO offset(0) zmenit na promenou, nastavovat offset pro konzoli?
-		regs.rax.r = written;
-	} else {
+	std::shared_ptr<IHandleObject> cons = handles->get_handle_object(regs.rdx.x);
+	written = cons->write(reinterpret_cast<char*>(regs.rdi.r), 0, (size_t)regs.rcx.r); //TODO offset(0) zmenit na promenou
+	regs.rax.r = written;
+
 		/*
 		HANDLE hnd = Resolve_kiv_os_Handle(regs.rdx.x);
 		regs.flags.carry = hnd == INVALID_HANDLE_VALUE;
@@ -61,20 +59,16 @@ void write_file(kiv_os::TRegisters &regs) {
 		if (!regs.flags.carry) regs.rax.r = written;
 		else regs.rax.r = GetLastError();
 		*/
-	}
+	
 	
 }
 
 void read_file(kiv_os::TRegisters &regs) {
 	DWORD read;
-	Unlock_Kernel();	//TODO: Can I allow to interruption while reading a file?
-
-	if (regs.rdx.x == kiv_os::stdInput) { //stdInput
-		std::shared_ptr<ConsoleInputStream> cis = std::make_shared<ConsoleInputStream>();
-		read = cis->read(reinterpret_cast<char*>(regs.rdi.r), (size_t)0, (size_t)regs.rcx.r); //TODO offset(0) zmenit na promenou, nastavovat offset pro konzoli?
-		regs.rax.r = read;
-	}
-	else {
+	//Unlock_Kernel();	//TODO: Can I allow to interruption while reading a file?
+	std::shared_ptr<IHandleObject> cons = handles->get_handle_object(regs.rdx.x);
+	read = cons->read(reinterpret_cast<char*>(regs.rdi.r), (size_t)0, (size_t)regs.rcx.r); //TODO offset(0) zmenit na promenou, nastavovat offset pro konzoli?
+	regs.rax.r = read;
 		//TODO Cteni z fs
 
 		/*HANDLE hnd = Resolve_kiv_os_Handle(regs.rdx.x);
@@ -82,13 +76,13 @@ void read_file(kiv_os::TRegisters &regs) {
 		if (!regs.flags.carry) regs.flags.carry = !ReadFile(hnd, reinterpret_cast<void*>(regs.rdi.r), (DWORD)regs.rcx.r, &read, NULL);
 		if (!regs.flags.carry) regs.rax.r = read;
 		else regs.rax.r = GetLastError();*/
-	}
+	
 
 }
 
 void close_handle(kiv_os::TRegisters &regs) { //TODO close pro konzoli? 
-	HANDLE hnd = Resolve_kiv_os_Handle(regs.rdx.x);
-	regs.flags.carry = !CloseHandle(hnd);
-	if (!regs.flags.carry) Remove_Handle(regs.rdx.x);
-	else regs.rax.r = GetLastError();
+	//HANDLE hnd = Resolve_kiv_os_Handle(regs.rdx.x);
+	//regs.flags.carry = !CloseHandle(hnd);
+	//if (!regs.flags.carry) Remove_Handle(regs.rdx.x);
+	//else regs.rax.r = GetLastError();
 }

@@ -3,7 +3,7 @@
 #include "kernel.h"
 
 
-
+std::shared_ptr<Handles> handles;
 BinSemaphore interrupt_sem;
 HMODULE User_Programs;
 void Set_Error(const bool failed, kiv_os::TRegisters &regs) {
@@ -26,7 +26,10 @@ void Unlock_Kernel()
 }
 
 void Initialize_Kernel() {
-	User_Programs = LoadLibrary(L"user.dll");	
+	User_Programs = LoadLibrary(L"user.dll");
+	handles = std::make_shared<Handles>();
+	handles->init_console_handles();
+	
 }
 
 void Shutdown_Kernel() {

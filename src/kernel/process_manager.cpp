@@ -49,7 +49,7 @@ void Wait_For(kiv_os::TRegisters &regs) {
 			pcb->proc_thread.join();
 		}
 		if (pcb != nullptr) {
-			(Remove_Process(proc_handles[i]);
+			Remove_Process(proc_handles[i]);
 		}
 	}
 
