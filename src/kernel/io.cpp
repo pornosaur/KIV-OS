@@ -1,7 +1,7 @@
 #include "io.h"
 #include "kernel.h"
 #include "Handles.h"
-#include "IHandleObject.h"
+#include "FileHandler.h"
 #include <memory>
 
 
@@ -46,10 +46,11 @@ void create_file(kiv_os::TRegisters &regs) {
 }
 
 void write_file(kiv_os::TRegisters &regs) {
-	DWORD written;
+	size_t written;
 
-	std::shared_ptr<IHandleObject> cons = handles->get_handle_object(regs.rdx.x);
+	std::shared_ptr<FileHandler> cons = handles->get_handle_object(regs.rdx.x);
 	written = cons->write(reinterpret_cast<char*>(regs.rdi.r), 0, (size_t)regs.rcx.r); //TODO offset(0) zmenit na promenou
+	
 	regs.rax.r = written;
 
 		/*
@@ -64,9 +65,9 @@ void write_file(kiv_os::TRegisters &regs) {
 }
 
 void read_file(kiv_os::TRegisters &regs) {
-	DWORD read;
+	size_t read;
 	//Unlock_Kernel();	//TODO: Can I allow to interruption while reading a file?
-	std::shared_ptr<IHandleObject> cons = handles->get_handle_object(regs.rdx.x);
+	std::shared_ptr<FileHandler> cons = handles->get_handle_object(regs.rdx.x);
 	read = cons->read(reinterpret_cast<char*>(regs.rdi.r), (size_t)0, (size_t)regs.rcx.r); //TODO offset(0) zmenit na promenou, nastavovat offset pro konzoli?
 	regs.rax.r = read;
 		//TODO Cteni z fs

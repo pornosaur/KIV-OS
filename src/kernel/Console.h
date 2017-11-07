@@ -2,8 +2,9 @@
 
 #include "..\api\api.h"
 #include <Windows.h>
-#include "IHandleObject.h"
-class Console : public IHandleObject
+#include "FileHandler.h"
+
+class Console : public FileHandler
 {
 
 
@@ -11,8 +12,8 @@ public:
 	Console(kiv_os::THandle);
 	~Console();
 
-	int read(char* b, size_t offset, size_t length);
-	int write(char* buffer, size_t offset, size_t length);
+	size_t read(char* buffer, size_t offset, size_t length);
+	size_t write(char* buffer, size_t offset, size_t length);
 private:
 	HANDLE mStdIn;
 	HANDLE mStdOut;

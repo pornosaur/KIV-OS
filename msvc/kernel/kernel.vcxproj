@@ -25,17 +25,21 @@
     <ClCompile Include="..\..\src\kernel\io.cpp" />
     <ClCompile Include="..\..\src\kernel\kernel.cpp" />
     <ClCompile Include="..\..\src\kernel\BinSemaphore.cpp" />
+    <ClCompile Include="..\..\src\kernel\Pipe.cpp" />
+    <ClCompile Include="..\..\src\kernel\PipeHnadler.cpp" />
     <ClCompile Include="..\..\src\kernel\process_manager.cpp" />
     <ClCompile Include="..\..\src\kernel\proc_filesystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\api\api.h" />
     <ClInclude Include="..\..\src\kernel\Console.h" />
+    <ClInclude Include="..\..\src\kernel\FileHandler.h" />
     <ClInclude Include="..\..\src\kernel\Handles.h" />
-    <ClInclude Include="..\..\src\kernel\IHandleObject.h" />
     <ClInclude Include="..\..\src\kernel\io.h" />
     <ClInclude Include="..\..\src\kernel\kernel.h" />
     <ClInclude Include="..\..\src\kernel\BinSemaphore.h" />
+    <ClInclude Include="..\..\src\kernel\Pipe.h" />
+    <ClInclude Include="..\..\src\kernel\PipeHandler.h" />
     <ClInclude Include="..\..\src\kernel\process_manager.h" />
     <ClInclude Include="..\..\src\kernel\proc_filesystem.h" />
   </ItemGroup>

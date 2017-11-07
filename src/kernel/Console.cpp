@@ -26,46 +26,47 @@ Console::Console(kiv_os::THandle handle)
 
 }
 
-int Console::read(char* b, size_t offset, size_t length) {
+size_t Console::read(char* buffer, size_t offset, size_t length) {
 
 	//Note that the following is such a tricky combination
 	//that the use of fread, setting length to zero with closed
 	//stdin, etc. won't work correctly. So, do not change this!
 
 	if (mStdInOpen) {
-
+	
+		size_t r;
+		size_t lengthtrim = ULONG_MAX;
 		DWORD read;
-		DWORD lengthtrim = ULONG_MAX;
-		if (length<(size_t)ULONG_MAX) lengthtrim = (DWORD)length;
+		if (length<(size_t)ULONG_MAX) lengthtrim = (size_t)length;
 		//size_t could be greater than DWORD, so we might have to trim
 
-		BOOL res = ReadFile(mStdIn, &b[offset], lengthtrim, &read, NULL);
+		BOOL res = ReadFile(mStdIn, &buffer[offset], lengthtrim, &read, NULL);
 
 		mStdInOpen = (res) & (read>0);
 
 		if (mStdInOpen) {
 			mStdInOpen = !
 				((read>2) &&			//there was something before Ctrl+Z
-				(b[read - 3] == 0x1a) & (b[read - 2] == 0x0d) & (b[read - 1] == 0x0a));
+				(buffer[read - 3] == 0x1a) & (buffer[read - 2] == 0x0d) & (buffer[read - 1] == 0x0a));
 			if ((!mStdInOpen) & (read>2)) read -= 3;
 			//delete the sequence, if it is necessary
-			return read>0 ? read : -1;
+			return read>0 ? (size_t)read : -1;
 		}
 
-		return mStdInOpen ? read : -1;
+		return mStdInOpen ? (size_t)read : -1;
 	}
 	else
 		return -1;	//stdin is no longer open
 }
 
-int Console::write(char* buffer, size_t offset, size_t length) {
+size_t Console::write(char* buffer, size_t offset, size_t length) {
 	
 	if (mStdOutOpen || mStdError) {
-		DWORD write;
-		DWORD lengthtrim = ULONG_MAX;
-		if (length<(size_t)ULONG_MAX) lengthtrim = (DWORD)length;
+		size_t write;
+		size_t lengthtrim = ULONG_MAX;
+		if (length<(size_t)ULONG_MAX) lengthtrim = (size_t)length;
 		HANDLE mStd = (mStdOutOpen) ? mStdOut : mStdError;
-		BOOL res = WriteFile(mStd, buffer, lengthtrim, &write, NULL);
+		BOOL res = WriteFile(mStd, buffer, lengthtrim, (LPDWORD)&write, NULL);
 		return res ? write : -1;
 	}else
 		return -1;
