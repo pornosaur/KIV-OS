@@ -42,7 +42,9 @@ void __stdcall Sys_Call(kiv_os::TRegisters &regs)
 
 	switch (regs.rax.h) {
 		case kiv_os::scIO:		HandleIO(regs);
+			break;
 		case kiv_os::scProc:	Handle_Proc(regs);
+			break;
 	}
 
 	
