@@ -52,18 +52,16 @@ namespace kiv_os_cmd {
 		std::list<struct cmd_item_t> commands;
 
 		bool Parse_Pipe(const std::string& cmd_line);
-		bool Default_Parse_Args(struct cmd_item_t& cmd_item);
-		bool Echo_Parse_Args(struct cmd_item_t& cmd_item);
 		bool Parse_Command(struct cmd_item_t& cmd_item);
 		bool Parse_Redirect(struct cmd_item_t& cmd_item);
-
-		void clear();
 	
 	public:
 		CommandsWrapper();
 
 		bool Run_Parse(std::string& line);
 		void Print_Error();
+		void Clear();
+		void Prepare_Commands();
 
 	}; //class CommandsWrapper
 

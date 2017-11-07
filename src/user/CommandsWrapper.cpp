@@ -22,14 +22,8 @@ bool kiv_os_cmd::CommandsWrapper::Run_Parse(std::string& line)
 		return false;
 	}
 
-	for (auto cmd_item : commands)
-	{
-		//TODO: make process here  but move to own function
-	}
-
 	assert(error.empty());
 	assert(!commands.empty());
-	clear();
 
 	return true;
 }
@@ -173,7 +167,7 @@ bool kiv_os_cmd::CommandsWrapper::Parse_Redirect(struct cmd_item_t& cmd_item)
 	return true;
 }
 
-void kiv_os_cmd::CommandsWrapper::clear()
+void kiv_os_cmd::CommandsWrapper::Clear()
 {
 	error.clear();
 	commands.clear();
@@ -181,17 +175,26 @@ void kiv_os_cmd::CommandsWrapper::clear()
 
 void kiv_os_cmd::CommandsWrapper::Print_Error()
 {
+	assert(!error.empty());
 	if (!error.empty()) {
 		error += "\n";
 		size_t size = error.size(), written;
 		char* c_error = kiv_os_str::copy_string(error);
 
-		//TODO: change stdOutput to stdError
 		kiv_os_rtl::Write_File(kiv_os::stdOutput, c_error, size, written);
 
 		free(c_error);
 		c_error = NULL;
 	}
 
-	clear();
+	Clear();
+}
+
+void kiv_os_cmd::CommandsWrapper::Prepare_Commands()
+{
+	assert(!commands.empty());
+
+	for (auto cmd : commands) {
+
+	}
 }
