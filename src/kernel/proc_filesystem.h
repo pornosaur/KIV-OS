@@ -3,7 +3,8 @@
 #include "..\api\api.h"
 #include "thread"
 struct PCB {
-	kiv_os::THandle PID;
+	kiv_os::THandle pid;
+	kiv_os::THandle ppid;
 	char *proc_name;
 	kiv_os::THandle stdin_t;
 	kiv_os::THandle stdout_t;

@@ -5,10 +5,10 @@ kiv_os::THandle next_pid = 0;
 std::map<kiv_os::THandle, std::shared_ptr<PCB>> process_table;
 
 kiv_os::THandle Add_Process(std::shared_ptr<PCB> pcb) {
-	pcb->PID = next_pid;
+	pcb->pid = next_pid;
 	process_table[next_pid] = pcb;
 	next_pid++;
-	return pcb->PID;
+	return pcb->pid;
 }
 
 std::shared_ptr<PCB> Get_Process(kiv_os::THandle pid) {
