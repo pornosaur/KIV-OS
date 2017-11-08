@@ -10,8 +10,8 @@ public:
 	Console(kiv_os::THandle);
 	~Console();
 
-	size_t read(char* buffer, size_t offset, size_t length);
-	size_t write(char* buffer, size_t offset, size_t length);
+	bool read(char* buffer, size_t offset, size_t length, size_t& read);
+	bool write(char* buffer, size_t offset, size_t length, size_t& written);
 private:
 	HANDLE mStdIn;
 	HANDLE mStdOut;

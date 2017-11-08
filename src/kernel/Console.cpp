@@ -26,48 +26,59 @@ Console::Console(kiv_os::THandle handle)
 
 }
 
-size_t Console::read(char* buffer, size_t offset, size_t length) {
+bool Console::read(char* buffer, size_t offset, size_t length, size_t& read) {
 
 	//Note that the following is such a tricky combination
 	//that the use of fread, setting length to zero with closed
 	//stdin, etc. won't work correctly. So, do not change this!
 
 	if (mStdInOpen) {
-		DWORD lengthtrim = ULONG_MAX;
-		DWORD read;
+		DWORD read_dw, lengthtrim = ULONG_MAX;
+
 		if (length < (size_t)ULONG_MAX) lengthtrim = (DWORD)length;
 		//size_t could be greater than DWORD, so we might have to trim
 
-		BOOL res = ReadFile(mStdIn, &buffer[offset], lengthtrim, &read, NULL);
+		BOOL res = ReadFile(mStdIn, &buffer[offset], lengthtrim, &read_dw, NULL);
 
-		mStdInOpen = (res) & (read>0);
+		mStdInOpen = (res) & (read_dw > 0);
 
 		if (mStdInOpen) {
 			mStdInOpen = !
-				((read>2) &&			//there was something before Ctrl+Z
-				(buffer[read - 3] == 0x1a) & (buffer[read - 2] == 0x0d) & (buffer[read - 1] == 0x0a));
-			if ((!mStdInOpen) & (read > 2)) read -= 3;
+				((read_dw > 2) &&			//there was something before Ctrl+Z
+				(buffer[read_dw - 3] == 0x1a) & (buffer[read_dw - 2] == 0x0d) & (buffer[read_dw - 1] == 0x0a));
+			
+			if ((!mStdInOpen) & (read_dw > 2)) {
+				read_dw -= 3;
+			}
 			//delete the sequence, if it is necessary
-			return read > 0 ? (size_t)read : -1;
-		}
 
-		return mStdInOpen ? (size_t)read : -1;
+			read = read_dw > 0 ? (size_t)read_dw : 0;
+			return res;
+		}
+		
+		read = mStdInOpen ? (size_t)read_dw : 0;
+		return res;
 	}
 	else
-		return -1;	//stdin is no longer open
+		return false;	//stdin is no longer open
 }
 
-size_t Console::write(char* buffer, size_t offset, size_t length) {
-	
+bool Console::write(char* buffer, size_t offset, size_t length, size_t& written) 
+{
 	if (mStdOutOpen || mStdError) {
-		DWORD write;
-		DWORD lengthtrim = ULONG_MAX;
-		if (length < (size_t)ULONG_MAX) lengthtrim = (DWORD)length;
+		DWORD write, lengthtrim = ULONG_MAX;
+
+		if (length < (size_t)ULONG_MAX) {
+			lengthtrim = (DWORD)length;
+		}
+
 		HANDLE mStd = (mStdOutOpen) ? mStdOut : mStdError;
 		BOOL res = WriteFile(mStd, buffer, lengthtrim, &write, NULL);
-		return res ? write : -1;
-	}else
-		return -1;
+		written = res ? (size_t)write : 0;
+		return res;
+	}
+	else
+		return false;
 }
 
 
