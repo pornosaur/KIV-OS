@@ -61,7 +61,7 @@ namespace kiv_os_cmd {
 		bool Run_Parse(std::string& line);
 		void Print_Error();
 		void Clear();
-		void Prepare_Commands();
+		void Run_Commands();
 
 	}; //class CommandsWrapper
 

@@ -190,9 +190,10 @@ void kiv_os_cmd::CommandsWrapper::Print_Error()
 	Clear();
 }
 
-void kiv_os_cmd::CommandsWrapper::Prepare_Commands()
+void kiv_os_cmd::CommandsWrapper::Run_Commands()
 {
 	assert(!commands.empty());
+	//TODO: here odpalit processes
 
 	for (auto cmd : commands) {
 
