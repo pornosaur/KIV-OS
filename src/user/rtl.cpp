@@ -79,10 +79,25 @@ bool kiv_os_rtl::Create_Process(const char *program_name, kiv_os::TProcess_Start
 
 }
 
-bool kiv_os_rtl::Wait_For(const kiv_os::THandle *proc_handles, const size_t count) {
+bool kiv_os_rtl::Create_Thread(kiv_os::TThread_Proc ttp, void *data, kiv_os::THandle &process_handle) {
+	kiv_os::TRegisters regs = Prepare_SysCall_Context(kiv_os::scProc, kiv_os::scClone);
+	regs.rcx.l = kiv_os::clCreate_Thread;
+
+	regs.rdx.r = reinterpret_cast<decltype(regs.rdx.r)>(ttp);
+	regs.rdi.r = reinterpret_cast<decltype(regs.rdi.r)> (data);
+
+	const bool result = Do_SysCall(regs);
+	process_handle = static_cast<kiv_os::THandle>(regs.rax.x);
+	return result;
+
+
+}
+
+bool kiv_os_rtl::Wait_For(std::vector<kiv_os::THandle> proc_handles, const size_t count) {
 	kiv_os::TRegisters regs = Prepare_SysCall_Context(kiv_os::scProc, kiv_os::scWait_For);
-	regs.rdx.r = reinterpret_cast<decltype(regs.rdx.r)>(proc_handles);
-	regs.rcx.r = static_cast<decltype(regs.rcx.r)>(count);
+	kiv_os::THandle *proc_handles_arr = &proc_handles[0];
+	regs.rdx.r = reinterpret_cast<decltype(regs.rdx.r)>(proc_handles_arr);
+	regs.rcx.r = static_cast<decltype(regs.rcx.r)>(proc_handles.size());
 
 	const bool result = Do_SysCall(regs);
 
