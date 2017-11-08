@@ -190,12 +190,32 @@ void kiv_os_cmd::CommandsWrapper::Print_Error()
 	Clear();
 }
 
-void kiv_os_cmd::CommandsWrapper::Run_Commands()
+std::vector<kiv_os::THandle> kiv_os_cmd::CommandsWrapper::Run_Commands(kiv_os::TProcess_Startup_Info *tsi)
 {
+	std::vector<kiv_os::THandle> proc_handles;
 	assert(!commands.empty());
 	//TODO: here odpalit processes
 
 	for (auto cmd : commands) {
+		if (cmd.is_redirect) {
+			switch (cmd.redirect.type) {
+			case kiv_os_cmd::redirect_type::redirect_to_command:
+				//TODO: 
+				break;
+			case kiv_os_cmd::redirect_type::redirect_to_file:
+				//TODO
+				break;
+			case kiv_os_cmd::redirect_type::redirect_to_file_append:
+				//TODO
+				break;
+			}
+
+		}
+		tsi->arg = kiv_os_str::copy_string(cmd.args_line); //argumenty
+		kiv_os::THandle proc_handle;
+		kiv_os_rtl::Create_Process(kiv_os_str::copy_string(cmd.command), tsi, proc_handle); //vytvoreni procesu
+		proc_handles.push_back(proc_handle); //pridani handlu do pole s handly
 
 	}
+	return proc_handles;
 }

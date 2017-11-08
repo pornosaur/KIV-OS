@@ -5,7 +5,7 @@
 
 #include <list>
 #include <regex>
-
+#include <vector>
 #define SPACE		'\x20'	
 #define PIPE		'\x7C'	/* | */
 #define LF			'\x0A'	
@@ -57,11 +57,10 @@ namespace kiv_os_cmd {
 	
 	public:
 		CommandsWrapper();
-
 		bool Run_Parse(std::string& line);
 		void Print_Error();
 		void Clear();
-		void Run_Commands();
+		std::vector<kiv_os::THandle> kiv_os_cmd::CommandsWrapper::Run_Commands(kiv_os::TProcess_Startup_Info *tsi);
 
 	}; //class CommandsWrapper
 
