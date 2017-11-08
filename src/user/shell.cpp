@@ -27,14 +27,20 @@ size_t __stdcall shell(const kiv_os::TRegisters &regs) {
 	kiv_os_rtl::Wait_For(proc_handles, 1);*/ //ceka se na dokonceni vsech procesu
 	char *input = (char *)calloc(MAX_SIZE_BUFFER_IN, sizeof(char));
 	kiv_os_cmd::CommandsWrapper cmd_w;
+
 	while (run_shell) {
 		kiv_os_rtl::Read_File(kiv_os::stdInput, input, MAX_SIZE_BUFFER_IN, read);
 		
 		/* Input is not empty; 2 because of \r\n */
+		/* TODO: on linux could be less then 2? */
 		if (read > 2) {
 			if (!cmd_w.Run_Parse(std::string(input))) {
 				cmd_w.Print_Error();
+				continue;
 			}
+
+			cmd_w.Run_Commands();
+			cmd_w.Clear();
 		}
 
 		input = (char *)calloc(MAX_SIZE_BUFFER_IN, sizeof(char));
