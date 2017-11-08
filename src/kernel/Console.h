@@ -6,8 +6,6 @@
 
 class Console : public FileHandler
 {
-
-
 public:
 	Console(kiv_os::THandle);
 	~Console();
