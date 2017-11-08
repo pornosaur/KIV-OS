@@ -16,15 +16,7 @@ size_t __stdcall shell(const kiv_os::TRegisters &regs) {
 	kiv_os_rtl::Write_File(kiv_os::stdOutput, hello, strlen(hello), written);
 	kiv_os::TProcess_Startup_Info tsi;
 
-	/*tsi.arg = "hello"; //argumenty
-	tsi.stdin_t = kiv_os::stdInput; //nastaveni std - jiz presmerovanych
-	tsi.stdout_t = kiv_os::stdOutput;
-	tsi.stderr_t = kiv_os::stdError;
-	kiv_os::THandle proc_handles[10]; //pole s handly procesu
-	kiv_os::THandle proc_handle; 
-	kiv_os_rtl::Create_Process("echo", &tsi, proc_handle); //vytvoreni procesu
-	proc_handles[0] = proc_handle; //pridani handlu do pole s handly
-	kiv_os_rtl::Wait_For(proc_handles, 1);*/ //ceka se na dokonceni vsech procesu
+	
 	char *input = (char *)calloc(MAX_SIZE_BUFFER_IN, sizeof(char));
 	kiv_os_cmd::CommandsWrapper cmd_w;
 
@@ -39,7 +31,14 @@ size_t __stdcall shell(const kiv_os::TRegisters &regs) {
 				continue;
 			}
 
-			cmd_w.Run_Commands();
+			tsi.stdin_t = kiv_os::stdInput; //nastaveni std - jiz presmerovanych
+			tsi.stdout_t = kiv_os::stdOutput;
+			tsi.stderr_t = kiv_os::stdError;
+			
+			kiv_os::THandle proc_handle;
+
+			std::vector<kiv_os::THandle> proc_handles = cmd_w.Run_Commands(&tsi);
+			kiv_os_rtl::Wait_For(proc_handles, 1);
 			cmd_w.Clear();
 		}
 
