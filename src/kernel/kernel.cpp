@@ -1,13 +1,11 @@
 #pragma once
 
 #include "kernel.h"
-#include "io.h"
-#include <Windows.h>
 
-HMODULE User_Programs;
-
+ProcessManager *processManager;
+std::shared_ptr<Handles> handles;
 BinSemaphore interrupt_sem;
-
+HMODULE User_Programs;
 void Set_Error(const bool failed, kiv_os::TRegisters &regs) {
 	if (failed) {
 		regs.flags.carry = true;
@@ -28,7 +26,11 @@ void Unlock_Kernel()
 }
 
 void Initialize_Kernel() {
-	User_Programs = LoadLibrary(L"user.dll");	
+	User_Programs = LoadLibrary(L"user.dll");
+	handles = std::make_shared<Handles>();
+	processManager = new ProcessManager();
+	handles->init_console_handles();
+	
 }
 
 void Shutdown_Kernel() {
@@ -37,25 +39,36 @@ void Shutdown_Kernel() {
 
 void __stdcall Sys_Call(kiv_os::TRegisters &regs) 
 {
-	Lock_Kernel();
-
 	switch (regs.rax.h) {
-		case kiv_os::scIO:		HandleIO(regs);
-	}
-
-	Unlock_Kernel();
+		case kiv_os::scIO:
+			HandleIO(regs);
+			break;
+		case kiv_os::scProc:
+			processManager->handle_proc(regs);
+			break;
+	}	
 }
 
 void __stdcall Run_VM() {
 	Initialize_Kernel();
 
 	//spustime shell - v realnem OS bychom ovsem spousteli login
-	kiv_os::TEntry_Point shell = (kiv_os::TEntry_Point)GetProcAddress(User_Programs, "shell");
-	if (shell) {
-		//spravne se ma shell spustit pres clone!
+	//kiv_os::TEntry_Point shell = (kiv_os::TEntry_Point)GetProcAddress(User_Programs, "shell");
+	//if (shell) {
+		
 		kiv_os::TRegisters regs{ 0 };
-		shell(regs);
-	}
+		kiv_os::TProcess_Startup_Info tsi;
+		tsi.arg = "shell"; //argumenty
+		tsi.stdin_t = kiv_os::stdInput; //nastaveni std - jiz presmerovanych
+		tsi.stdout_t = kiv_os::stdOutput;
+		tsi.stderr_t = kiv_os::stdError;
+		kiv_os::THandle proc_handles[1];
+		
+		processManager->create_process("shell", &tsi, regs);
+		proc_handles[0] = static_cast<kiv_os::THandle>(regs.rax.r);
+		processManager->wait_for(proc_handles, 1);
+
+	//}
 
 	Shutdown_Kernel();
 }

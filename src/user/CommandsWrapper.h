@@ -3,25 +3,65 @@
 #include "..\api\api.h"
 #include "commands.h"
 
-#include "Arguments.h"
+#include <list>
+#include <regex>
+#include <vector>
+#define SPACE		'\x20'	
+#define PIPE		'\x7C'	/* | */
+#define LF			'\x0A'	
+#define DASH		'\x2D'	/* - */
+#define STROKE		'\x2F'  /* / */
+#define DOT			'\x2E'	/* . */
+#define COLON		'\x3A'	/* : */
+
+#define CMD_ARG			0
+#define CMD_INPUT		1
+
+
+#define ERR_INCORRECT_CMD	"The syntax of the command is incorrect!"
+#define ERR_UNKNOWN_CMD		"The command was not found!"
+#define ERR_UNXPECTED		"It was unexpected at this time!"
 
 namespace kiv_os_cmd {
 
-	/* Tabulka muze byt max. velikosti uint8_t => 256 - pro nase ucely postacujici */
-	struct cmd_function_t {
-		const char* name;
-		size_t(__stdcall *cmd_fun)(const kiv_os::TRegisters&) = NULL;
+	enum redirect_type
+	{
+		redirect_to_file, 
+		redirect_to_file_append,
+		redirect_to_command
+	};
+
+	struct redirect_t {
+		std::string dest = "";				/* Writes the command output to a file or a device. */
+		redirect_type type;
+	};
+
+	struct cmd_item_t {
+		std::string command = "";
+		std::string args_line = "";
+		bool is_redirect = false;
+		struct redirect_t redirect;
 	};
 
 	class CommandsWrapper {
 	private:
+
+		static const std::regex r_cmd_line, r_split_pipe, r_command, r_args;
 	
-		static const cmd_function_t cmd_fcs_list[];
+		std::string error;
+		std::list<struct cmd_item_t> commands;
 
-		int call_cmd_function(char* cmd_name, const char* params);
-
+		bool Parse_Pipe(const std::string& cmd_line);
+		bool Parse_Command(struct cmd_item_t& cmd_item);
+		bool Parse_Redirect(struct cmd_item_t& cmd_item);
+	
 	public:
-		CommandsWrapper(kiv_os_cmd::Arguments& args);
+		CommandsWrapper();
+		bool Run_Parse(std::string& line);
+		void Print_Error();
+		void Clear();
+		std::vector<kiv_os::THandle> kiv_os_cmd::CommandsWrapper::Run_Commands(kiv_os::TProcess_Startup_Info *tsi);
 
-	};
-}
+	}; //class CommandsWrapper
+
+} //namespace kiv_os_cmd

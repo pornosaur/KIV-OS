@@ -1,4 +1,7 @@
 #include "commands.h"
+#include "rtl.h"
+
+#include <cstring>
 
 size_t __stdcall type(const kiv_os::TRegisters &regs)
 {
@@ -14,7 +17,14 @@ size_t __stdcall rd(const kiv_os::TRegisters &regs) {
 }
 
 size_t __stdcall echo(const kiv_os::TRegisters &regs) {
-	return 0;
+	kiv_os::TProcess_Startup_Info *tsi = reinterpret_cast<kiv_os::TProcess_Startup_Info*> (regs.rdi.r);
+	const char* params = tsi->arg;
+	kiv_os::THandle stdout_t = tsi->stdout_t;
+	size_t writen;	
+
+	kiv_os_rtl::Write_File(stdout_t, params, strlen(params), writen);
+	
+	return writen;
 }
 
 size_t __stdcall wc(const kiv_os::TRegisters &regs) {

@@ -1,42 +1,46 @@
-#include "handles.h"
-
-#include <map>
-#include <mutex>
-#include <random>
-
-std::map<kiv_os::THandle, HANDLE> Handles;
-std::mutex Handles_Guard;
-kiv_os::THandle Last_Handle = 0;
-
-std::random_device rd;
-std::mt19937 gen(rd());
-std::uniform_int_distribution<> dis(1, 6);
+#include "Handles.h"
 
 
 
-kiv_os::THandle Convert_Native_Handle(const HANDLE hnd) {
+Handles::Handles() {
+}
+
+void Handles::init_console_handles(){
+	std::shared_ptr<Console> conIn = std::make_shared<Console>(kiv_os::stdInput);
+	handles.insert(std::pair<kiv_os::THandle, std::shared_ptr<FileHandler>>(kiv_os::stdInput, conIn));
+
+	std::shared_ptr<Console> conOut = std::make_shared<Console>(kiv_os::stdOutput);
+	handles.insert(std::pair<kiv_os::THandle, std::shared_ptr<FileHandler>>(kiv_os::stdOutput, conOut));
+
+	std::shared_ptr<Console> conError = std::make_shared<Console>(kiv_os::stdError);
+	handles.insert(std::pair<kiv_os::THandle, std::shared_ptr<FileHandler>>(kiv_os::stdError, conError));
+}
+
+kiv_os::THandle Handles::add_handle(std::shared_ptr<FileHandler> hnd) {
 	std::lock_guard<std::mutex> guard(Handles_Guard);
 
-	Last_Handle += dis(gen);	//vygenerujeme novy interni handle s nahodnou hodnotou
+	Last_Handle++;
 
-	Handles.insert(std::pair<kiv_os::THandle, HANDLE>(Last_Handle, hnd));
-
+	handles.insert(std::pair<kiv_os::THandle, std::shared_ptr<FileHandler>>(Last_Handle, hnd));
 	return Last_Handle;
 }
 
-HANDLE Resolve_kiv_os_Handle(const kiv_os::THandle hnd) {
+std::shared_ptr<FileHandler> Handles::get_handle_object(const kiv_os::THandle hnd) {
 	std::lock_guard<std::mutex> guard(Handles_Guard);
 
-	auto resolved = Handles.find(hnd);
-	if (resolved != Handles.end()) {
+	auto resolved = handles.find(hnd);
+	if (resolved != handles.end()) {
 		return resolved->second;
 	}
 	else
-		return INVALID_HANDLE_VALUE;
+		return nullptr;
 }
 
-bool Remove_Handle(const kiv_os::THandle hnd) {
+bool Handles::Remove_Handle(const kiv_os::THandle hnd) {
 	std::lock_guard<std::mutex> guard(Handles_Guard);
+	return handles.erase(hnd) == 1;
+}
 
-	return Handles.erase(hnd) == 1;
+Handles::~Handles() {
+
 }

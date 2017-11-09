@@ -1,6 +1,6 @@
 #include "shell.h"
 #include "string.h"
-#include "Arguments.h"
+#include "CommandsWrapper.h"
 
 #include <cstring>
 #include <cstdlib>
@@ -8,59 +8,51 @@
 #include <ctype.h>
 
 
-size_t __stdcall shell(const kiv_os::TRegisters &regs) {
-	/* First group => command; Second group => parametrs */
-	static const std::regex regex_cmd("\\s*(\\w+)\\s*(.*)");
-	static const std::regex regex_redirect("(.*)\\s>{1,2}\\s([\\w\\._]+)");
-	static std::cmatch match, m_redirect;
 
+size_t __stdcall shell(const kiv_os::TRegisters &regs) {
 	size_t written, read;
 
 	const char* hello = "****KIV-OS****\n";
-	kiv_os_rtl::Write_File(stdinn, hello, strlen(hello), written);
+	kiv_os_rtl::Write_File(kiv_os::stdOutput, hello, strlen(hello), written);
+	kiv_os::TProcess_Startup_Info tsi;
 
+	
 	char *input = (char *)calloc(MAX_SIZE_BUFFER_IN, sizeof(char));
+	kiv_os_cmd::CommandsWrapper cmd_w;
+
 	while (run_shell) {
 		kiv_os_rtl::Read_File(kiv_os::stdInput, input, MAX_SIZE_BUFFER_IN, read);
-
+		
 		/* Input is not empty; 2 because of \r\n */
+		/* TODO: on linux could be less then 2? */
 		if (read > 2) {
-			kiv_os_cmd::Arguments args(input, read);
-		}
+			if (!cmd_w.Run_Parse(std::string(input))) {
+				cmd_w.Print_Error();
+				continue;
+			}
 
-		/*
-		if (std::regex_search(input, match, regex_cmd) && (match.size() == REGEX_DEF_GROUP)) {
+			tsi.stdin_t = kiv_os::stdInput; //nastaveni std - jiz presmerovanych
+			tsi.stdout_t = kiv_os::stdOutput;
+			tsi.stderr_t = kiv_os::stdError;
+			
+			kiv_os::THandle proc_handle;
 
-		char *params = kiv_os_str::copy_string(match[2].str());
-		if (!match[2].str().empty() && std::regex_search(params, m_redirect, regex_redirect)) {
-		const char* msg = "\tRedirect found\n";
-		kiv_os_rtl::Write_File(stdinn, msg, strlen(msg), error_write);
-		char *new_params = kiv_os_str::copy_string(m_redirect[1].str());
-		free(params);
-		params = new_params;
+			std::vector<kiv_os::THandle> proc_handles = cmd_w.Run_Commands(&tsi);
+			kiv_os_rtl::Wait_For(proc_handles, 1);
+			cmd_w.Clear();
 		}
-		char *cmd_name = kiv_os_str::copy_string(match[1].str());
-		if (call_cmd_function(cmd_name, params) == ERROR_RESULT) {
-		kiv_os_rtl::Write_File(stdinn, error_dialog, strlen(error_dialog), error_write);
-		}
-		free(cmd_name);
-		free(params);
-		}
-		else {
-		kiv_os_rtl::Write_File(stdinn, error_dialog, strlen(error_dialog), error_write);
-		}*/
 
 		input = (char *)calloc(MAX_SIZE_BUFFER_IN, sizeof(char));
 	}
 
-	kiv_os_rtl::Close_File(stdinn);
 	free(input);
-
+	input = NULL;
+	
 	return 0;
 }
 
 void __stdcall shell_stop()
 {
-	//TODO: implement shell stop 
 	run_shell = 0;
+	//TODO: implement also shell stop in the Kernel
 }
