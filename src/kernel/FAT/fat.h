@@ -1,3 +1,4 @@
+#pragma once
 #ifndef FAT_H
 #define FAT_H
 
@@ -6,45 +7,48 @@
 
 #include "fat_structure.h"
 
-FILE *p_file;
+static char *memory;
+static size_t memory_size;
 
-unsigned int start_of_fat = 0;
-unsigned int fat_record_size = 0;
-unsigned int fat_size = 0;
-unsigned int start_of_root_dir = 0;
-unsigned int max_dir_entries = 0;
-unsigned int start_of_data = 0;
+static unsigned int start_of_fat = 0;
+static unsigned int fat_record_size = 0;
+static unsigned int fat_size = 0;
+static unsigned int start_of_root_dir = 0;
+static unsigned int max_dir_entries = 0;
 
-struct boot_record *boot_record = NULL;
-int32_t *fat1 = NULL;
-int32_t *fat2 = NULL;
+static struct boot_record *boot_record = NULL;
+static uint32_t *fat1 = NULL;
+static uint32_t *fat2 = NULL;
 
-int init(char *fat_name);
-int close_fat();
+int fat_init(char *memory, size_t memory_size);
+void close_fat();
 
-struct dir_file *create_file(char file_name[], int32_t act_fat_position);
-struct dir_file *get_file_info_by_name(char file_name[], int32_t act_fat_position);
+int fat_create_file(struct dir_file **new_file, const char *file_name, uint32_t act_fat_position, unsigned long *dir_position);
+struct dir_file *fat_get_object_info_by_name(const char *file_name, unsigned int file_type, uint32_t act_fat_position, unsigned long *dir_position);
 
-int delete_file_by_name(char file_name[], int32_t act_fat_position);
-int delete_file_by_file(struct dir_file *file, long position);
+int fat_delete_file_by_name(const char *file_name, uint32_t act_fat_position);
+int fat_delete_file_by_file(struct dir_file *file, unsigned long position);
 
-long read_file(struct dir_file file, char *buffer, int buffer_size, long offset);
-long write_file(struct dir_file file, int32_t dir_position, char *buffer, int buffer_size, long offset);
+size_t fat_read_file(struct dir_file file, char *buffer, unsigned int buffer_size, unsigned long offset);
+size_t fat_write_file(struct dir_file *file, unsigned long dir_position, char *buffer, unsigned int buffer_size, unsigned long offset);
 
-struct dir_file *create_dir(char dir_name[], int32_t act_fat_position);
-int delete_empty_dir(char dir_name[], int32_t act_fat_position);
-struct dir_file *read_dir(int32_t act_fat_position, int32_t *files);
-
-
-
-void create_values_from_clusters(const int32_t *clusters, int32_t *values, long size);
-void init_object(struct dir_file *object, char name[], int32_t file_size, int8_t file_type, int32_t first_cluster);
+int fat_create_dir(struct dir_file **new_dir, const char *dir_name, uint32_t act_fat_position, unsigned long *dir_position);
+int fat_delete_empty_dir(const char *dir_name, uint32_t act_fat_position);
+struct dir_file *fat_read_dir(uint32_t act_fat_position, uint32_t *files);
 
 
+int is_boot_record_init();
 
-char *read_object(int *ret_code, int *data_size, char file_name[], int32_t act_fat_position);
+uint16_t get_cluster_size();
+
+uint32_t get_fat_size_in_bytes();
+
+uint16_t get_dir_clusters();
+
+uint32_t get_dir_size_in_bytes();
+
+unsigned int get_start_of_root_dir();
 
 
-void print_all();
 
 #endif
