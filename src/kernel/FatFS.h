@@ -7,12 +7,12 @@ extern "C" {
 	#include "FAT/fat_structure.h"
 }
 
-class VfsFat : public Vfs
+class FatFS : public Vfs
 {
 
 public:
-	VfsFat(char *memory, size_t memory_size);
-	~VfsFat();
+	FatFS(char *memory, size_t memory_size);
+	~FatFS();
 
 	int create_dir(struct Vfs::file **directory, const std::string absolute_path);
 	int remove_emtpy_dir(struct Vfs::file **file);
@@ -26,10 +26,10 @@ public:
 
 	virtual int close_file(struct Vfs::file **file);
 
-	static int VfsFat::init_fat_disk(char *memory, size_t memory_size, uint16_t cluster_size);
+	static int FatFS::init_fat_disk(char *memory, size_t memory_size, uint16_t cluster_size);
 
 private:
-	struct Vfs::dentry *VfsFat::find_object_in_directory(struct Vfs::dentry *m_dentry, const std::string& dentry_name, unsigned int type);
+	struct Vfs::dentry *FatFS::find_object_in_directory(struct Vfs::dentry *m_dentry, const std::string& dentry_name, unsigned int type);
 
-	struct Vfs::dentry *VfsFat::find_path(const std::string absolute_path, size_t *start, size_t *end);
+	struct Vfs::dentry *FatFS::find_path(const std::string absolute_path, size_t *start, size_t *end);
 };

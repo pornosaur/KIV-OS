@@ -1,6 +1,6 @@
-#include "VfsFat.h"
+#include "FatFS.h"
 
-VfsFat::VfsFat(char *memory, size_t memory_size)
+FatFS::FatFS(char *memory, size_t memory_size)
 {
 	int result = fat_init(memory, memory_size);
 
@@ -24,12 +24,12 @@ VfsFat::VfsFat(char *memory, size_t memory_size)
 }
 
 
-VfsFat::~VfsFat()
+FatFS::~FatFS()
 {
 	close_fat();
 }
 
-int VfsFat::init_fat_disk(char *memory, size_t memory_size, uint16_t cluster_size) {
+int FatFS::init_fat_disk(char *memory, size_t memory_size, uint16_t cluster_size) {
 
 	uint8_t fat_copies = (uint8_t)2u;
 	uint16_t b_record_size = sizeof(struct boot_record);
@@ -74,7 +74,7 @@ int VfsFat::init_fat_disk(char *memory, size_t memory_size, uint16_t cluster_siz
 	return 0;
 }
 
-int VfsFat::create_dir(struct Vfs::file **directory, const std::string absolute_path)
+int FatFS::create_dir(struct Vfs::file **directory, const std::string absolute_path)
 {
 	struct Vfs::dentry *m_dentry = NULL;
 	struct Vfs::dentry *f_dentry = NULL;
@@ -82,7 +82,7 @@ int VfsFat::create_dir(struct Vfs::file **directory, const std::string absolute_
 	size_t end = 0;
 	*directory = NULL;
 
-	m_dentry = VfsFat::find_path(absolute_path, &start, &end);
+	m_dentry = FatFS::find_path(absolute_path, &start, &end);
 	if (m_dentry == NULL) {
 		return ERR_INVALID_PATH;
 	}
@@ -124,7 +124,7 @@ int VfsFat::create_dir(struct Vfs::file **directory, const std::string absolute_
 	return ERR_SUCCESS;
 }
 
-int VfsFat::remove_emtpy_dir(struct Vfs::file **file)
+int FatFS::remove_emtpy_dir(struct Vfs::file **file)
 {
 	if (*file == NULL || (*file)->f_dentry == NULL || (*file)->f_dentry->d_file_type != Vfs::VFS_OBJECT_DIRECTORY) {
 		return ERR_INVALID_ARGUMENTS;
@@ -156,13 +156,13 @@ int VfsFat::remove_emtpy_dir(struct Vfs::file **file)
 	}
 }
 
-int VfsFat::read_dir(struct Vfs::file *file)
+int FatFS::read_dir(struct Vfs::file *file)
 {
 	return NULL;
 	//TODO
 }
 
-int VfsFat::create_file(struct Vfs::file **file, const std::string absolute_path)
+int FatFS::create_file(struct Vfs::file **file, const std::string absolute_path)
 {
 	struct Vfs::dentry *m_dentry = NULL;
 	struct Vfs::dentry *f_dentry = NULL;
@@ -170,7 +170,7 @@ int VfsFat::create_file(struct Vfs::file **file, const std::string absolute_path
 	size_t end = 0;
 	*file = NULL;
 
-	m_dentry = VfsFat::find_path(absolute_path, &start, &end);
+	m_dentry = FatFS::find_path(absolute_path, &start, &end);
 	if (m_dentry == NULL) {
 		return ERR_INVALID_PATH;
 	}
@@ -220,7 +220,7 @@ int VfsFat::create_file(struct Vfs::file **file, const std::string absolute_path
 	return ERR_SUCCESS;
 }
 
-int VfsFat::open_object(struct Vfs::file **object, const std::string absolute_path, unsigned int type)
+int FatFS::open_object(struct Vfs::file **object, const std::string absolute_path, unsigned int type)
 {
 	struct Vfs::dentry *m_dentry = NULL;
 	struct Vfs::dentry *f_dentry = NULL;
@@ -228,7 +228,7 @@ int VfsFat::open_object(struct Vfs::file **object, const std::string absolute_pa
 	size_t end = 0;
 	*object = NULL;
 
-	m_dentry = VfsFat::find_path(absolute_path, &start, &end);
+	m_dentry = FatFS::find_path(absolute_path, &start, &end);
 	if (m_dentry == NULL) {
 		return ERR_INVALID_PATH;
 	}
@@ -255,7 +255,7 @@ int VfsFat::open_object(struct Vfs::file **object, const std::string absolute_pa
 	return ERR_SUCCESS;
 }
 
-struct Vfs::dentry *VfsFat::find_object_in_directory(struct Vfs::dentry *m_dentry, const std::string& dentry_name, unsigned int type) {
+struct Vfs::dentry *FatFS::find_object_in_directory(struct Vfs::dentry *m_dentry, const std::string& dentry_name, unsigned int type) {
 	
 	struct Vfs::dentry *f_dentry = Vfs::sb_find_dentry_in_dentry(m_dentry, dentry_name, type);
 
@@ -274,7 +274,7 @@ struct Vfs::dentry *VfsFat::find_object_in_directory(struct Vfs::dentry *m_dentr
 	return f_dentry;
 }
 
-Vfs::dentry * VfsFat::find_path(const std::string absolute_path, size_t * start, size_t * end)
+Vfs::dentry * FatFS::find_path(const std::string absolute_path, size_t * start, size_t * end)
 {
 	std::string delimeter = "/";
 	struct Vfs::dentry *m_dentry = NULL;
@@ -309,7 +309,7 @@ Vfs::dentry * VfsFat::find_path(const std::string absolute_path, size_t * start,
 	return m_dentry;
 }
 
-int VfsFat::write_to_file(struct Vfs::file *file, size_t *writed_bytes, char *buffer, size_t buffer_size)
+int FatFS::write_to_file(struct Vfs::file *file, size_t *writed_bytes, char *buffer, size_t buffer_size)
 {
 	if (file == NULL || file->f_dentry == NULL || file->f_dentry->d_file_type != Vfs::VFS_OBJECT_FILE) {
 		return ERR_INVALID_ARGUMENTS;
@@ -332,7 +332,7 @@ int VfsFat::write_to_file(struct Vfs::file *file, size_t *writed_bytes, char *bu
 	return ERR_SUCCESS;
 }
 
-int VfsFat::read_file(struct Vfs::file *file, size_t *read_bytes, char *buffer, size_t buffer_size)
+int FatFS::read_file(struct Vfs::file *file, size_t *read_bytes, char *buffer, size_t buffer_size)
 {
 	if (file == NULL || file->f_dentry == NULL || file->f_dentry->d_file_type != Vfs::VFS_OBJECT_FILE) {
 		return ERR_INVALID_ARGUMENTS;
@@ -352,7 +352,7 @@ int VfsFat::read_file(struct Vfs::file *file, size_t *read_bytes, char *buffer, 
 	return ERR_SUCCESS;
 }
 
-int VfsFat::remove_file(struct Vfs::file **file)
+int FatFS::remove_file(struct Vfs::file **file)
 {
 	if (*file == NULL || (*file)->f_dentry == NULL || (*file)->f_dentry->d_file_type != Vfs::VFS_OBJECT_FILE) {
 		return ERR_INVALID_ARGUMENTS;
@@ -378,7 +378,7 @@ int VfsFat::remove_file(struct Vfs::file **file)
 	}
 }
 
-int VfsFat::close_file(struct Vfs::file **file)
+int FatFS::close_file(struct Vfs::file **file)
 {
 	if (*file == NULL)
 	{

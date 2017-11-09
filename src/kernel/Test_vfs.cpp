@@ -63,8 +63,8 @@ void Test_vfs::init() {
 	memory_size = 4096;
 	memory = new char[memory_size];
 
-	VfsFat::init_fat_disk(memory, memory_size, 128u);
-	vfs = new VfsFat(memory, memory_size);
+	FatFS::init_fat_disk(memory, memory_size, 128u);
+	vfs = new FatFS(memory, memory_size);
 	
 	assert(vfs != NULL);
 }
