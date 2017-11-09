@@ -26,12 +26,13 @@
     <ClCompile Include="..\..\src\kernel\kernel.cpp" />
     <ClCompile Include="..\..\src\kernel\BinSemaphore.cpp" />
     <ClCompile Include="..\..\src\kernel\Pipe.cpp" />
-    <ClCompile Include="..\..\src\kernel\PipeHnadler.cpp" />
+    <ClCompile Include="..\..\src\kernel\PipeHandler.cpp" />
     <ClCompile Include="..\..\src\kernel\process_manager.cpp" />
     <ClCompile Include="..\..\src\kernel\proc_filesystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\api\api.h" />
+    <ClInclude Include="..\..\src\api\api_extension.h" />
     <ClInclude Include="..\..\src\kernel\Console.h" />
     <ClInclude Include="..\..\src\kernel\FileHandler.h" />
     <ClInclude Include="..\..\src\kernel\Handles.h" />

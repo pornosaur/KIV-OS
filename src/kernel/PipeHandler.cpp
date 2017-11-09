@@ -4,29 +4,27 @@
 PipeHandler::~PipeHandler()
 {
 	if (get_flags() == kiv_os::fmOpen_Write) {
-		//TODO: maybe close should be returned bool 
-		pipe->close_pipe_write();
+		if (pipe->close_pipe_write()) {
+			delete pipe;
+		}
+	} 
+	else if (get_flags() == kiv_os::fmOpen_Read) {
+		pipe->close_pipe_read();
+
+		if (!pipe->is_pipe_alive()) {
+			delete pipe;
+		}
 	}
 }
 
 bool PipeHandler::read(char* buffer, size_t offset, size_t length, size_t& read) 
 {
-	//TODO: fixed all method to returned bool and read in param!!s
-	//bool read_result = pipe->pipe_read(buffer, offset, length, read);
-
-	if (IS_EOF(read, 1)) {
-		//TODO: EOF was sent
-
-		return false;
-	}
-
-	return true;
+	return pipe->pipe_read(buffer, offset, length, read);
 }
 
 
 
 bool PipeHandler::write(char* buffer, size_t offset, size_t length, size_t& written)
 {
-
-	return 0;
+	return pipe->pipe_write(buffer, offset, length, written);
 }

@@ -42,7 +42,7 @@
     <ClCompile Include="..\..\src\kernel\Pipe.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\kernel\PipeHnadler.cpp">
+    <ClCompile Include="..\..\src\kernel\PipeHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -78,6 +78,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\kernel\FileHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\api\api_extension.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
