@@ -80,5 +80,8 @@
     <ClInclude Include="..\..\src\api\api_extension.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\kernel\Handles.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
