@@ -35,7 +35,6 @@
     <ClInclude Include="..\..\src\api\api_extension.h" />
     <ClInclude Include="..\..\src\kernel\Console.h" />
     <ClInclude Include="..\..\src\kernel\FileHandler.h" />
-    <ClInclude Include="..\..\src\kernel\Handles.h" />
     <ClInclude Include="..\..\src\kernel\io.h" />
     <ClInclude Include="..\..\src\kernel\kernel.h" />
     <ClInclude Include="..\..\src\kernel\BinSemaphore.h" />
