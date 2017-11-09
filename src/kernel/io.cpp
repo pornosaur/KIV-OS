@@ -30,12 +30,18 @@ void HandleIO(kiv_os::TRegisters &regs) {
 			read_file(regs);			
 			break;
 		}
+
+		case kiv_os::scCreate_Pipe: {
+			create_pipe(regs);
+			break;
+		}
 	}
 }
 
 void create_file(kiv_os::TRegisters &regs) {
 	//pro stdout/in/err neni potreba vytvaret soubor
 	//TODO volani FS pro otevreni souboru
+	//TODO catch errors
 	
 	/*HANDLE result = CreateFileA((char*)regs.rdx.r, GENERIC_READ | GENERIC_WRITE, (DWORD)regs.rcx.r, 0, OPEN_EXISTING, 0, 0);
 	//zde je treba podle Rxc doresit shared_read, shared_write, OPEN_EXISING, etc. podle potreby
@@ -49,7 +55,7 @@ void write_file(kiv_os::TRegisters &regs) {
 	size_t written;
 
 	std::shared_ptr<FileHandler> cons = handles->get_handle_object(regs.rdx.x);
-	written = cons->write(reinterpret_cast<char*>(regs.rdi.r), 0, (size_t)regs.rcx.r); //TODO offset(0) zmenit na promenou
+	bool result = cons->write(reinterpret_cast<char*>(regs.rdi.r), 0, (size_t)regs.rcx.r, written); //TODO offset(0) zmenit na promenou
 	
 	regs.rax.r = written;
 
@@ -68,7 +74,7 @@ void read_file(kiv_os::TRegisters &regs) {
 	size_t read;
 	//Unlock_Kernel();	//TODO: Can I allow to interruption while reading a file?
 	std::shared_ptr<FileHandler> cons = handles->get_handle_object(regs.rdx.x);
-	read = cons->read(reinterpret_cast<char*>(regs.rdi.r), (size_t)0, (size_t)regs.rcx.r); //TODO offset(0) zmenit na promenou, nastavovat offset pro konzoli?
+	bool result = cons->read(reinterpret_cast<char*>(regs.rdi.r), (size_t)0, (size_t)regs.rcx.r, read); //TODO offset(0) zmenit na promenou, nastavovat offset pro konzoli?
 	regs.rax.r = read;
 		//TODO Cteni z fs
 
@@ -82,8 +88,24 @@ void read_file(kiv_os::TRegisters &regs) {
 }
 
 void close_handle(kiv_os::TRegisters &regs) { //TODO close pro konzoli? 
+	std::shared_ptr<FileHandler> cons = handles->get_handle_object(regs.rdx.x);
+	regs.flags.carry = !cons;
+	if (!regs.flags.carry) {
+		handles->Remove_Handle(regs.rdx.x);
+		assert(cons.get());
+		delete cons.get();
+	}
+	else {
+		//TODO: Last Error here !!
+	}
+
 	//HANDLE hnd = Resolve_kiv_os_Handle(regs.rdx.x);
 	//regs.flags.carry = !CloseHandle(hnd);
 	//if (!regs.flags.carry) Remove_Handle(regs.rdx.x);
 	//else regs.rax.r = GetLastError();
+}
+
+void create_pipe(kiv_os::TRegisters &regs)
+{
+
 }
