@@ -8,103 +8,111 @@ Vfs::Vfs()
 
 Vfs::~Vfs()
 {
-	struct Vfs::super_block *sb = Vfs::sb;
-	struct Vfs::super_block *next = NULL;
-	Vfs::sb = NULL;
-
-	while (sb != NULL) {
-		Vfs::sb_remove_all_dentry(&(sb->s_root));
-		next = sb->s_next;
-		delete sb;
-		sb = next;
-	}
+	delete fs;
+	// TODO remove list of FS
 }
 
-
-struct Vfs::super_block *Vfs::init_super_block(
-	unsigned long s_blocksize,
-	bool s_dirt,
-	unsigned long s_maxbytes,
-	struct Vfs::dentry *s_root,
-	unsigned int s_count,
-	const std::string s_id)
-{	
-	struct Vfs::super_block *s_block = new struct Vfs::super_block();
-	s_block -> s_blocksize = s_blocksize;
-	s_block -> s_dirt = s_dirt;
-	s_block -> s_maxbytes = s_maxbytes;
-	s_block -> s_root = s_root;
-	s_block -> s_count = s_count;
-	s_block -> s_id = s_id;
-	s_block -> s_next = Vfs::sb;
-
-	Vfs::sb = s_block;
-	return s_block;
-}
-
-struct Vfs::dentry* Vfs::init_dentry(
-	struct Vfs::super_block *d_sb,
-	struct Vfs::dentry *d_parent,
-	const std::string d_name,
-	unsigned long d_position,
-	unsigned long d_dentry_position,
-	unsigned int d_file_type,
-	unsigned long d_size,
-	unsigned long d_blocks)
+int Vfs::create_dir(FS::file ** directory, const std::string absolute_path)
 {
-	struct Vfs::dentry *d_entry = new struct Vfs::dentry();
-	d_entry->d_sb = d_sb;
-	d_entry->d_parent = d_parent;
-	d_entry->d_name = d_name;
-	d_entry->d_count = 0;
-	d_entry->d_mounted = 0;
-	d_entry->d_position = d_position;
-	d_entry->d_dentry_position = d_dentry_position;
-	d_entry->d_file_type = d_file_type;
-	d_entry->d_size = d_size;
-	d_entry->d_blocks = d_blocks;
-	d_entry->d_dirt = 0;
-	d_entry->d_subdirectories = NULL;
-	d_entry->d_next_subdir = NULL;
+	size_t start = 0;
+	size_t end = absolute_path.find("/");
+
+	const std::string disk = absolute_path.substr(start, end);
+	const std::string path = (end == std::string::npos) ? "" : absolute_path.substr(end + 1, std::string::npos);
+
+	FS *file_system = Vfs::find_fs_by_name(disk);
+
+	if (path == "") {
+		return FS::ERR_INVALID_PATH;
+	}
+
+	return fs->fs_create_dir(directory, path);
+}
+
+int Vfs::remove_emtpy_dir(FS::file ** file)
+{
+	int result = fs->fs_remove_emtpy_dir(file);
+	if (result == FS::ERR_SUCCESS) {
+		Vfs::sb_remove_file(file);
+	}
+	return result;
+}
+
+int Vfs::read_dir(FS::file * file)
+{
+	return fs->fs_read_dir(file);
+}
+
+int Vfs::open_object(FS::file ** object, const std::string absolute_path, unsigned int type)
+{
+	size_t start = 0;
+	size_t end = absolute_path.find("/");
+
+	const std::string disk = absolute_path.substr(start, end);
+	const std::string path = (end == std::string::npos) ? "" : absolute_path.substr(end + 1, std::string::npos);
+
+	FS *file_system = Vfs::find_fs_by_name(disk);
+
+	return file_system->fs_open_object(object, path, type);
+}
+
+int Vfs::create_file(FS::file ** file, const std::string absolute_path)
+{
+	size_t start = 0;
+	size_t end = absolute_path.find("/");
+
+	const std::string disk = absolute_path.substr(start, end);
+	const std::string path = (end == std::string::npos)? "" :absolute_path.substr(end+1, std::string::npos);
 	
-	if (d_parent != NULL) {
-		d_parent->d_count++;
-		d_entry->d_next_subdir = d_parent->d_subdirectories;
-		d_parent->d_subdirectories = d_entry;
+	FS *file_system = Vfs::find_fs_by_name(disk);
+
+	if (path == "") {
+		return FS::ERR_INVALID_PATH;
 	}
 
-	return d_entry;
+	return file_system->fs_create_file(file, path);
 }
 
-struct Vfs::file *Vfs::init_file(
-	struct Vfs::dentry *f_dentry,
-	unsigned int f_count,
-	unsigned long position)
+int Vfs::write_to_file(FS::file * file, size_t * writed_bytes, char * buffer, size_t buffer_size)
 {
-	struct Vfs::file *file = new struct Vfs::file();
-	file->f_dentry = f_dentry;
-	file->f_count = f_count;
-
-	return file;
+	return fs->fs_write_to_file(file, writed_bytes, buffer, buffer_size);
 }
 
-Vfs::super_block * Vfs::find_super_block_by_name(const std::string name)
+int Vfs::read_file(FS::file * file, size_t * read_bytes, char * buffer, size_t buffer_size)
 {
-	struct Vfs::super_block *sb = Vfs::sb;
+	return fs->fs_read_file(file, read_bytes, buffer, buffer_size);
+}
 
-	while (sb != NULL) {
-
-		if(sb->s_root->d_name == name)
-		{
-			return sb;
-		}
-		sb = sb->s_next;
+int Vfs::remove_file(FS::file ** file)
+{
+	int result = fs->fs_remove_file(file);
+	if (result == FS::ERR_SUCCESS) {
+		Vfs::sb_remove_file(file);
 	}
+	return result;
+}
+
+int Vfs::close_file(FS::file ** file)
+{
+	int result = fs->fs_close_file(file);
+	if (result == FS::ERR_SUCCESS) {
+		Vfs::sb_remove_file(file);
+	}
+	return result;
+
+}
+
+
+FS *Vfs::find_fs_by_name(const std::string name)
+{
+	
+	// TODO implement
+	return fs;
 
 	return NULL;
 }
 
-int Vfs::sb_remove_file(struct Vfs::file **file) {
+int Vfs::sb_remove_file(struct FS::file **file) {
 	if ((*file) == NULL) {
 		return -1;
 	}
@@ -112,7 +120,7 @@ int Vfs::sb_remove_file(struct Vfs::file **file) {
 	if ((*file)->f_dentry != NULL)
 	{
 		(*file)->f_dentry->d_count--;
-		Vfs::sb_remove_dentry((*file)->f_dentry); // nesmaze se kdyz na nej nekdo odkazuje
+		(*file)->f_dentry->d_fs->sb_remove_dentry((*file)->f_dentry); // nesmaze se kdyz na nej nekdo odkazuje
 		(*file)->f_dentry = NULL;
 	}
 
@@ -122,79 +130,7 @@ int Vfs::sb_remove_file(struct Vfs::file **file) {
 	return 0;
 }
 
-int Vfs::sb_remove_dentry(struct Vfs::dentry *m_dentry) {
-
-	if (m_dentry == NULL || m_dentry->d_count > 0 || m_dentry->d_mounted == 1) {
-		return -1;
-	}
-
-	struct Vfs::dentry *parent = m_dentry->d_parent;
-
-	if (m_dentry->d_next_subdir != NULL) {
-		parent->d_subdirectories = m_dentry->d_next_subdir;
-		delete m_dentry;
-		parent->d_count--;
-		return 0;
-	}
-	
-	if (parent->d_count > 1)
-	{
-		if (parent->d_subdirectories == m_dentry)
-		{
-			parent->d_subdirectories = m_dentry->d_next_subdir;
-		}
-		else
-		{
-			struct Vfs::dentry *subdir = parent->d_subdirectories;
-			while (subdir != NULL) {
-
-				if (subdir->d_next_subdir == m_dentry) {
-					subdir->d_next_subdir = m_dentry->d_next_subdir;
-					break;
-				}
-				subdir = subdir->d_next_subdir;
-			}
-		}
-	}
-	delete m_dentry;
-
-	parent->d_count--;
-	Vfs::sb_remove_dentry(parent);
-	return 0;
-}
-
-void Vfs::sb_remove_all_dentry(struct Vfs::dentry **d_entry) {
-
-	if (*d_entry == NULL) {
-		return;
-	}
-		
-	Vfs::sb_remove_all_dentry(&((*d_entry)->d_subdirectories));
-	Vfs::sb_remove_all_dentry(&((*d_entry)->d_next_subdir));
-
-	delete *d_entry;
-	*d_entry = NULL;
-}
-
-struct Vfs::dentry *Vfs::sb_find_dentry_in_dentry(struct Vfs::dentry * f_dentry, const std::string name, unsigned int file_type) {
-	
-	if (f_dentry == NULL || f_dentry->d_file_type != 0 || f_dentry->d_subdirectories == NULL) {
-		return NULL;
-	}
-
-	struct Vfs::dentry *m_dentry = f_dentry->d_subdirectories;
-	while (m_dentry != NULL) {
-		
-		if (name.compare(m_dentry->d_name) == 0 && m_dentry->d_file_type == file_type) {
-			return m_dentry;
-		}
-		m_dentry = m_dentry->d_next_subdir;
-	}
-
-	return NULL;
-}
-
-void Vfs::set_file_position(struct Vfs::file * file, unsigned long position)
+void Vfs::set_file_position(struct FS::file * file, unsigned long position)
 {
 	if (file != NULL || file->f_dentry == NULL) {
 		if (file->f_dentry->d_size < position) {
@@ -202,14 +138,14 @@ void Vfs::set_file_position(struct Vfs::file * file, unsigned long position)
 		}
 		else if (position < 0) {
 			file->position = 0;
-		} 
+		}
 		else {
 			file->position = position;
 		}
 	}
 }
 
-unsigned long Vfs::get_file_position(Vfs::file * file)
+unsigned long Vfs::get_file_position(FS::file * file)
 {
 	if (file == NULL) {
 		return -1;
@@ -217,4 +153,10 @@ unsigned long Vfs::get_file_position(Vfs::file * file)
 	else {
 		return file->position;
 	}
+}
+
+int Vfs::register_fs(FS * fs)
+{
+	this->fs = fs;
+	return FS::ERR_SUCCESS;
 }

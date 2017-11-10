@@ -1,35 +1,33 @@
 #include <string>
 
-#include "Vfs.h"
+#include "FS.h"
 
 extern "C" {
 	#include "FAT/fat.h"
 	#include "FAT/fat_structure.h"
 }
 
-class FatFS : public Vfs
+class FatFS : public FS
 {
 
 public:
 	FatFS(char *memory, size_t memory_size);
 	~FatFS();
 
-	int create_dir(struct Vfs::file **directory, const std::string absolute_path);
-	int remove_emtpy_dir(struct Vfs::file **file);
-	int read_dir(struct Vfs::file *file);
-
-	int open_object(struct Vfs::file **object, const std::string absolute_path, unsigned int type);
-	int create_file(struct Vfs::file **file, const std::string absolute_path); /* smaze jiz existujici soubor, existuje-li*/
-	int write_to_file(struct Vfs::file *file, size_t *writed_bytes, char *buffer, size_t buffer_size);
-	int read_file(struct Vfs::file *file, size_t *read_bytes, char *buffer, size_t buffer_size);
-	int remove_file(struct Vfs::file **file);
-
-	virtual int close_file(struct Vfs::file **file);
+	int fs_create_dir(struct FS::file **directory, const std::string absolute_path);
+	int fs_remove_emtpy_dir(struct FS::file **file);
+	int fs_read_dir(struct FS::file *file);
+	int fs_open_object(struct FS::file **object, const std::string absolute_path, unsigned int type);
+	int fs_create_file(struct FS::file **file, const std::string absolute_path); /* smaze jiz existujici soubor, existuje-li*/
+	int fs_write_to_file(struct FS::file *file, size_t *writed_bytes, char *buffer, size_t buffer_size);
+	int fs_read_file(struct FS::file *file, size_t *read_bytes, char *buffer, size_t buffer_size);
+	int fs_remove_file(struct FS::file **file);
+	int fs_close_file(struct FS::file **file);
 
 	static int FatFS::init_fat_disk(char *memory, size_t memory_size, uint16_t cluster_size);
 
 private:
-	struct Vfs::dentry *FatFS::find_object_in_directory(struct Vfs::dentry *m_dentry, const std::string& dentry_name, unsigned int type);
+	struct FS::dentry *FatFS::find_object_in_directory(struct FS::dentry *m_dentry, const std::string& dentry_name, unsigned int type);
 
-	struct Vfs::dentry *FatFS::find_path(const std::string absolute_path, size_t *start, size_t *end);
+	struct FS::dentry *FatFS::find_path(const std::string absolute_path, size_t *start, size_t *end);
 };

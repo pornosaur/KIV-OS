@@ -3,6 +3,8 @@
 #include <iostream>
 #include <cassert>
 
+#include "Vfs.h"
+#include "FS.h"
 #include "FatFS.h"
 
 class Test_vfs
@@ -11,7 +13,7 @@ class Test_vfs
 		Test_vfs();
 		~Test_vfs();
 	private:
-		FatFS *vfs;
+		Vfs *vfs;
 		size_t memory_size;
 		char * memory;
 

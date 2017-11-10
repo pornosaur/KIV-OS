@@ -23,6 +23,7 @@
     <ClCompile Include="..\..\src\kernel\dllmain.cpp" />
     <ClCompile Include="..\..\src\kernel\FAT\fat.c" />
     <ClCompile Include="..\..\src\kernel\FAT\library.c" />
+    <ClCompile Include="..\..\src\kernel\FS.cpp" />
     <ClCompile Include="..\..\src\kernel\Test_vfs.cpp" />
     <ClCompile Include="..\..\src\kernel\Vfs.cpp" />
     <ClCompile Include="..\..\src\kernel\FatFS.cpp" />
@@ -39,6 +40,7 @@
     <ClInclude Include="..\..\src\kernel\FAT\fat.h" />
     <ClInclude Include="..\..\src\kernel\FAT\fat_structure.h" />
     <ClInclude Include="..\..\src\kernel\FAT\library.h" />
+    <ClInclude Include="..\..\src\kernel\FS.h" />
     <ClInclude Include="..\..\src\kernel\Test_vfs.h" />
     <ClInclude Include="..\..\src\kernel\Vfs.h" />
     <ClInclude Include="..\..\src\kernel\FatFS.h" />
