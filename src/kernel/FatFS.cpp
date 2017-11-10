@@ -1,6 +1,6 @@
 #include "FatFS.h"
 
-FatFS::FatFS(char *memory, size_t memory_size)
+FatFS::FatFS(char *memory, size_t memory_size, const std::string disk_id)
 {
 	int result = fat_init(memory, memory_size);
 
@@ -12,9 +12,9 @@ FatFS::FatFS(char *memory, size_t memory_size)
 	struct FS::super_block * sb = FS::init_super_block(
 		get_cluster_size(), 0,
 		get_fat_size_in_bytes(),
-		NULL, 1, "FAT_DISK");
+		NULL, 1, disk_id);
 
-	struct FS::dentry *root = FS::init_dentry(NULL, "C:", 0, get_start_of_root_dir(), FS_OBJECT_DIRECTORY,
+	struct FS::dentry *root = FS::init_dentry(NULL, disk_id, 0, get_start_of_root_dir(), FS_OBJECT_DIRECTORY,
 		get_dir_size_in_bytes(), get_dir_clusters());
 	root->d_count = 1;
 	root->d_mounted = 1;

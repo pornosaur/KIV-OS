@@ -59,6 +59,7 @@ public:
 	static const int ERR_FILE_OPEN_BY_OTHER = -6; // should mean also direcotry had some subdirecotries
 	static const int ERR_INVALID_ARGUMENTS = -7;
 	static const int ERR_DISK_ERROR = -8;
+	static const int ERR_FS_EXISTS = -9;
 
 	// METHODS FOR WORK WITH FILES
 	virtual int fs_create_dir(struct FS::file **directory, const std::string absolute_path) = 0;

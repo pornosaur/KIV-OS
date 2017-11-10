@@ -11,7 +11,7 @@ class FatFS : public FS
 {
 
 public:
-	FatFS(char *memory, size_t memory_size);
+	FatFS::FatFS(char *memory, size_t memory_size, const std::string disk_id);
 	~FatFS();
 
 	int fs_create_dir(struct FS::file **directory, const std::string absolute_path);

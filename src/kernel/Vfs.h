@@ -1,6 +1,7 @@
 #pragma once
 
 #include<string>
+#include<map>
 
 #include "FS.h"
 
@@ -25,14 +26,14 @@ public:
 	void set_file_position(struct FS::file *file, unsigned long position); // TODO move to fileHandler
 	unsigned long get_file_position(struct FS::file *file); // TODO move to fileHandler
 	
-	int register_fs(FS *fs);
+	int register_fs(const std::string name, FS * fs);
 
 	//virtual int get_current_dir() = 0;
 	//virtual int set_current_dir() = 0;
 
 
 private:
-	FS *fs;
+	std::map<std::string, FS*> file_systems;
 
 	int sb_remove_file(struct FS::file **file);
 
