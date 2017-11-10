@@ -3,10 +3,14 @@
 
 class FileHandler
 {
+
 private:
 	uint8_t flags;
 
 public:
+	static const uint8_t fmOpen_Write = 2;
+	static const uint8_t fmOpen_Read = 3;
+
 	FileHandler(uint8_t flags = 0) : flags(flags) {};
 	~FileHandler() {};
 	/* Len = size buff */

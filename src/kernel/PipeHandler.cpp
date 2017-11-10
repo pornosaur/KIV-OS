@@ -3,12 +3,12 @@
 
 PipeHandler::~PipeHandler()
 {
-	if (get_flags() == kiv_os::fmOpen_Write) {
+	if (this->get_flags() == FileHandler::fmOpen_Write) {
 		if (pipe->close_pipe_write()) {
 			delete pipe;
 		}
 	} 
-	else if (get_flags() == kiv_os::fmOpen_Read) {
+	else if (this->get_flags() == FileHandler::fmOpen_Read) {
 		pipe->close_pipe_read();
 
 		if (!pipe->is_pipe_alive()) {
