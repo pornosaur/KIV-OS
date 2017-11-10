@@ -94,14 +94,16 @@ bool kiv_os_rtl::Create_Thread(kiv_os::TThread_Proc ttp, void *data, kiv_os::THa
 }
 
 bool kiv_os_rtl::Wait_For(std::vector<kiv_os::THandle> proc_handles, const size_t count) {
-	kiv_os::TRegisters regs = Prepare_SysCall_Context(kiv_os::scProc, kiv_os::scWait_For);
-	kiv_os::THandle *proc_handles_arr = &proc_handles[0];
-	regs.rdx.r = reinterpret_cast<decltype(regs.rdx.r)>(proc_handles_arr);
-	regs.rcx.r = static_cast<decltype(regs.rcx.r)>(proc_handles.size());
+	if (count != 0) {
+		kiv_os::TRegisters regs = Prepare_SysCall_Context(kiv_os::scProc, kiv_os::scWait_For);
+		kiv_os::THandle *proc_handles_arr = &proc_handles[0];
+		regs.rdx.r = reinterpret_cast<decltype(regs.rdx.r)>(proc_handles_arr);
+		regs.rcx.r = static_cast<decltype(regs.rcx.r)>(proc_handles.size());
 
-	const bool result = Do_SysCall(regs);
+		const bool result = Do_SysCall(regs);
 
-	return result;
-
+		return result;
+	}
+	return true;
 
 }

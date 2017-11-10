@@ -1,10 +1,12 @@
 #include "process_manager.h"
 #include <algorithm>
+#include <string>      
+#include <iostream> 
 #ifdef DEBUG
 #define LOG(str)	std::cout << "LOG: " << str << std::endl;
 #endif
 ProcessManager::ProcessManager() {
-
+	proc_filesystem = new ProcFilesystem(); //TODO delete?
 }
 ProcessManager::~ProcessManager() {
 
@@ -26,7 +28,7 @@ void ProcessManager::handle_proc(kiv_os::TRegisters &regs) {
 			create_thread(thread_proc, data, regs);
 		}
 		break;
-	} 
+	}
 	case kiv_os::scWait_For: { //wait for processes
 		kiv_os::THandle *proc_handles = reinterpret_cast<kiv_os::THandle*> (regs.rdx.r);
 		size_t proc_count = regs.rcx.r;
@@ -40,29 +42,33 @@ void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_In
 
 	kiv_os::TEntry_Point program = (kiv_os::TEntry_Point)GetProcAddress(User_Programs, prog_name);
 	if (program == nullptr) {
-		regs.flags.carry = kiv_os::erInvalid_Argument;
-		//regs.rax.r = ""; //TODO
+		regs.flags.carry = 1;
+		regs.rax.r = static_cast<decltype(regs.flags.carry)>(kiv_os::erInvalid_Argument);
 		return;
 
 	}
 	std::shared_ptr<PCB> pcb = std::make_shared<PCB>();
 	pcb->proc_name = prog_name;
-	pcb->stdin_t = tsi->stdin_t;
-	pcb->stdout_t = tsi->stdout_t;
-	pcb->stderr_t = tsi->stderr_t;
-	kiv_os::THandle proc_handle = Add_Process(pcb);
+	pcb->open_files.push_back(tsi->stdin_t);
+	pcb->open_files.push_back(tsi->stdout_t);
+	pcb->open_files.push_back(tsi->stderr_t);
+
+	kiv_os::THandle proc_handle = proc_filesystem->add_process(pcb);
 	if (pcb->pid != 0) { //first process
 		std::thread::id thread_id = std::this_thread::get_id();
-		std::vector<thread_item>::iterator it = std::find_if(thread_list.begin(), thread_list.end(),
-			[&](const thread_item& element) { return element.second.get_id() == thread_id; });
-		
-		pcb->ppid = it->first;
-		
+		std::vector<std::shared_ptr<PCB>>::iterator it = std::find_if(proc_filesystem->process_table.begin(), proc_filesystem->process_table.end(),
+			[&](const std::shared_ptr<PCB>& element) { return element->proc_thread.get_id() == thread_id; });
+		//TODO thread not found	
+		pcb->ppid = (*it)->pid;
 	}
-	std::thread proc_thread = std::thread(program, regs);
-	thread_list.push_back(thread_item(pcb->pid, move(proc_thread)));
+	else { //first process
+		pcb->ppid = 0; //TODO realy 0?
+	}
 
-	
+
+	std::thread proc_thread = std::thread(program, regs);
+	pcb->proc_thread = move(proc_thread);	
+	//std::cout << proc_filesystem->pcb_table_to_str();
 	regs.rax.r = static_cast<decltype(regs.rdx.x)>(proc_handle);
 
 }
@@ -71,29 +77,32 @@ void ProcessManager::create_thread(kiv_os::TThread_Proc thread_proc, void *data,
 	
 	std::shared_ptr<PCB> pcb = std::make_shared<PCB>();
 	pcb->proc_name = nullptr;
-	kiv_os::THandle proc_handle = Add_Process(pcb);
+	kiv_os::THandle proc_handle = proc_filesystem->add_process(pcb);
+
+	std::thread::id thread_id = std::this_thread::get_id();
+	std::vector<std::shared_ptr<PCB>>::iterator it = std::find_if(proc_filesystem->process_table.begin(), proc_filesystem->process_table.end(),
+		[&](const std::shared_ptr<PCB>& element) { return element->proc_thread.get_id() == thread_id; });
+		//TODO thread not found	
+	pcb->ppid = (*it)->pid;
 	std::thread proc_thread = std::thread(thread_proc, data);
-	
-	thread_list.push_back(std::pair<kiv_os::THandle, std::thread>(pcb->pid, move(proc_thread)));
+	pcb->proc_thread = move(proc_thread);
 
 	regs.rax.r = static_cast<decltype(regs.rdx.x)>(proc_handle);
 }
 void ProcessManager::wait_for(kiv_os::THandle *proc_handles, size_t proc_count) {
 
 	std::shared_ptr<PCB> pcb;
+	kiv_os::THandle proc_handle;
 	for (int i = 0; i < proc_count; i++) {
-		if ((pcb=Get_Process(proc_handles[i])) != nullptr) {
-			std::vector<thread_item>::iterator it = std::find_if(thread_list.begin(), thread_list.end(),
-				[&](const thread_item& element) { return element.first == pcb->pid; });
-
-			if (it->second.joinable()) {
-				it->second.join();
-			}
-			thread_list.erase(it);
-			Remove_Process(proc_handles[i]);
-		}
-	}
+		proc_handle = proc_handles[i];
+		pcb = proc_filesystem->process_table[proc_handle];
 		
+		if (pcb->proc_thread.joinable()) {
+			pcb->proc_thread.join();
+		}
+		proc_filesystem->remove_process(proc_handles[i]);
+	}
+	//TODO return hadnle
 }
 
 

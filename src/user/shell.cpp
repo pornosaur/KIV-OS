@@ -38,7 +38,7 @@ size_t __stdcall shell(const kiv_os::TRegisters &regs) {
 			kiv_os::THandle proc_handle;
 
 			std::vector<kiv_os::THandle> proc_handles = cmd_w.Run_Commands(&tsi);
-			kiv_os_rtl::Wait_For(proc_handles, 1);
+			kiv_os_rtl::Wait_For(proc_handles, proc_handles.size());
 			cmd_w.Clear();
 		}
 

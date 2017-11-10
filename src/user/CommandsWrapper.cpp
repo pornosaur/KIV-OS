@@ -213,8 +213,11 @@ std::vector<kiv_os::THandle> kiv_os_cmd::CommandsWrapper::Run_Commands(kiv_os::T
 		}
 		tsi->arg = kiv_os_str::copy_string(cmd.args_line); //argumenty
 		kiv_os::THandle proc_handle;
-		kiv_os_rtl::Create_Process(kiv_os_str::copy_string(cmd.command), tsi, proc_handle); //vytvoreni procesu
-		proc_handles.push_back(proc_handle); //pridani handlu do pole s handly
+		bool result = kiv_os_rtl::Create_Process(kiv_os_str::copy_string(cmd.command), tsi, proc_handle); //vytvoreni procesu
+		if (result) {
+			proc_handles.push_back(proc_handle); //pridani handlu do pole s handly
+		}
+		
 
 	}
 	return proc_handles;
