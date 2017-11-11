@@ -24,6 +24,8 @@
     <ClCompile Include="..\..\src\kernel\FAT\fat.c" />
     <ClCompile Include="..\..\src\kernel\FAT\library.c" />
     <ClCompile Include="..\..\src\kernel\FS.cpp" />
+    <ClCompile Include="..\..\src\kernel\ProcessManager.cpp" />
+    <ClCompile Include="..\..\src\kernel\ProcessManagerTest.cpp" />
     <ClCompile Include="..\..\src\kernel\ProcFilesystem.cpp" />
     <ClCompile Include="..\..\src\kernel\Test_vfs.cpp" />
     <ClCompile Include="..\..\src\kernel\Vfs.cpp" />
@@ -34,7 +36,6 @@
     <ClCompile Include="..\..\src\kernel\BinSemaphore.cpp" />
     <ClCompile Include="..\..\src\kernel\Pipe.cpp" />
     <ClCompile Include="..\..\src\kernel\PipeHandler.cpp" />
-    <ClCompile Include="..\..\src\kernel\process_manager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\kernel\FAT\fat.h" />
@@ -42,6 +43,8 @@
     <ClInclude Include="..\..\src\kernel\FAT\library.h" />
     <ClInclude Include="..\..\src\kernel\FS.h" />
     <ClInclude Include="..\..\src\kernel\Handler.h" />
+    <ClInclude Include="..\..\src\kernel\ProcessManager.h" />
+    <ClInclude Include="..\..\src\kernel\ProcessManagerTest.h" />
     <ClInclude Include="..\..\src\kernel\ProcFilesystem.h" />
     <ClInclude Include="..\..\src\kernel\Test_vfs.h" />
     <ClInclude Include="..\..\src\kernel\Vfs.h" />
@@ -55,7 +58,6 @@
     <ClInclude Include="..\..\src\kernel\BinSemaphore.h" />
     <ClInclude Include="..\..\src\kernel\Pipe.h" />
     <ClInclude Include="..\..\src\kernel\PipeHandler.h" />
-    <ClInclude Include="..\..\src\kernel\process_manager.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B4305463-59C5-40C3-9A1A-92976A40562D}</ProjectGuid>

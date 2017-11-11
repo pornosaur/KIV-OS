@@ -1,4 +1,4 @@
-#include "process_manager.h"
+#include "ProcessManager.h"
 #include <algorithm>
 #include <string>      
 #include <iostream> 
@@ -57,15 +57,22 @@ void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_In
 	if (pcb->pid != 0) { //first process
 		std::thread::id thread_id = std::this_thread::get_id();
 		std::vector<std::shared_ptr<PCB>>::iterator it = std::find_if(proc_filesystem->process_table.begin(), proc_filesystem->process_table.end(),
-			[&](const std::shared_ptr<PCB>& element) { return element->proc_thread.get_id() == thread_id; });
-		//TODO thread not found	
+			[&](const std::shared_ptr<PCB>& element) {
+			if (element == nullptr) { return false; }
+			return element->proc_thread.get_id() == thread_id; 
+		});
+		if (it == proc_filesystem->process_table.end()) {
+			//TODO error
+			proc_filesystem->remove_process(proc_handle);
+			return;
+		}	
 		pcb->ppid = (*it)->pid;
 	}
 	else { //first process
 		pcb->ppid = 0; //TODO realy 0?
 	}
 
-
+	std::thread::id thread_id = std::this_thread::get_id();
 	std::thread proc_thread = std::thread(program, regs);
 	pcb->proc_thread = move(proc_thread);	
 	//std::cout << proc_filesystem->pcb_table_to_str();
@@ -76,14 +83,22 @@ void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_In
 void ProcessManager::create_thread(kiv_os::TThread_Proc thread_proc, void *data, kiv_os::TRegisters &regs) {
 	
 	std::shared_ptr<PCB> pcb = std::make_shared<PCB>();
-	pcb->proc_name = nullptr;
+	pcb->proc_name = "thread";
 	kiv_os::THandle proc_handle = proc_filesystem->add_process(pcb);
 
 	std::thread::id thread_id = std::this_thread::get_id();
 	std::vector<std::shared_ptr<PCB>>::iterator it = std::find_if(proc_filesystem->process_table.begin(), proc_filesystem->process_table.end(),
-		[&](const std::shared_ptr<PCB>& element) { return element->proc_thread.get_id() == thread_id; });
-		//TODO thread not found	
+		[&](const std::shared_ptr<PCB>& element) { 
+		if (element == nullptr) { return false; }
+		return element->proc_thread.get_id() == thread_id; });
+	if (it == proc_filesystem->process_table.end()) {
+		//TODO error
+		proc_filesystem->remove_process(proc_handle);
+		return;
+	}
 	pcb->ppid = (*it)->pid;
+	pcb->open_files = (*it)->open_files;
+
 	std::thread proc_thread = std::thread(thread_proc, data);
 	pcb->proc_thread = move(proc_thread);
 
