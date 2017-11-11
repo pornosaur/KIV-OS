@@ -2,6 +2,9 @@
 #include "kernel.h"
 #include "Handles.h"
 #include "FileHandler.h"
+#include "PipeHandler.h"
+#include "Pipe.h"
+
 #include <memory>
 
 
@@ -76,6 +79,7 @@ void read_file(kiv_os::TRegisters &regs) {
 	std::shared_ptr<FileHandler> cons = handles->get_handle_object(regs.rdx.x);
 	bool result = cons->read(reinterpret_cast<char*>(regs.rdi.r), (size_t)0, (size_t)regs.rcx.r, read); //TODO offset(0) zmenit na promenou, nastavovat offset pro konzoli?
 	regs.rax.r = read;
+	regs.flags.carry = !result; //TODO Erro like this?
 		//TODO Cteni z fs
 
 		/*HANDLE hnd = Resolve_kiv_os_Handle(regs.rdx.x);
@@ -93,7 +97,7 @@ void close_handle(kiv_os::TRegisters &regs) { //TODO close pro konzoli?
 	if (!regs.flags.carry) {
 		handles->Remove_Handle(regs.rdx.x);
 		assert(cons.get());
-		delete cons.get();
+		cons.reset();	/* Free a handler */
 	}
 	else {
 		//TODO: Last Error here !!
@@ -107,5 +111,15 @@ void close_handle(kiv_os::TRegisters &regs) { //TODO close pro konzoli?
 
 void create_pipe(kiv_os::TRegisters &regs)
 {
+	//TODO debug auto
+	//TODO return errors
+	kiv_os::THandle* pipe_handles = reinterpret_cast<kiv_os::THandle*>(regs.rdx.r);
 
+	Pipe *pipe = new Pipe();
+
+	std::shared_ptr<PipeHandler> handle_write = std::make_shared<PipeHandler>(pipe, PipeHandler::fmOpen_Write);
+	std::shared_ptr<PipeHandler> handle_read = std::make_shared<PipeHandler>(pipe, PipeHandler::fmOpen_Read);
+	
+	*pipe_handles = handles->add_handle(handle_write);
+	*(pipe_handles + 1) = handles->add_handle(handle_read);
 }
