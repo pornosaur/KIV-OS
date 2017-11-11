@@ -1,4 +1,5 @@
 #include "string.h"
+#include <cassert>
 
 void kiv_os_str::string_to_lower(char* str, size_t size)
 {
@@ -22,6 +23,8 @@ char *kiv_os_str::copy_string(const std::string& str)
 	char *new_str = (char*)malloc(sizeof(char) * (len + 1u));
 	strcpy_s(new_str, len + 1u, str.c_str());
 	new_str[len] = '\0';
+
+	assert(str.compare(new_str) == 0);
 
 	return new_str;
 }
