@@ -23,5 +23,7 @@ namespace kiv_os_rtl {
 	//Vytvoreni procesu podle nazvu programu program_name s prislunymi paramatery a handlery ulozenych v tso.
 	bool Wait_For(std::vector<kiv_os::THandle> proc_hadles, const size_t count);
 
+	//Vytvori pipe, kde: pipe_handles[0] == zapis; pipe_handles[1] == cteni
+	bool Create_Pipe(kiv_os::THandle pipe_handles[2]);
 
 }

@@ -27,8 +27,6 @@ bool Do_SysCall(kiv_os::TRegisters &regs) {
 	return !regs.flags.carry;
 }
 
-
-
 kiv_os::THandle kiv_os_rtl::Create_File(const char* file_name, size_t flags) {
 	kiv_os::TRegisters regs = Prepare_SysCall_Context(kiv_os::scIO, kiv_os::scCreate_File);
 	regs.rdx.r = reinterpret_cast<decltype(regs.rdx.r)>(file_name);
@@ -75,8 +73,6 @@ bool kiv_os_rtl::Create_Process(const char *program_name, kiv_os::TProcess_Start
 	const bool result = Do_SysCall(regs);
 	process_handle = static_cast<kiv_os::THandle>(regs.rax.x);
 	return result;
-
-
 }
 
 bool kiv_os_rtl::Create_Thread(kiv_os::TThread_Proc ttp, void *data, kiv_os::THandle &process_handle) {
@@ -104,6 +100,15 @@ bool kiv_os_rtl::Wait_For(std::vector<kiv_os::THandle> proc_handles, const size_
 
 		return result;
 	}
+	
 	return true;
+}
+	
+bool kiv_os_rtl::Create_Pipe(kiv_os::THandle pipe_handles[2]) {
+	kiv_os::TRegisters regs = Prepare_SysCall_Context(kiv_os::scIO, kiv_os::scCreate_Pipe);
+	regs.rdx.r = reinterpret_cast<decltype(regs.rdx.r)>(pipe_handles);
 
+	const bool result = Do_SysCall(regs);
+
+	return result;
 }
