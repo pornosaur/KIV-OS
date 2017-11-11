@@ -3,10 +3,10 @@
 
 void Pipe::increase_handlers(const uint8_t handle_flag)
 {
-	if (handle_flag == FileHandler::fmOpen_Read) {
+	if (handle_flag == Handler::fmOpen_Read) {
 		readers++;
 	}
-	else if (handle_flag == FileHandler::fmOpen_Write) {
+	else if (handle_flag == Handler::fmOpen_Write) {
 		writers++;
 	}
 }
@@ -14,10 +14,10 @@ void Pipe::increase_handlers(const uint8_t handle_flag)
 void Pipe::decrease_handlers(const uint8_t handle_flag)
 {
 	//TODO: Here should be minimum = 0 -> time to delete pipe!!!
-	if (handle_flag == FileHandler::fmOpen_Read) {
+	if (handle_flag == Handler::fmOpen_Read) {
 		readers--;
 	}
-	else if (handle_flag == FileHandler::fmOpen_Write) {
+	else if (handle_flag == Handler::fmOpen_Write) {
 		writers--;
 	}
 }

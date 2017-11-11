@@ -41,6 +41,7 @@
     <ClInclude Include="..\..\src\kernel\FAT\fat_structure.h" />
     <ClInclude Include="..\..\src\kernel\FAT\library.h" />
     <ClInclude Include="..\..\src\kernel\FS.h" />
+    <ClInclude Include="..\..\src\kernel\Handler.h" />
     <ClInclude Include="..\..\src\kernel\ProcFilesystem.h" />
     <ClInclude Include="..\..\src\kernel\Test_vfs.h" />
     <ClInclude Include="..\..\src\kernel\Vfs.h" />
@@ -48,7 +49,6 @@
     <ClInclude Include="..\..\src\api\api.h" />
     <ClInclude Include="..\..\src\api\api_extension.h" />
     <ClInclude Include="..\..\src\kernel\Console.h" />
-    <ClInclude Include="..\..\src\kernel\FileHandler.h" />
     <ClInclude Include="..\..\src\kernel\Handles.h" />
     <ClInclude Include="..\..\src\kernel\io.h" />
     <ClInclude Include="..\..\src\kernel\kernel.h" />

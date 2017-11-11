@@ -3,12 +3,12 @@
 
 PipeHandler::~PipeHandler()
 {
-	if (this->get_flags() == FileHandler::fmOpen_Write) {
+	if (this->get_flags() == Handler::fmOpen_Write) {
 		if (pipe->close_pipe_write()) {
 			delete pipe;
 		}
 	} 
-	else if (this->get_flags() == FileHandler::fmOpen_Read) {
+	else if (this->get_flags() == Handler::fmOpen_Read) {
 		pipe->close_pipe_read();
 
 		if (!pipe->is_pipe_alive()) {

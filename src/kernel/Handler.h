@@ -1,7 +1,7 @@
 #pragma once
 #include "../api/api.h"
 
-class FileHandler
+class Handler
 {
 
 private:
@@ -11,8 +11,8 @@ public:
 	static const uint8_t fmOpen_Write = 2;
 	static const uint8_t fmOpen_Read = 3;
 
-	FileHandler(uint8_t flags = 0) : flags(flags) {};
-	~FileHandler() {};
+	Handler(uint8_t flags = 0) : flags(flags) {};
+	~Handler() {};
 	/* Len = size buff */
 	virtual bool read(char* buffer, size_t offset, size_t length, size_t& read) = 0;
 	virtual bool write(char* buffer, size_t offset, size_t length, size_t& written) = 0;

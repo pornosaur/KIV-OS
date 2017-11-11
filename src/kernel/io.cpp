@@ -1,7 +1,7 @@
 #include "io.h"
 #include "kernel.h"
 #include "Handles.h"
-#include "FileHandler.h"
+#include "Handler.h"
 #include "PipeHandler.h"
 #include "Pipe.h"
 
@@ -57,7 +57,7 @@ void create_file(kiv_os::TRegisters &regs) {
 void write_file(kiv_os::TRegisters &regs) {
 	size_t written;
 
-	std::shared_ptr<FileHandler> cons = handles->get_handle_object(regs.rdx.x);
+	std::shared_ptr<Handler> cons = handles->get_handle_object(regs.rdx.x);
 	bool result = cons->write(reinterpret_cast<char*>(regs.rdi.r), 0, (size_t)regs.rcx.r, written); //TODO offset(0) zmenit na promenou
 	
 	regs.rax.r = written;
@@ -76,7 +76,7 @@ void write_file(kiv_os::TRegisters &regs) {
 void read_file(kiv_os::TRegisters &regs) {
 	size_t read;
 	//Unlock_Kernel();	//TODO: Can I allow to interruption while reading a file?
-	std::shared_ptr<FileHandler> cons = handles->get_handle_object(regs.rdx.x);
+	std::shared_ptr<Handler> cons = handles->get_handle_object(regs.rdx.x);
 	bool result = cons->read(reinterpret_cast<char*>(regs.rdi.r), (size_t)0, (size_t)regs.rcx.r, read); //TODO offset(0) zmenit na promenou, nastavovat offset pro konzoli?
 	regs.rax.r = read;
 	regs.flags.carry = !result; //TODO Erro like this?
@@ -92,7 +92,7 @@ void read_file(kiv_os::TRegisters &regs) {
 }
 
 void close_handle(kiv_os::TRegisters &regs) { //TODO close pro konzoli? 
-	std::shared_ptr<FileHandler> cons = handles->get_handle_object(regs.rdx.x);
+	std::shared_ptr<Handler> cons = handles->get_handle_object(regs.rdx.x);
 	regs.flags.carry = !cons;
 	if (!regs.flags.carry) {
 		handles->Remove_Handle(regs.rdx.x);

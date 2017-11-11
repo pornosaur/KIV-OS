@@ -2,9 +2,9 @@
 
 #include "..\api\api.h"
 #include <Windows.h>
-#include "FileHandler.h"
+#include "Handler.h"
 
-class Console : public FileHandler
+class Console : public Handler
 {
 public:
 	Console(kiv_os::THandle);
