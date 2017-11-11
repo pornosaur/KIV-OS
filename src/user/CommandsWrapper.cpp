@@ -72,7 +72,7 @@ bool kiv_os_cmd::CommandsWrapper::Parse_Pipe(const std::string& cmd_line)
 		cmd_item.args_line = pipe;
 		
 		if (!Parse_Command(cmd_item)) {
-			error = ERR_UNKNOWN_CMD;
+			error = ERR_INCORRECT_CMD;
 			return false;
 		}
 
