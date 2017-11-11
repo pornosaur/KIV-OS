@@ -1,3 +1,5 @@
+#pragma once
+
 #include "FileHandler.h"
 #include <condition_variable>
 #include <mutex>
@@ -8,11 +10,11 @@
 class Pipe {
 
 private:
-	char* buffer_pipe;						/* buffer for data in pipe */
-	size_t readers, writers;				/* flags for reader and writer */
-	size_t written_in_buff;					/* size of data in buffer */
-	std::condition_variable cv_read;		/* waiting for reader */
-	std::mutex buff_m;						/* mutex for reading or writing from buffer */
+	char* buffer_pipe;								/* buffer for data in pipe */
+	size_t readers, writers;						/* flags for reader and writer */
+	size_t written_in_buff;							/* size of data in buffer */
+	std::condition_variable cv_read, cv_writer;		/* waiting for reader and writer */
+	std::mutex buff_m;								/* mutex for reading or writing from buffer */
 
 public:
 	void increase_handlers(const uint8_t handle_flag);
