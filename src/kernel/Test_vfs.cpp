@@ -1021,7 +1021,7 @@ void Test_vfs::create_file_with_space_in_name()
 
 	char buffer[20];
 	result = vfs->read_file(file, &bytes, buffer, 20);
-	assert(bytes = 10);
+	assert(bytes == 10);
 	assert(result == FS::ERR_SUCCESS);
 	assert(strncmp(text, buffer, 10) == 0);
 
@@ -1379,7 +1379,7 @@ void Test_vfs::open_dir_twice()
 	assert(dir2 != NULL);
 	assert(dir2->f_dentry != NULL);
 	assert(dir1->f_dentry == dir2->f_dentry);
-	assert(dir1->f_dentry->d_count = 2);
+	assert(dir1->f_dentry->d_count == 2);
 
 	result = vfs->close_file(&dir1);
 	assert(result == FS::ERR_SUCCESS);
@@ -1449,7 +1449,7 @@ void Test_vfs::remove_twice_open_dir()
 	assert(dir2 != NULL);
 	assert(dir2->f_dentry != NULL);
 	assert(dir1->f_dentry == dir2->f_dentry);
-	assert(dir1->f_dentry->d_count = 2);
+	assert(dir1->f_dentry->d_count == 2);
 
 	result = vfs->remove_emtpy_dir(&dir1);
 	assert(result == FS::ERR_FILE_OPEN_BY_OTHER);

@@ -101,17 +101,33 @@ int fat_create_file(struct dir_file **new_file, const char *file_name, uint32_t 
 
     // search free space in fat
     clusters = malloc(sizeof(uint32_t) * file_cluster_count);
+	if (!clusters) {
+		return 12;
+	}
+
     if(find_empty_clusters(boot_record->usable_cluster_count, fat1, clusters, file_cluster_count) == -1){
         free(clusters);
         return 7; // FAT IS FULL
     }
 
-    *(new_file) = malloc(sizeof(struct dir_file));
+    *new_file = malloc(sizeof(struct dir_file));
+	if (!(*new_file)) {
+		free(clusters);
+		return 12; // OUT OF MEMORY
+	}
+
     init_object(*new_file, file_name, 1, OBJECT_FILE, clusters[0]);
 
     write_to_dir(memory, memory_size, *new_file, (uint32_t) *dir_position);
 
     values = malloc(sizeof(uint32_t) * file_cluster_count);
+	if (!values) {
+		free(clusters);
+		free(*new_file);
+		*new_file = NULL;
+		return 12; // OUT OF MEMORY
+	}
+
     create_values_from_clusters(clusters, values, file_cluster_count);
 
     change_fat(fat1, clusters, values, (uint32_t)file_cluster_count);
@@ -313,6 +329,10 @@ int fat_create_dir(struct dir_file **new_dir, const char *dir_name, uint32_t act
 
     file_cluster_count = boot_record->dir_clusters;
     clusters = malloc(sizeof(uint32_t) * file_cluster_count);
+	if (!clusters) {
+		return 12;
+	}
+
     if(find_empty_clusters(boot_record->usable_cluster_count, fat1, clusters, file_cluster_count) == -1){
         free(clusters);
         return 7; // FAT IS FULL
@@ -320,12 +340,23 @@ int fat_create_dir(struct dir_file **new_dir, const char *dir_name, uint32_t act
 
 
     *new_dir = malloc(sizeof(struct dir_file));
+	if (!(*new_dir)) {
+		free(clusters);
+		return 12; // OUT OF MEMORY
+	}
+
     init_object(*new_dir, dir_name, 0, OBJECT_DIRECTORY, clusters[0]);
 
     write_empty_dir_to_fat(memory, memory_size, clusters, (uint32_t) file_cluster_count, start_of_root_dir, boot_record->cluster_size);
     write_to_dir(memory, memory_size, *new_dir, (uint32_t) *dir_position);
 
     values = malloc(sizeof(uint32_t) * file_cluster_count);
+	if (!values) {
+		free(clusters);
+		free(*new_dir);
+		*new_dir = NULL;
+		return 12; // OUT OF MEMORY
+	}
     create_values_from_clusters(clusters, values, file_cluster_count);
 
     change_fat(fat1, clusters, values, (uint32_t)file_cluster_count);
@@ -580,6 +611,10 @@ size_t write_bigger_file(uint32_t *old_clusters, uint32_t new_file_clusters_size
 
     // search free space in fat ========================================================================================
     new_clusters = malloc(sizeof(uint32_t) * (new_file_clusters_size - old_file_clusters_size));
+	if (!new_clusters) {
+		return 0;
+	}
+
     if(find_empty_clusters(boot_record->usable_cluster_count, fat1, new_clusters, new_file_clusters_size - old_file_clusters_size) == -1){
         free(new_clusters);
         return 0;
@@ -587,6 +622,11 @@ size_t write_bigger_file(uint32_t *old_clusters, uint32_t new_file_clusters_size
 
     //write data =======================================================================================================
     clusters = malloc(sizeof(uint32_t) * new_file_clusters_size);
+	if (!clusters) {
+		free(new_clusters);
+		return 0;
+	}
+
     for(i = 0; i < new_file_clusters_size; i++){
 
         if(i < old_file_clusters_size) {
@@ -603,6 +643,10 @@ size_t write_bigger_file(uint32_t *old_clusters, uint32_t new_file_clusters_size
     number_of_new_clusters = new_file_clusters_size - old_file_clusters_size;
 
     values = malloc(sizeof(uint32_t) * number_of_new_clusters);
+	if (!values) {
+		free(new_clusters);
+		return 0;
+	}
     create_values_from_clusters(new_clusters, values, number_of_new_clusters);
 
     // write new clusters to fat
@@ -646,6 +690,9 @@ size_t write_smaller_file(uint32_t *old_clusters, uint32_t new_file_clusters_siz
 
     // mark last cluster as last
     values = malloc(sizeof(uint32_t));
+	if (!values) {
+		return 0;
+	}
     values[0] = FAT_FILE_END;
     change_fat(fat1, old_clusters + new_file_clusters_size - 1, values, 1);
     change_fat(fat2, old_clusters + new_file_clusters_size - 1, values, 1);

@@ -103,6 +103,8 @@ int FatFS::fs_create_dir(struct FS::file **directory, const std::string absolute
 			case 2:
 			case 9:
 				return ERR_INVALID_ARGUMENTS;
+			case 12:
+				return ERR_OUT_OF_MEMORY;
 			default:
 				return ERR_DISK_ERROR;
 			}
@@ -194,6 +196,8 @@ int FatFS::fs_create_file(struct FS::file **file, const std::string absolute_pat
 		case 2:
 		case 9:
 			return ERR_INVALID_ARGUMENTS;
+		case 12:
+			return ERR_OUT_OF_MEMORY;
 		default:
 			return ERR_DISK_ERROR;
 		}

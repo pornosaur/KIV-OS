@@ -170,7 +170,7 @@ int Vfs::sb_remove_file(struct FS::file **file) {
 
 void Vfs::set_file_position(struct FS::file * file, unsigned long position)
 {
-	if (file != NULL || file->f_dentry == NULL) {
+	if (file != NULL && file->f_dentry != NULL) {
 		if (file->f_dentry->d_size < position) {
 			file->position = file->f_dentry->d_size;
 		}

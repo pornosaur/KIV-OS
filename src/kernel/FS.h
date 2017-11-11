@@ -60,6 +60,7 @@ public:
 	static const int ERR_INVALID_ARGUMENTS = -7;
 	static const int ERR_DISK_ERROR = -8;
 	static const int ERR_FS_EXISTS = -9;
+	static const int ERR_OUT_OF_MEMORY = -10;
 
 	// METHODS FOR WORK WITH FILES
 	virtual int fs_create_dir(struct FS::file **directory, const std::string absolute_path) = 0;

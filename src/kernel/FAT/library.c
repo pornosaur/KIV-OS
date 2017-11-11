@@ -15,6 +15,9 @@ struct boot_record *get_boot_record(char *memory, size_t memory_size) {
 	}
 
     struct boot_record *boot_record = (struct boot_record *) malloc(sizeof(struct boot_record));
+	if (!boot_record) {
+		return NULL;
+	}
 
 	memcpy(boot_record, memory, sizeof(struct boot_record));
 
@@ -37,6 +40,9 @@ int32_t *get_fat(char *memory, size_t memory_size, size_t start_of_fat, unsigned
 	}
 
 	fat = (uint32_t *)malloc(fat_size);
+	if (!fat) {
+		return NULL;
+	}
 
     size_t i = 0;
 	size_t memory_shift = start_of_fat;
@@ -97,6 +103,9 @@ int *get_file_clusters(struct dir_file *file, uint32_t *clusters_size, uint16_t 
     }
 
     clusters = malloc(sizeof(uint32_t) * (*clusters_size) + 1);
+	if (!clusters) {
+		return NULL;
+	}
 
     cluster_position = file->first_cluster;
 
@@ -190,6 +199,9 @@ struct dir_file *get_object_in_dir(char *memory, size_t memory_size, const char 
 	}
 
 	object = (struct dir_file *) malloc(sizeof(struct dir_file));
+	if (!object) {
+		return NULL;
+	}
 
 	*object_dir_pos = start_position;
 	
@@ -231,6 +243,9 @@ struct dir_file *get_all_in_dir(char *memory, size_t memory_size, uint32_t *numb
     *number_of_objects = 0;
 
     files = malloc(sizeof(struct dir_file) * max_entries);
+	if (!files) {
+		return NULL;
+	}
 
 	position = start_position;
 
@@ -268,6 +283,9 @@ int is_dir_empty(char *memory, size_t memory_size, uint32_t max_entries, uint32_
     }
 
     file = (struct dir_file *) malloc(sizeof(struct dir_file));
+	if (!file) {
+		return -1;
+	}
 
     for (i = 0; i < max_entries; i++) {
 		memcpy(file, memory + start_of_dir + (i * read_size), read_size);
@@ -300,6 +318,9 @@ int find_empty_space_in_dir(char *memory, size_t memory_size, unsigned long *pos
     }
 
     file = (struct dir_file *) malloc(sizeof(struct dir_file));
+	if (!file) {
+		return -1;
+	}
 
 	*position = start_of_dir;
     for (i = 0; i < max_entries; i++) {
@@ -425,6 +446,10 @@ int write_empty_dir_to_fat(char *memory, size_t memory_size, const uint32_t *clu
     u_cluster_size = cluster_size;
 
     data = malloc(u_cluster_size);
+	if (!data) {
+		return -1;
+	}
+
     memset(data, 0, u_cluster_size);
 
     for(i = 0; i < clusters_size; i++){
@@ -638,9 +663,15 @@ void print_directory(char *memory, size_t memory_size, struct dir_file *files, u
     unsigned int next_number_of_objects = 0;
 	char *space = NULL;
 
-	if(memory == NULL)
+	if (memory == NULL) {
+		return;
+	}
 
 	space = malloc(sizeof(char) * (level + 1));
+	if (!space) {
+		return;
+	}
+
 
     for(i = 0; i < level; i++){
         space[i] = '\t';
