@@ -9,9 +9,7 @@ PipeHandler::~PipeHandler()
 		}
 	} 
 	else if (this->get_flags() == Handler::fmOpen_Read) {
-		pipe->close_pipe_read();
-
-		if (!pipe->is_pipe_alive()) {
+		if (pipe->close_pipe_read()) {
 			delete pipe;
 		}
 	}

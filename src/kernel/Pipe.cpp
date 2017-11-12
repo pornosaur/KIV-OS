@@ -1,25 +1,17 @@
 #include "Pipe.h"
 #include <cassert>
+#include <cstring>
 
-void Pipe::increase_handlers(const uint8_t handle_flag)
+Pipe::~Pipe()
 {
-	if (handle_flag == Handler::fmOpen_Read) {
-		readers++;
-	}
-	else if (handle_flag == Handler::fmOpen_Write) {
-		writers++;
-	}
-}
+	 assert(!is_pipe_alive()); 
+	 delete[] buffer_pipe; 
 
-void Pipe::decrease_handlers(const uint8_t handle_flag)
-{
-	//TODO: Here should be minimum = 0 -> time to delete pipe!!!
-	if (handle_flag == Handler::fmOpen_Read) {
-		readers--;
-	}
-	else if (handle_flag == Handler::fmOpen_Write) {
-		writers--;
-	}
+	 buffer_pipe = NULL;
+	 first = NULL;
+	 last = NULL;
+
+	 assert(!buffer_pipe && !first && !last);
 }
 
 bool Pipe::close_pipe_write() 
@@ -30,9 +22,12 @@ bool Pipe::close_pipe_write()
 	return !is_pipe_alive();
 }
 
-void Pipe::close_pipe_read()
+bool Pipe::close_pipe_read()
 {
 	readers = 0;
+	cv_writer.notify_one();
+
+	return !is_pipe_alive();
 }
 
 bool Pipe::is_pipe_alive()
@@ -46,8 +41,12 @@ bool Pipe::pipe_write(char* buffer, size_t offset, size_t length, size_t& writte
 	std::unique_lock<std::mutex> lock(buff_m);
 	assert(writers);
 
-	//TODO is it necessary to check if the buffer is full?
+	//TODO Make circle buffer
 	while (written_in_buff >= MAX_BUFFER_SIZE) {
+		if (!readers) {
+			return false;
+		}
+
 		cv_writer.wait(lock);
 	}
 
@@ -55,18 +54,48 @@ bool Pipe::pipe_write(char* buffer, size_t offset, size_t length, size_t& writte
 	while (tmp_written < length) {
 		size_t to_write = length > MAX_BUFFER_SIZE ? MAX_BUFFER_SIZE : length;
 		assert(buffer_pipe);
-
-		memcpy(buffer_pipe, buffer, to_write);
+		
+		strncpy_s(buffer_pipe, MAX_BUFFER_SIZE, buffer, to_write);	/* TODO discus about memcpy vs strncpy */
 		tmp_written += to_write;
 		written_in_buff = tmp_written;
 		
 		assert(tmp_written <= length);
 		assert(readers);
-		cv_read.notify_one();	/* TODO: notify one or all? */
+		cv_read.notify_one();	
 		
 	}
-
 	written = tmp_written;
+
+	/*
+	size_t offset = 0;
+	while (write > 0) {
+		while (written >= MAX_BUFF) {
+			if (!readers) {
+				return false;
+			}
+
+			cv_writer.wait(lock);
+		}
+		size_t to_write = (MAX_BUFF - written) >= write ? write : MAX_BUFF - written;
+		size_t pos = last + to_write;
+
+		size_t new_write = 0;
+		if (pos >= MAX_BUFF) {
+			new_write = MAX_BUFF - (last + 1);
+			memcpy(&buff[last + 1], &w[offset], new_write);
+			memcpy(&buff[0], &w[offset + new_write], to_write - new_write);
+			last = pos % MAX_BUFF;
+		}
+		else {
+			memcpy(&buff[last + 1], &w[offset], pos);
+			last += to_write;
+		}
+
+		offset += (to_write - new_write);
+		written += to_write;
+		write -= to_write;
+	}
+	*/
 
 	return true;
 }
@@ -86,8 +115,7 @@ bool Pipe::pipe_read(char* buffer, size_t offset, size_t length, size_t& read)
 	}
 
 	assert(readers);
-
-	memcpy(buffer, buffer_pipe, written_in_buff);
+	strncpy_s(buffer, length, buffer_pipe, written_in_buff);		/* TODO discus about memcpy vs strncpy */
 	read = written_in_buff;
 	written_in_buff -= read;
 	cv_writer.notify_one();  //TODO: discus about it with team

@@ -1,8 +1,6 @@
 #include "Handler.h"
 #include "Pipe.h"
 
-#define IS_EOF(result, read) (!result && read == 0)
-
 class PipeHandler : public Handler {
 
 private: 
