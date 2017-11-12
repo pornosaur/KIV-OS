@@ -2,6 +2,7 @@
 
 #include "Handler.h"
 #include "VfsStructures.h"
+#include "FS.h"
 #include "../api/api.h"
 
 

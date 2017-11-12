@@ -83,24 +83,30 @@ int Vfs::create_file(FileHandler ** file, const std::string absolute_path)
 	return file_system->fs_create_file(file, path);
 }
 
-int Vfs::write_to_file(FileHandler * file, size_t * writed_bytes, char * buffer, size_t buffer_size)
+int Vfs::write_to_file(Handler * file, size_t * writed_bytes, char * buffer, size_t buffer_size)
 {
-	if (file == NULL || file->get_dentry() == NULL || file->get_dentry()->d_fs == NULL) {
+	if (file == NULL) {
 		return FS::ERR_INVALID_ARGUMENTS;
 	}
 
-	FS * m_fs = file->get_dentry()->d_fs;
-	return m_fs->fs_write_to_file(file, writed_bytes, buffer, buffer_size);
+	if (file->write(buffer, 0, buffer_size, *writed_bytes)) {
+		return 0;
+	}
+	
+	return -1;
 }
 
-int Vfs::read_file(FileHandler * file, size_t * read_bytes, char * buffer, size_t buffer_size)
+int Vfs::read_file(Handler * file, size_t * read_bytes, char * buffer, size_t buffer_size)
 {
-	if (file == NULL || file->get_dentry() == NULL || file->get_dentry()->d_fs == NULL) {
+	if (file == NULL) {
 		return FS::ERR_INVALID_ARGUMENTS;
 	}
 
-	FS * m_fs = file->get_dentry()->d_fs;
-	return m_fs->fs_read_file(file, read_bytes, buffer, buffer_size);
+	if (file->read(buffer, 0, buffer_size, *read_bytes)) {
+		return 0;
+	}
+
+	return -1;
 }
 
 int Vfs::remove_file(FileHandler ** file)

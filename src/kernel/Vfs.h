@@ -19,8 +19,8 @@ public:
 	int read_dir(FileHandler *file);
 	int open_object(FileHandler **object, const std::string absolute_path, unsigned int type);
 	int create_file(FileHandler **file, const std::string absolute_path);
-	int write_to_file(FileHandler *file, size_t *writed_bytes, char *buffer, size_t buffer_size);
-	int read_file(FileHandler *file, size_t *read_bytes, char *buffer, size_t buffer_size);
+	int write_to_file(Handler *file, size_t *writed_bytes, char *buffer, size_t buffer_size);
+	int read_file(Handler *file, size_t *read_bytes, char *buffer, size_t buffer_size);
 	int remove_file(FileHandler **file);
 	int close_file(FileHandler **file);
 

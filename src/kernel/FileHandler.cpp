@@ -6,12 +6,38 @@ FileHandler::~FileHandler()
 
 bool FileHandler::read(char * buffer, size_t offset, size_t length, size_t & read)
 {
-	return false;
+	if (dentry == NULL || dentry->d_fs == NULL) {
+		//return FS::ERR_INVALID_ARGUMENTS;
+		return false;
+	}
+
+	FS * m_fs = dentry->d_fs;
+	int result = m_fs->fs_read_file(this, &read, buffer, length);
+
+	if (result == 0) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 bool FileHandler::write(char * buffer, size_t offset, size_t length, size_t & written)
 {
-	return false;
+	if (dentry == NULL || dentry->d_fs == NULL) {
+		//return FS::ERR_INVALID_ARGUMENTS;
+		return false;
+	}
+	
+	FS * m_fs = dentry->d_fs;
+	int result = m_fs->fs_write_to_file(this, &written, buffer, length);
+
+	if (result == 0) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 dentry * FileHandler::get_dentry()

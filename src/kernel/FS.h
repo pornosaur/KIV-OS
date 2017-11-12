@@ -2,8 +2,9 @@
 
 #include <string>
 
-#include "FileHandler.h"
 #include "VfsStructures.h"
+
+class FileHandler;
 
 class FS
 {
