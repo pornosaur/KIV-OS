@@ -66,9 +66,6 @@
     <ClCompile Include="..\..\src\kernel\ProcessManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\kernel\ProcessManagerTest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\kernel\io.h">
@@ -132,9 +129,6 @@
 	  <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\kernel\ProcessManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\kernel\ProcessManagerTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
