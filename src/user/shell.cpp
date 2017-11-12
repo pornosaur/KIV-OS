@@ -11,7 +11,7 @@
 
 size_t __stdcall shell(const kiv_os::TRegisters &regs) {
 	size_t written, read;
-
+	int run_shell = 1;
 	const char* hello = "****KIV-OS****\n";
 	kiv_os_rtl::Write_File(kiv_os::stdOutput, hello, strlen(hello), written);
 	kiv_os::TProcess_Startup_Info tsi;
@@ -41,6 +41,9 @@ size_t __stdcall shell(const kiv_os::TRegisters &regs) {
 			kiv_os_rtl::Wait_For(proc_handles, proc_handles.size());
 			cmd_w.Clear();
 		}
+		else {
+			run_shell = 0;
+		}
 
 		input = (char *)calloc(MAX_SIZE_BUFFER_IN, sizeof(char));
 	}
@@ -53,6 +56,6 @@ size_t __stdcall shell(const kiv_os::TRegisters &regs) {
 
 void __stdcall shell_stop()
 {
-	run_shell = 0;
+	//run_shell = 0;
 	//TODO: implement also shell stop in the Kernel
 }
