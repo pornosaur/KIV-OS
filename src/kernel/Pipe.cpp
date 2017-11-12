@@ -58,17 +58,17 @@ bool Pipe::pipe_write(char* buffer, size_t offset, size_t length, size_t& writte
 			cv_writer.wait(lock);
 		}
 		size_t to_write = (MAX_BUFFER_SIZE - written_in_buff) >= write ? write : MAX_BUFFER_SIZE - written_in_buff;
-		size_t write_byte = last + to_write;
+		size_t write_byte_pos = last + to_write;
 
 		size_t new_write_byte = 0;
-		if (write_byte >= MAX_BUFFER_SIZE) {
+		if (write_byte_pos >= MAX_BUFFER_SIZE) {
 			new_write_byte = MAX_BUFFER_SIZE - last;
 			memcpy(&buffer_pipe[last], &buffer[new_offset], new_write_byte);
 			memcpy(&buffer_pipe[0], &buffer[new_offset + new_write_byte], to_write - new_write_byte);
-			last = write_byte % MAX_BUFFER_SIZE;
+			last = write_byte_pos % MAX_BUFFER_SIZE;
 		}
 		else {
-			memcpy(&buffer_pipe[last], &buffer[new_offset], write_byte);
+			memcpy(&buffer_pipe[last], &buffer[new_offset], to_write);
 			last += to_write;	//TODO MAYBE + 1 => NEED DEBUG
 		}
 
