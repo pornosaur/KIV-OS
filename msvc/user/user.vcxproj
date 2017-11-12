@@ -23,6 +23,7 @@
     <ClCompile Include="..\..\src\user\CommandsWrapper.cpp" />
     <ClCompile Include="..\..\src\user\dllmain.cpp" />
     <ClCompile Include="..\..\src\user\pipe_test.cpp" />
+    <ClCompile Include="..\..\src\user\rgen.cpp" />
     <ClCompile Include="..\..\src\user\rtl.cpp" />
     <ClCompile Include="..\..\src\user\shell.cpp" />
     <ClCompile Include="..\..\src\user\string.cpp" />
@@ -33,6 +34,7 @@
     <ClInclude Include="..\..\src\user\commands.h" />
     <ClInclude Include="..\..\src\user\CommandsWrapper.h" />
     <ClInclude Include="..\..\src\user\pipe_test.h" />
+    <ClInclude Include="..\..\src\user\rgen.h" />
     <ClInclude Include="..\..\src\user\rtl.h" />
     <ClInclude Include="..\..\src\user\shell.h" />
     <ClInclude Include="..\..\src\user\string.h" />
