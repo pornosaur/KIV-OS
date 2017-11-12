@@ -8,6 +8,7 @@
 #include <vector>
 #include <utility>
 #include <thread>
+#include <mutex>
 class ProcessManager {
 	public:
 		ProcessManager();
@@ -20,4 +21,5 @@ class ProcessManager {
 
 	private:
 		ProcFilesystem *proc_filesystem;
+		std::mutex proc_table_mutex;
 };

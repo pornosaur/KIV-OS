@@ -48,15 +48,16 @@ void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_In
 
 	}
 	std::shared_ptr<PCB> pcb = std::make_shared<PCB>();
+	std::vector<std::shared_ptr<PCB>>::iterator it;
 	pcb->proc_name = prog_name;
 	pcb->open_files.push_back(tsi->stdin_t);
 	pcb->open_files.push_back(tsi->stdout_t);
 	pcb->open_files.push_back(tsi->stderr_t);
-
+	std::unique_lock<std::mutex> lck(proc_table_mutex);
 	kiv_os::THandle proc_handle = proc_filesystem->add_process(pcb);
 	if (pcb->pid != 0) { //first process
 		std::thread::id thread_id = std::this_thread::get_id();
-		std::vector<std::shared_ptr<PCB>>::iterator it = std::find_if(proc_filesystem->process_table.begin(), proc_filesystem->process_table.end(),
+		it = std::find_if(proc_filesystem->process_table.begin(), proc_filesystem->process_table.end(),
 			[&](const std::shared_ptr<PCB>& element) {
 			if (element == nullptr) { return false; }
 			return element->proc_thread.get_id() == thread_id; 
@@ -75,7 +76,15 @@ void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_In
 	std::thread::id thread_id = std::this_thread::get_id();
 	std::thread proc_thread = std::thread(program, regs);
 	pcb->proc_thread = move(proc_thread);	
-	//std::cout << proc_filesystem->pcb_table_to_str();
+	if (pcb->pid == 0) {
+		std::cout << "LOG: Init process " << prog_name << " start" << std::endl;
+	}
+	else {
+		std::cout << "LOG: Process "<< prog_name <<"in process " << (*it)->proc_name << " created w/ pid " << pcb->pid << std::endl;
+		std::cout << "---ACTUAL PCB TABLE---" << std::endl;
+		std::cout << proc_filesystem->pcb_table_to_str();
+	}
+	
 	regs.rax.r = static_cast<decltype(regs.rdx.x)>(proc_handle);
 
 }
@@ -84,6 +93,8 @@ void ProcessManager::create_thread(kiv_os::TThread_Proc thread_proc, void *data,
 	
 	std::shared_ptr<PCB> pcb = std::make_shared<PCB>();
 	pcb->proc_name = "thread";
+
+	std::unique_lock<std::mutex> lck(proc_table_mutex);
 	kiv_os::THandle proc_handle = proc_filesystem->add_process(pcb);
 
 	std::thread::id thread_id = std::this_thread::get_id();
@@ -101,7 +112,9 @@ void ProcessManager::create_thread(kiv_os::TThread_Proc thread_proc, void *data,
 
 	std::thread proc_thread = std::thread(thread_proc, data);
 	pcb->proc_thread = move(proc_thread);
-
+	std::cout << "LOG: Thread for process " << (*it)->proc_name << " created w/ pid " << (*it)->pid << std::endl;
+	std::cout << "---ACTUAL PCB TABLE---" << std::endl;
+	std::cout << proc_filesystem->pcb_table_to_str();
 	regs.rax.r = static_cast<decltype(regs.rdx.x)>(proc_handle);
 }
 void ProcessManager::wait_for(kiv_os::THandle *proc_handles, size_t proc_count) {
@@ -111,10 +124,11 @@ void ProcessManager::wait_for(kiv_os::THandle *proc_handles, size_t proc_count) 
 	for (int i = 0; i < proc_count; i++) {
 		proc_handle = proc_handles[i];
 		pcb = proc_filesystem->process_table[proc_handle];
-		
+		std::cout << "LOG: Process " << proc_filesystem->process_table[proc_handles[i]]->proc_name << " waiting" << std::endl;
 		if (pcb->proc_thread.joinable()) {
 			pcb->proc_thread.join();
 		}
+		std::cout << "LOG: Process " << proc_filesystem->process_table[proc_handles[i]]->proc_name << " ended" << std::endl;
 		proc_filesystem->remove_process(proc_handles[i]);
 	}
 	//TODO return hadnle
