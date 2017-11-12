@@ -57,10 +57,15 @@ bool Console::read(char* buffer, size_t offset, size_t length, size_t& read) {
 		}
 		
 		read = mStdInOpen ? (size_t)read_dw : 0;
+		mStdInOpen = true; //TODO only for testing, change it but how?
 		return res;
 	}
-	else
+	else {
+		read = 0;		//TODO only for testing, change it but how? Console close after press ctrl+z in subshell and stay closed in init shell
+		mStdInOpen = true; //TODO only for testing, change it but how?
 		return false;	//stdin is no longer open
+	}
+		
 }
 
 bool Console::write(char* buffer, size_t offset, size_t length, size_t& written) 
