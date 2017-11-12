@@ -41,61 +41,47 @@ bool Pipe::pipe_write(char* buffer, size_t offset, size_t length, size_t& writte
 	std::unique_lock<std::mutex> lock(buff_m);
 	assert(writers);
 
-	//TODO Make circle buffer
-	while (written_in_buff >= MAX_BUFFER_SIZE) {
-		if (!readers) {
-			return false;
-		}
-
-		cv_writer.wait(lock);
+	if (!readers) {
+		close_pipe_write();
+		return false;
 	}
-
-	size_t tmp_written = 0;
-	while (tmp_written < length) {
-		size_t to_write = length > MAX_BUFFER_SIZE ? MAX_BUFFER_SIZE : length;
-		assert(buffer_pipe);
-		
-		strncpy_s(buffer_pipe, MAX_BUFFER_SIZE, buffer, to_write);	/* TODO discus about memcpy vs strncpy */
-		tmp_written += to_write;
-		written_in_buff = tmp_written;
-		
-		assert(tmp_written <= length);
-		assert(readers);
-		cv_read.notify_one();	
-		
-	}
-	written = tmp_written;
-
-	/*
-	size_t offset = 0;
+	
+	//TODO if is set offset need it is different size of writing
+	size_t new_offset = 0, write = length;
 	while (write > 0) {
-		while (written >= MAX_BUFF) {
+		while (written_in_buff >= MAX_BUFFER_SIZE) {
 			if (!readers) {
+				close_pipe_write();
 				return false;
 			}
 
 			cv_writer.wait(lock);
 		}
-		size_t to_write = (MAX_BUFF - written) >= write ? write : MAX_BUFF - written;
-		size_t pos = last + to_write;
+		size_t to_write = (MAX_BUFFER_SIZE - written_in_buff) >= write ? write : MAX_BUFFER_SIZE - written_in_buff;
+		size_t write_byte = last + to_write;
 
-		size_t new_write = 0;
-		if (pos >= MAX_BUFF) {
-			new_write = MAX_BUFF - (last + 1);
-			memcpy(&buff[last + 1], &w[offset], new_write);
-			memcpy(&buff[0], &w[offset + new_write], to_write - new_write);
-			last = pos % MAX_BUFF;
+		size_t new_write_byte = 0;
+		if (write_byte >= MAX_BUFFER_SIZE) {
+			new_write_byte = MAX_BUFFER_SIZE - last;
+			memcpy(&buffer_pipe[last], &buffer[new_offset], new_write_byte);
+			memcpy(&buffer_pipe[0], &buffer[new_offset + new_write_byte], to_write - new_write_byte);
+			last = write_byte % MAX_BUFFER_SIZE;
 		}
 		else {
-			memcpy(&buff[last + 1], &w[offset], pos);
-			last += to_write;
+			memcpy(&buffer_pipe[last], &buffer[new_offset], write_byte);
+			last += to_write;	//TODO MAYBE + 1 => NEED DEBUG
 		}
 
-		offset += (to_write - new_write);
-		written += to_write;
+		assert(new_write_byte <= to_write);
+		new_offset += (to_write - new_write_byte);
+		written_in_buff += to_write;
 		write -= to_write;
+
+		cv_read.notify_one();
 	}
-	*/
+
+	//TODO write \0 at the end of writing
+	
 
 	return true;
 }
