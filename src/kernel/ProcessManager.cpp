@@ -2,14 +2,15 @@
 #include <algorithm>
 #include <string>      
 #include <iostream> 
+
 #ifdef DEBUG
 #define LOG(str)	std::cout << "LOG: " << str << std::endl;
 #endif
 ProcessManager::ProcessManager() {
-	proc_filesystem = new ProcFilesystem(); //TODO delete?
+	proc_filesystem = new ProcFilesystem();
 }
 ProcessManager::~ProcessManager() {
-
+	delete(proc_filesystem);
 }
 void ProcessManager::handle_proc(kiv_os::TRegisters &regs) {
 	switch (regs.rax.l) {
@@ -55,7 +56,7 @@ void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_In
 	pcb->open_files.push_back(tsi->stderr_t);
 	std::unique_lock<std::mutex> lck(proc_table_mutex);
 	kiv_os::THandle proc_handle = proc_filesystem->add_process(pcb);
-	if (pcb->pid != 0) { //first process
+	if (pcb->pid != 0) {
 		std::thread::id thread_id = std::this_thread::get_id();
 		it = std::find_if(proc_filesystem->process_table.begin(), proc_filesystem->process_table.end(),
 			[&](const std::shared_ptr<PCB>& element) {
@@ -80,7 +81,7 @@ void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_In
 		std::cout << "LOG: Init process " << prog_name << " start" << std::endl;
 	}
 	else {
-		std::cout << "LOG: Process "<< prog_name <<"in process " << (*it)->proc_name << " created w/ pid " << pcb->pid << std::endl;
+		std::cout << "LOG: Process "<< prog_name <<" in process " << (*it)->proc_name << " created w/ pid " << pcb->pid << std::endl;
 		std::cout << "---ACTUAL PCB TABLE---" << std::endl;
 		std::cout << proc_filesystem->pcb_table_to_str();
 	}
@@ -128,7 +129,8 @@ void ProcessManager::wait_for(kiv_os::THandle *proc_handles, size_t proc_count) 
 		if (pcb->proc_thread.joinable()) {
 			pcb->proc_thread.join();
 		}
-		std::cout << "LOG: Process " << proc_filesystem->process_table[proc_handles[i]]->proc_name << " ended" << std::endl;
+		std::cout << "LOG: Process " << proc_filesystem->process_table[proc_handles[i]]->proc_name <<
+			" w/ pid "<< proc_filesystem->process_table[proc_handles[i]]->pid<<" ended" << std::endl;
 		proc_filesystem->remove_process(proc_handles[i]);
 	}
 	//TODO return hadnle
