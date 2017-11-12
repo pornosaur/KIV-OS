@@ -25,7 +25,7 @@ public:
 	int close_file(FileHandler **file);
 
 	int set_file_position(FileHandler * file, long offset, uint8_t origin);
-	unsigned long get_file_position(FileHandler *file);
+	size_t get_file_position(FileHandler *file);
 	
 	int register_fs(const std::string name, FS * fs);
 

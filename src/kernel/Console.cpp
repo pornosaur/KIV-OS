@@ -26,7 +26,7 @@ Console::Console(kiv_os::THandle handle)
 
 }
 
-bool Console::read(char* buffer, size_t offset, size_t length, size_t& read) {
+bool Console::read(char* buffer, size_t length, size_t& read) {
 
 	//Note that the following is such a tricky combination
 	//that the use of fread, setting length to zero with closed
@@ -38,7 +38,7 @@ bool Console::read(char* buffer, size_t offset, size_t length, size_t& read) {
 		if (length < (size_t)ULONG_MAX) lengthtrim = (DWORD)length;
 		//size_t could be greater than DWORD, so we might have to trim
 
-		BOOL res = ReadFile(mStdIn, &buffer[offset], lengthtrim, &read_dw, NULL);
+		BOOL res = ReadFile(mStdIn, &buffer[position], lengthtrim, &read_dw, NULL);
 
 		mStdInOpen = (res) & (read_dw > 0);
 
@@ -68,7 +68,7 @@ bool Console::read(char* buffer, size_t offset, size_t length, size_t& read) {
 		
 }
 
-bool Console::write(char* buffer, size_t offset, size_t length, size_t& written) 
+bool Console::write(char* buffer, size_t length, size_t& written) 
 {
 	if (mStdOutOpen || mStdError) {
 		DWORD write, lengthtrim = ULONG_MAX;
@@ -84,6 +84,13 @@ bool Console::write(char* buffer, size_t offset, size_t length, size_t& written)
 	}
 	else
 		return false;
+}
+
+int Console::fseek(long offset, uint8_t origin)
+{
+	Handler::position = (size_t)offset;
+	// TODO implement
+	return 0;
 }
 
 

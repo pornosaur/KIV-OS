@@ -17,14 +17,22 @@ PipeHandler::~PipeHandler()
 	}
 }
 
-bool PipeHandler::read(char* buffer, size_t offset, size_t length, size_t& read) 
+bool PipeHandler::read(char* buffer, size_t length, size_t& read) 
 {
-	return pipe->pipe_read(buffer, offset, length, read);
+	return pipe->pipe_read(buffer, position, length, read);
 }
 
 
 
-bool PipeHandler::write(char* buffer, size_t offset, size_t length, size_t& written)
+bool PipeHandler::write(char* buffer, size_t length, size_t& written)
 {
-	return pipe->pipe_write(buffer, offset, length, written);
+	return pipe->pipe_write(buffer, position, length, written);
 }
+
+int PipeHandler::fseek(long offset, uint8_t origin)
+{
+	Handler::position = (size_t)offset;
+	// TODO implement
+	return 0;
+}
+

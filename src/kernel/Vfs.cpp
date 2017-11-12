@@ -89,7 +89,7 @@ int Vfs::write_to_file(Handler * file, size_t * writed_bytes, char * buffer, siz
 		return FS::ERR_INVALID_ARGUMENTS;
 	}
 
-	if (file->write(buffer, 0, buffer_size, *writed_bytes)) {
+	if (file->write(buffer, buffer_size, *writed_bytes)) {
 		return 0;
 	}
 	
@@ -102,7 +102,7 @@ int Vfs::read_file(Handler * file, size_t * read_bytes, char * buffer, size_t bu
 		return FS::ERR_INVALID_ARGUMENTS;
 	}
 
-	if (file->read(buffer, 0, buffer_size, *read_bytes)) {
+	if (file->read(buffer, buffer_size, *read_bytes)) {
 		return 0;
 	}
 
@@ -185,7 +185,7 @@ int Vfs::set_file_position(FileHandler * file, long offset, uint8_t origin)
 	return result;
 }
 
-unsigned long Vfs::get_file_position(FileHandler * file)
+size_t Vfs::get_file_position(FileHandler * file)
 {
 	if (file == NULL) {
 		return 0;

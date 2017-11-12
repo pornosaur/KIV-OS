@@ -4,7 +4,7 @@ FileHandler::~FileHandler()
 {
 }
 
-bool FileHandler::read(char * buffer, size_t offset, size_t length, size_t & read)
+bool FileHandler::read(char * buffer, size_t length, size_t & read)
 {
 	if (dentry == NULL || dentry->d_fs == NULL) {
 		//return FS::ERR_INVALID_ARGUMENTS;
@@ -22,7 +22,7 @@ bool FileHandler::read(char * buffer, size_t offset, size_t length, size_t & rea
 	}
 }
 
-bool FileHandler::write(char * buffer, size_t offset, size_t length, size_t & written)
+bool FileHandler::write(char * buffer, size_t length, size_t & written)
 {
 	if (dentry == NULL || dentry->d_fs == NULL) {
 		//return FS::ERR_INVALID_ARGUMENTS;
@@ -45,14 +45,9 @@ dentry * FileHandler::get_dentry()
 	return dentry;
 }
 
-unsigned long FileHandler::ftell()
-{
-	return position;
-}
-
 int FileHandler::fseek(long offset, uint8_t origin)
 {
-	long new_position = 0;
+	long new_position = (long)position;
 	if (dentry == NULL) {
 		return -1;
 	}
@@ -75,6 +70,6 @@ int FileHandler::fseek(long offset, uint8_t origin)
 		return -1;
 	}
 
-	position = (unsigned long)new_position;
+	position = (size_t)new_position;
 	return 0;
 }

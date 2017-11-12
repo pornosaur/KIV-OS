@@ -58,7 +58,8 @@ void write_file(kiv_os::TRegisters &regs) {
 	size_t written;
 
 	std::shared_ptr<Handler> cons = handles->get_handle_object(regs.rdx.x);
-	bool result = cons->write(reinterpret_cast<char*>(regs.rdi.r), 0, (size_t)regs.rcx.r, written); //TODO offset(0) zmenit na promenou
+	cons->fseek(0, kiv_os::fsBeginning);//TODO offset(0) zmenit na promenou
+	bool result = cons->write(reinterpret_cast<char*>(regs.rdi.r), (size_t)regs.rcx.r, written); //TODO offset(0) zmenit na promenou
 	
 	regs.rax.r = written;
 
@@ -77,7 +78,8 @@ void read_file(kiv_os::TRegisters &regs) {
 	size_t read;
 	//Unlock_Kernel();	//TODO: Can I allow to interruption while reading a file?
 	std::shared_ptr<Handler> cons = handles->get_handle_object(regs.rdx.x);
-	bool result = cons->read(reinterpret_cast<char*>(regs.rdi.r), (size_t)0, (size_t)regs.rcx.r, read); //TODO offset(0) zmenit na promenou, nastavovat offset pro konzoli?
+	cons->fseek(0, kiv_os::fsBeginning); //TODO offset(0) zmenit na promenou, nastavovat offset pro konzoli?
+	bool result = cons->read(reinterpret_cast<char*>(regs.rdi.r), (size_t)regs.rcx.r, read); //TODO offset(0) zmenit na promenou, nastavovat offset pro konzoli?
 	regs.rax.r = read;
 	regs.flags.carry = !result; //TODO Erro like this?
 		//TODO Cteni z fs
