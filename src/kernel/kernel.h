@@ -2,7 +2,7 @@
 
 #include "..\api\api.h"
 #include "BinSemaphore.h"
-#include "process_manager.h"
+#include "ProcessManager.h"
 
 #include "io.h"
 #include <Windows.h>

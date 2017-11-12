@@ -27,9 +27,6 @@
     <ClCompile Include="..\..\src\kernel\BinSemaphore.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\kernel\process_manager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\kernel\Console.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -64,6 +61,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\kernel\FileHandler.cpp">
+	  <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\kernel\ProcessManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\kernel\ProcessManagerTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -78,9 +81,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\kernel\BinSemaphore.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\kernel\process_manager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\kernel\Console.h">
@@ -129,6 +129,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\kernel\VfsStructures.h">
+	  <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\kernel\ProcessManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\kernel\ProcessManagerTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
