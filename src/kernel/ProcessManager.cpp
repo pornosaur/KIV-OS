@@ -52,7 +52,7 @@ void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_In
 	pcb->open_files.push_back(tsi->stdin_t);
 	pcb->open_files.push_back(tsi->stdout_t);
 	pcb->open_files.push_back(tsi->stderr_t);
-
+	std::unique_lock<std::mutex> lck(proc_table_mutex);
 	kiv_os::THandle proc_handle = proc_filesystem->add_process(pcb);
 	if (pcb->pid != 0) { //first process
 		std::thread::id thread_id = std::this_thread::get_id();
@@ -84,6 +84,8 @@ void ProcessManager::create_thread(kiv_os::TThread_Proc thread_proc, void *data,
 	
 	std::shared_ptr<PCB> pcb = std::make_shared<PCB>();
 	pcb->proc_name = "thread";
+
+	std::unique_lock<std::mutex> lck(proc_table_mutex);
 	kiv_os::THandle proc_handle = proc_filesystem->add_process(pcb);
 
 	std::thread::id thread_id = std::this_thread::get_id();
@@ -101,7 +103,7 @@ void ProcessManager::create_thread(kiv_os::TThread_Proc thread_proc, void *data,
 
 	std::thread proc_thread = std::thread(thread_proc, data);
 	pcb->proc_thread = move(proc_thread);
-
+	
 	regs.rax.r = static_cast<decltype(regs.rdx.x)>(proc_handle);
 }
 void ProcessManager::wait_for(kiv_os::THandle *proc_handles, size_t proc_count) {
