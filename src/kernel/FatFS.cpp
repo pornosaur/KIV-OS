@@ -299,7 +299,7 @@ int FatFS::fs_write_to_file(FileHandler *file, size_t *writed_bytes, char *buffe
 	d_file -> file_type = file->get_dentry()->d_file_type;
 	d_file -> first_cluster = file->get_dentry()->d_position;
 
-	*writed_bytes = fat_write_file(d_file, file->get_dentry()->d_dentry_position, buffer, (unsigned int) buffer_size, file->get_position());
+	*writed_bytes = fat_write_file(d_file, file->get_dentry()->d_dentry_position, buffer, (unsigned int) buffer_size, file->ftell());
 
 	if (*writed_bytes != 0) {
 		file->get_dentry()->d_size = d_file -> file_size;
@@ -322,7 +322,7 @@ int FatFS::fs_read_file(FileHandler *file, size_t *read_bytes, char *buffer, siz
 	d_file.file_type = file->get_dentry()->d_file_type;
 	d_file.first_cluster = file->get_dentry()->d_position;
 
-	*read_bytes = fat_read_file(d_file, buffer, (unsigned int) buffer_size, file->get_position());
+	*read_bytes = fat_read_file(d_file, buffer, (unsigned int) buffer_size, file->ftell());
 	if (*read_bytes < 0) {
 		return ERR_INVALID_ARGUMENTS;
 	}

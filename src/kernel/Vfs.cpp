@@ -168,28 +168,24 @@ int Vfs::sb_remove_file(FileHandler **file) { // TODO this could be in FileHandl
 	return 0;
 }
 
-void Vfs::set_file_position(FileHandler * file, unsigned long position)
+int Vfs::set_file_position(FileHandler * file, long offset, uint8_t origin)
 {
+	int result = -1;
+	
 	if (file != NULL && file->get_dentry() != NULL) {
-		if (file->get_dentry()->d_size < position) {
-			file->set_position(file->get_dentry()->d_size);
-		}
-		else if (position < 0) {
-			file->set_position(0);
-		}
-		else {
-			file->set_position(position);
-		}
+		result = file->fseek(offset, origin);
 	}
+
+	return result;
 }
 
 unsigned long Vfs::get_file_position(FileHandler * file)
 {
 	if (file == NULL) {
-		return -1;
+		return 0;
 	}
 	else {
-		return file->get_position();
+		return file->ftell();
 	}
 }
 

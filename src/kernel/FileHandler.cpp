@@ -19,12 +19,36 @@ dentry * FileHandler::get_dentry()
 	return dentry;
 }
 
-unsigned long FileHandler::get_position()
+unsigned long FileHandler::ftell()
 {
 	return position;
 }
 
-void FileHandler::set_position(unsigned long pos)
+int FileHandler::fseek(long offset, uint8_t origin)
 {
-	position = pos;
+	long new_position = 0;
+	if (dentry == NULL) {
+		return -1;
+	}
+
+	switch (origin) {
+		case kiv_os::fsBeginning:
+			new_position = offset;
+			break;
+		case kiv_os::fsCurrent:
+			new_position += offset;
+			break;
+		case kiv_os::fsEnd:
+			new_position = dentry->d_size + offset;
+			break;
+		default:
+			return -1;
+	}
+
+	if (new_position < 0 || (unsigned long)new_position > dentry->d_size) {
+		return -1;
+	}
+
+	position = (unsigned long)new_position;
+	return 0;
 }

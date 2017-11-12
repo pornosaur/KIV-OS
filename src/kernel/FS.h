@@ -40,9 +40,6 @@ public:
 	virtual int fs_remove_file(FileHandler **file) = 0;
 	virtual int fs_close_file(FileHandler **file) = 0;
 
-	void set_file_position(FileHandler *file, unsigned long position); // TODO move to fileHandler
-	unsigned long get_file_position(FileHandler *file); // TODO move to fileHandler
-
 	int sb_remove_dentry(struct dentry * dentry); // TODO maybe protected in future
 
 protected:

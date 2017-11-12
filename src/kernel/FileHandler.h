@@ -2,6 +2,7 @@
 
 #include "Handler.h"
 #include "VfsStructures.h"
+#include "../api/api.h"
 
 
 class FileHandler : public Handler
@@ -20,7 +21,7 @@ public:
 	bool write(char* buffer, size_t offset, size_t length, size_t& written);
 
 	struct dentry *get_dentry();
-	unsigned long get_position();
+	unsigned long ftell();
 
-	void set_position(unsigned long pos);
+	int fseek(long offset, uint8_t origin);
 };

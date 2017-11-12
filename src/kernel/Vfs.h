@@ -24,8 +24,8 @@ public:
 	int remove_file(FileHandler **file);
 	int close_file(FileHandler **file);
 
-	void set_file_position(FileHandler *file, unsigned long position); // TODO move to fileHandler
-	unsigned long get_file_position(FileHandler *file); // TODO move to fileHandler
+	int set_file_position(FileHandler * file, long offset, uint8_t origin);
+	unsigned long get_file_position(FileHandler *file);
 	
 	int register_fs(const std::string name, FS * fs);
 

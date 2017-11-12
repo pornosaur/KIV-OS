@@ -758,7 +758,7 @@ void Test_vfs::read_file_from_exact_position()
 	assert(bytes == 36);
 
 	
-	file->set_position(10);
+	file->fseek(10, kiv_os::fsBeginning);
 	result = vfs->read_file(file, &bytes, buffer, buff_size);
 	assert(bytes == 26);
 	assert(result == FS::ERR_SUCCESS);
@@ -849,7 +849,7 @@ void Test_vfs::read_small_piece_of_file()
 	assert(bytes == 200);
 	assert(result == FS::ERR_SUCCESS);
 
-	file->set_position(120);
+	file->fseek(120, kiv_os::fsBeginning);
 	result = vfs->read_file(file, &bytes, buffer, buff_size);
 	assert(bytes == 30);
 	assert(result == FS::ERR_SUCCESS);
@@ -884,7 +884,7 @@ void Test_vfs::read_all_file_by_pieces()
 
 	shuld_read = 31;
 	for (int i = 0; i < 200; i += 31) {
-		file->set_position(i);
+		file->fseek(i, kiv_os::fsBeginning);
 		if (200 - i < shuld_read) {
 			shuld_read = 200 - i;
 		}
@@ -940,13 +940,13 @@ void Test_vfs::rewrite_file()
 	assert(strncmp(buffer, text, 200) == 0);
 
 	std::cout << "writing short text" << std::endl;
-	file->set_position(10);
+	file->fseek(10, kiv_os::fsBeginning);
 	result = vfs->write_to_file(file, &bytes, text1, 10);
 	assert(bytes == 10);
 	assert(result == FS::ERR_SUCCESS);
 	assert(file->get_dentry()->d_size == 20);
 
-	file->set_position(0);
+	file->fseek(0, kiv_os::fsBeginning);
 	result = vfs->read_file(file, &bytes, buffer, buff_size);
 	assert(bytes == 20);
 	assert(result == FS::ERR_SUCCESS);
