@@ -29,8 +29,8 @@ std::shared_ptr<PCB> ProcFilesystem::get_process(kiv_os::THandle pid) {
 }
 
 void ProcFilesystem::remove_process(kiv_os::THandle pid) {
-	process_table[pid] = nullptr; //is it all right?
-
+	process_table[pid].reset();
+	process_table[pid] = nullptr;
 }
 
 
@@ -43,7 +43,7 @@ void ProcFilesystem::delete_open_file(kiv_os::THandle open_file_handle) {
 std::string ProcFilesystem::pcb_table_to_str() {
 	std::ostringstream oss;
 	std::string separator = " | ";
-	for each (std::shared_ptr<PCB> pcb in process_table)
+	for(std::shared_ptr<PCB> pcb : process_table)
 	{
 		if (pcb != nullptr) {
 			oss << pcb->pid << separator << pcb->ppid << separator << pcb->proc_name << std::endl;
