@@ -12,7 +12,7 @@ Vfs::~Vfs()
 	// Use shared pointer will be solution (FS is created somewhere and add to Vfs by register_FS)
 }
 
-int Vfs::create_dir(FS::file ** directory, const std::string absolute_path)
+int Vfs::create_dir(FileHandler ** directory, const std::string absolute_path)
 {
 	size_t start = 0;
 	size_t end = absolute_path.find("/");
@@ -29,13 +29,13 @@ int Vfs::create_dir(FS::file ** directory, const std::string absolute_path)
 	return file_system->fs_create_dir(directory, path);
 }
 
-int Vfs::remove_emtpy_dir(FS::file ** file)
+int Vfs::remove_emtpy_dir(FileHandler ** file)
 {
-	if (*file == NULL || (*file)->f_dentry == NULL || (*file)->f_dentry->d_fs == NULL) {
+	if (*file == NULL || (*file)->get_dentry() == NULL || (*file)->get_dentry()->d_fs == NULL) {
 		return FS::ERR_INVALID_ARGUMENTS;
 	}
 
-	FS * m_fs = (*file)->f_dentry->d_fs;
+	FS * m_fs = (*file)->get_dentry()->d_fs;
 	int result = m_fs->fs_remove_emtpy_dir(file);
 	if (result == FS::ERR_SUCCESS) {
 		Vfs::sb_remove_file(file);
@@ -43,17 +43,17 @@ int Vfs::remove_emtpy_dir(FS::file ** file)
 	return result;
 }
 
-int Vfs::read_dir(FS::file * file)
+int Vfs::read_dir(FileHandler * file)
 {
-	if (file == NULL || file->f_dentry == NULL || file->f_dentry->d_fs == NULL) {
+	if (file == NULL || file->get_dentry() == NULL || file->get_dentry()->d_fs == NULL) {
 		return FS::ERR_INVALID_ARGUMENTS;
 	}
 
-	FS * m_fs = file->f_dentry->d_fs;
+	FS * m_fs = file->get_dentry()->d_fs;
 	return m_fs->fs_read_dir(file);
 }
 
-int Vfs::open_object(FS::file ** object, const std::string absolute_path, unsigned int type)
+int Vfs::open_object(FileHandler ** object, const std::string absolute_path, unsigned int type)
 {
 	size_t start = 0;
 	size_t end = absolute_path.find("/");
@@ -66,7 +66,7 @@ int Vfs::open_object(FS::file ** object, const std::string absolute_path, unsign
 	return file_system->fs_open_object(object, path, type);
 }
 
-int Vfs::create_file(FS::file ** file, const std::string absolute_path)
+int Vfs::create_file(FileHandler ** file, const std::string absolute_path)
 {
 	size_t start = 0;
 	size_t end = absolute_path.find("/");
@@ -83,33 +83,33 @@ int Vfs::create_file(FS::file ** file, const std::string absolute_path)
 	return file_system->fs_create_file(file, path);
 }
 
-int Vfs::write_to_file(FS::file * file, size_t * writed_bytes, char * buffer, size_t buffer_size)
+int Vfs::write_to_file(FileHandler * file, size_t * writed_bytes, char * buffer, size_t buffer_size)
 {
-	if (file == NULL || file->f_dentry == NULL || file->f_dentry->d_fs == NULL) {
+	if (file == NULL || file->get_dentry() == NULL || file->get_dentry()->d_fs == NULL) {
 		return FS::ERR_INVALID_ARGUMENTS;
 	}
 
-	FS * m_fs = file->f_dentry->d_fs;
+	FS * m_fs = file->get_dentry()->d_fs;
 	return m_fs->fs_write_to_file(file, writed_bytes, buffer, buffer_size);
 }
 
-int Vfs::read_file(FS::file * file, size_t * read_bytes, char * buffer, size_t buffer_size)
+int Vfs::read_file(FileHandler * file, size_t * read_bytes, char * buffer, size_t buffer_size)
 {
-	if (file == NULL || file->f_dentry == NULL || file->f_dentry->d_fs == NULL) {
+	if (file == NULL || file->get_dentry() == NULL || file->get_dentry()->d_fs == NULL) {
 		return FS::ERR_INVALID_ARGUMENTS;
 	}
 
-	FS * m_fs = file->f_dentry->d_fs;
+	FS * m_fs = file->get_dentry()->d_fs;
 	return m_fs->fs_read_file(file, read_bytes, buffer, buffer_size);
 }
 
-int Vfs::remove_file(FS::file ** file)
+int Vfs::remove_file(FileHandler ** file)
 {
-	if (*file == NULL || (*file)->f_dentry == NULL || (*file)->f_dentry->d_fs == NULL) {
+	if (*file == NULL || (*file)->get_dentry() == NULL || (*file)->get_dentry()->d_fs == NULL) {
 		return FS::ERR_INVALID_ARGUMENTS;
 	}
 
-	FS * m_fs = (*file)->f_dentry->d_fs;
+	FS * m_fs = (*file)->get_dentry()->d_fs;
 
 	int result = m_fs->fs_remove_file(file);
 	if (result == FS::ERR_SUCCESS) {
@@ -118,13 +118,13 @@ int Vfs::remove_file(FS::file ** file)
 	return result;
 }
 
-int Vfs::close_file(FS::file ** file)
+int Vfs::close_file(FileHandler ** file)
 {
-	if (*file == NULL || (*file)->f_dentry == NULL || (*file)->f_dentry->d_fs == NULL) {
+	if (*file == NULL || (*file)->get_dentry() == NULL || (*file)->get_dentry()->d_fs == NULL) {
 		return FS::ERR_INVALID_ARGUMENTS;
 	}
 
-	FS * m_fs = (*file)->f_dentry->d_fs;
+	FS * m_fs = (*file)->get_dentry()->d_fs;
 
 	int result = m_fs->fs_close_file(file);
 	if (result == FS::ERR_SUCCESS) {
@@ -150,16 +150,16 @@ FS *Vfs::find_fs_by_name(const std::string name)
 	return NULL;
 }
 
-int Vfs::sb_remove_file(struct FS::file **file) {
+int Vfs::sb_remove_file(FileHandler **file) { // TODO this could be in FileHandler destructor
 	if ((*file) == NULL) {
 		return -1;
 	}
 
-	if ((*file)->f_dentry != NULL)
+	if ((*file)->get_dentry() != NULL)
 	{
-		(*file)->f_dentry->d_count--;
-		(*file)->f_dentry->d_fs->sb_remove_dentry((*file)->f_dentry); // nesmaze se kdyz na nej nekdo odkazuje
-		(*file)->f_dentry = NULL;
+		(*file)->get_dentry()->d_count--;
+		(*file)->get_dentry()->d_fs->sb_remove_dentry((*file)->get_dentry()); // nesmaze se kdyz na nej nekdo odkazuje
+		//(*file)->set_dentry(NULL);
 	}
 
 	delete *file;
@@ -168,28 +168,28 @@ int Vfs::sb_remove_file(struct FS::file **file) {
 	return 0;
 }
 
-void Vfs::set_file_position(struct FS::file * file, unsigned long position)
+void Vfs::set_file_position(FileHandler * file, unsigned long position)
 {
-	if (file != NULL && file->f_dentry != NULL) {
-		if (file->f_dentry->d_size < position) {
-			file->position = file->f_dentry->d_size;
+	if (file != NULL && file->get_dentry() != NULL) {
+		if (file->get_dentry()->d_size < position) {
+			file->set_position(file->get_dentry()->d_size);
 		}
 		else if (position < 0) {
-			file->position = 0;
+			file->set_position(0);
 		}
 		else {
-			file->position = position;
+			file->set_position(position);
 		}
 	}
 }
 
-unsigned long Vfs::get_file_position(FS::file * file)
+unsigned long Vfs::get_file_position(FileHandler * file)
 {
 	if (file == NULL) {
 		return -1;
 	}
 	else {
-		return file->position;
+		return file->get_position();
 	}
 }
 

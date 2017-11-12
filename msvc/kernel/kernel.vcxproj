@@ -23,6 +23,7 @@
     <ClCompile Include="..\..\src\kernel\dllmain.cpp" />
     <ClCompile Include="..\..\src\kernel\FAT\fat.c" />
     <ClCompile Include="..\..\src\kernel\FAT\library.c" />
+    <ClCompile Include="..\..\src\kernel\FileHandler.cpp" />
     <ClCompile Include="..\..\src\kernel\FS.cpp" />
     <ClCompile Include="..\..\src\kernel\ProcFilesystem.cpp" />
     <ClCompile Include="..\..\src\kernel\Test_vfs.cpp" />
@@ -40,6 +41,7 @@
     <ClInclude Include="..\..\src\kernel\FAT\fat.h" />
     <ClInclude Include="..\..\src\kernel\FAT\fat_structure.h" />
     <ClInclude Include="..\..\src\kernel\FAT\library.h" />
+    <ClInclude Include="..\..\src\kernel\FileHandler.h" />
     <ClInclude Include="..\..\src\kernel\FS.h" />
     <ClInclude Include="..\..\src\kernel\Handler.h" />
     <ClInclude Include="..\..\src\kernel\ProcFilesystem.h" />
@@ -56,6 +58,7 @@
     <ClInclude Include="..\..\src\kernel\Pipe.h" />
     <ClInclude Include="..\..\src\kernel\PipeHandler.h" />
     <ClInclude Include="..\..\src\kernel\process_manager.h" />
+    <ClInclude Include="..\..\src\kernel\VfsStructures.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B4305463-59C5-40C3-9A1A-92976A40562D}</ProjectGuid>

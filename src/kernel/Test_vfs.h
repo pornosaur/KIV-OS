@@ -4,8 +4,9 @@
 #include <cassert>
 
 #include "Vfs.h"
-#include "FS.h"
 #include "FatFS.h"
+#include "FileHandler.h"
+#include "VfsStructures.h"
 
 class Test_vfs
 {

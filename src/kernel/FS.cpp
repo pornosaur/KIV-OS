@@ -14,15 +14,15 @@ FS::~FS()
 	sb = NULL;
 }
 
-struct FS::super_block *FS::init_super_block(
+struct super_block *FS::init_super_block(
 	unsigned long s_blocksize,
 	bool s_dirt,
 	unsigned long s_maxbytes,
-	struct FS::dentry *s_root,
+	struct dentry *s_root,
 	unsigned int s_count,
 	const std::string s_id)
 {
-	struct FS::super_block *s_block = new struct FS::super_block();
+	struct super_block *s_block = new struct super_block();
 	s_block->s_blocksize = s_blocksize;
 	s_block->s_dirt = s_dirt;
 	s_block->s_maxbytes = s_maxbytes;
@@ -35,8 +35,8 @@ struct FS::super_block *FS::init_super_block(
 	return s_block;
 }
 
-struct FS::dentry* FS::init_dentry(
-	struct FS::dentry *d_parent,
+struct dentry* FS::init_dentry(
+	struct dentry *d_parent,
 	const std::string d_name,
 	unsigned long d_position,
 	unsigned long d_dentry_position,
@@ -44,7 +44,7 @@ struct FS::dentry* FS::init_dentry(
 	unsigned long d_size,
 	unsigned long d_blocks)
 {
-	struct FS::dentry *d_entry = new struct FS::dentry();
+	struct dentry *d_entry = new struct dentry();
 	d_entry->d_fs = this;
 	d_entry->d_parent = d_parent;
 	d_entry->d_name = d_name;
@@ -68,25 +68,13 @@ struct FS::dentry* FS::init_dentry(
 	return d_entry;
 }
 
-struct FS::file *FS::init_file(
-	struct FS::dentry *f_dentry,
-	unsigned int f_count,
-	unsigned long position)
-{
-	struct FS::file *file = new struct FS::file();
-	file->f_dentry = f_dentry;
-	file->f_count = f_count;
-
-	return file;
-}
-
-int FS::sb_remove_dentry(struct FS::dentry *m_dentry) {
+int FS::sb_remove_dentry(struct dentry *m_dentry) {
 
 	if (m_dentry == NULL || m_dentry->d_count > 0 || m_dentry->d_mounted == 1) {
 		return -1;
 	}
 
-	struct FS::dentry *parent = m_dentry->d_parent;
+	struct dentry *parent = m_dentry->d_parent;
 
 	if (m_dentry->d_next_subdir != NULL) {
 		parent->d_subdirectories = m_dentry->d_next_subdir;
@@ -103,7 +91,7 @@ int FS::sb_remove_dentry(struct FS::dentry *m_dentry) {
 		}
 		else
 		{
-			struct FS::dentry *subdir = parent->d_subdirectories;
+			struct dentry *subdir = parent->d_subdirectories;
 			while (subdir != NULL) {
 
 				if (subdir->d_next_subdir == m_dentry) {
@@ -121,7 +109,7 @@ int FS::sb_remove_dentry(struct FS::dentry *m_dentry) {
 	return 0;
 }
 
-void FS::sb_remove_all_dentry(struct FS::dentry **d_entry) {
+void FS::sb_remove_all_dentry(struct dentry **d_entry) {
 
 	if (*d_entry == NULL) {
 		return;
@@ -134,7 +122,7 @@ void FS::sb_remove_all_dentry(struct FS::dentry **d_entry) {
 	*d_entry = NULL;
 }
 
-struct FS::dentry *FS::sb_find_dentry_in_dentry(struct FS::dentry * f_dentry, const std::string name, unsigned int file_type) {
+struct dentry *FS::sb_find_dentry_in_dentry(struct dentry * f_dentry, const std::string name, unsigned int file_type) {
 
 	if (name == "" && f_dentry != NULL && f_dentry->d_file_type == file_type) {
 		return f_dentry;
@@ -144,7 +132,7 @@ struct FS::dentry *FS::sb_find_dentry_in_dentry(struct FS::dentry * f_dentry, co
 		return NULL;
 	}
 
-	struct FS::dentry *m_dentry = f_dentry->d_subdirectories;
+	struct dentry *m_dentry = f_dentry->d_subdirectories;
 	while (m_dentry != NULL) {
 
 		if (name.compare(m_dentry->d_name) == 0 && m_dentry->d_file_type == file_type) {
