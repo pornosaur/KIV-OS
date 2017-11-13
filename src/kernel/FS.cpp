@@ -20,7 +20,7 @@ struct super_block *FS::init_super_block(
 	unsigned long s_maxbytes,
 	struct dentry *s_root,
 	unsigned int s_count,
-	const std::string s_id)
+	const std::string &s_id)
 {
 	struct super_block *s_block = new struct super_block();
 	s_block->s_blocksize = s_blocksize;
@@ -37,7 +37,7 @@ struct super_block *FS::init_super_block(
 
 struct dentry* FS::init_dentry(
 	struct dentry *d_parent,
-	const std::string d_name,
+	const std::string &d_name,
 	unsigned long d_position,
 	unsigned long d_dentry_position,
 	unsigned int d_file_type,
@@ -122,7 +122,7 @@ void FS::sb_remove_all_dentry(struct dentry **d_entry) {
 	*d_entry = NULL;
 }
 
-struct dentry *FS::sb_find_dentry_in_dentry(struct dentry * f_dentry, const std::string name, unsigned int file_type) {
+struct dentry *FS::sb_find_dentry_in_dentry(struct dentry * f_dentry, const std::string &name, unsigned int file_type) {
 
 	if (name == "" && f_dentry != NULL && f_dentry->d_file_type == file_type) {
 		return f_dentry;

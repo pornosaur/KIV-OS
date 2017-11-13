@@ -12,7 +12,7 @@ Vfs::~Vfs()
 	// Use shared pointer will be solution (FS is created somewhere and add to Vfs by register_FS)
 }
 
-int Vfs::create_dir(FileHandler ** directory, const std::string absolute_path)
+int Vfs::create_dir(FileHandler ** directory, const std::string &absolute_path)
 {
 	size_t start = 0;
 	size_t end = absolute_path.find("/");
@@ -53,7 +53,7 @@ int Vfs::read_dir(FileHandler * file)
 	return m_fs->fs_read_dir(file);
 }
 
-int Vfs::open_object(FileHandler ** object, const std::string absolute_path, unsigned int type)
+int Vfs::open_object(FileHandler ** object, const std::string &absolute_path, unsigned int type)
 {
 	size_t start = 0;
 	size_t end = absolute_path.find("/");
@@ -66,7 +66,7 @@ int Vfs::open_object(FileHandler ** object, const std::string absolute_path, uns
 	return file_system->fs_open_object(object, path, type);
 }
 
-int Vfs::create_file(FileHandler ** file, const std::string absolute_path)
+int Vfs::create_file(FileHandler ** file, const std::string &absolute_path)
 {
 	size_t start = 0;
 	size_t end = absolute_path.find("/");
@@ -141,7 +141,7 @@ int Vfs::close_file(FileHandler ** file)
 }
 
 
-FS *Vfs::find_fs_by_name(const std::string name)
+FS *Vfs::find_fs_by_name(const std::string &name)
 {	
 	auto it = Vfs::file_systems.find(name);
 
@@ -195,7 +195,7 @@ size_t Vfs::get_file_position(FileHandler * file)
 	}
 }
 
-int Vfs::register_fs(const std::string name, FS * fs)
+int Vfs::register_fs(const std::string &name, FS * fs)
 {
 	if (fs == NULL) {
 		return FS::ERR_INVALID_ARGUMENTS;

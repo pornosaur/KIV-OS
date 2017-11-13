@@ -31,11 +31,11 @@ public:
 	static const int ERR_OUT_OF_MEMORY = -10;
 
 	// METHODS FOR WORK WITH FILES
-	virtual int fs_create_dir(FileHandler **directory, const std::string absolute_path) = 0;
+	virtual int fs_create_dir(FileHandler **directory, const std::string &absolute_path) = 0;
 	virtual int fs_remove_emtpy_dir(FileHandler **file) = 0;
 	virtual int fs_read_dir(FileHandler *file) = 0;
-	virtual int fs_open_object(FileHandler **object, const std::string absolute_path, unsigned int type) = 0;
-	virtual int fs_create_file(FileHandler **file, const std::string absolute_path) = 0;
+	virtual int fs_open_object(FileHandler **object, const std::string &absolute_path, unsigned int type) = 0;
+	virtual int fs_create_file(FileHandler **file, const std::string &absolute_path) = 0;
 	virtual int fs_write_to_file(FileHandler *file, size_t *writed_bytes, char *buffer, size_t buffer_size) = 0;
 	virtual int fs_read_file(FileHandler *file, size_t *read_bytes, char *buffer, size_t buffer_size) = 0;
 	virtual int fs_remove_file(FileHandler **file) = 0;
@@ -52,11 +52,11 @@ protected:
 		unsigned long s_maxbytes,
 		struct dentry *s_root,
 		unsigned int s_count,
-		const std::string s_id);
+		const std::string &s_id);
 
 	struct dentry* init_dentry(
 		struct dentry *d_parent,
-		const std::string d_name,
+		const std::string &d_name,
 		unsigned long d_position,
 		unsigned long d_dentry_position,
 		unsigned int d_file_type,
@@ -65,5 +65,5 @@ protected:
 
 	void FS::sb_remove_all_dentry(struct dentry **d_entry);
 
-	struct dentry *sb_find_dentry_in_dentry(struct dentry * dentry, const std::string name, unsigned int file_type);
+	struct dentry *sb_find_dentry_in_dentry(struct dentry * dentry, const std::string &name, unsigned int file_type);
 };

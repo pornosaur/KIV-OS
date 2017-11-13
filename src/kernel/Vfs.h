@@ -14,11 +14,11 @@ public:
 	Vfs();
 	~Vfs();
 
-	int create_dir(FileHandler **directory, const std::string absolute_path);
+	int create_dir(FileHandler **directory, const std::string &absolute_path);
 	int remove_emtpy_dir(FileHandler **file);
 	int read_dir(FileHandler *file);
-	int open_object(FileHandler **object, const std::string absolute_path, unsigned int type);
-	int create_file(FileHandler **file, const std::string absolute_path);
+	int open_object(FileHandler **object, const std::string &absolute_path, unsigned int type);
+	int create_file(FileHandler **file, const std::string &absolute_path);
 	int write_to_file(Handler *file, size_t *writed_bytes, char *buffer, size_t buffer_size);
 	int read_file(Handler *file, size_t *read_bytes, char *buffer, size_t buffer_size);
 	int remove_file(FileHandler **file);
@@ -27,10 +27,7 @@ public:
 	int set_file_position(FileHandler * file, long offset, uint8_t origin);
 	size_t get_file_position(FileHandler *file);
 	
-	int register_fs(const std::string name, FS * fs);
-
-	//virtual int get_current_dir() = 0;
-	//virtual int set_current_dir() = 0;
+	int register_fs(const std::string &name, FS * fs);
 
 
 private:
@@ -38,6 +35,6 @@ private:
 
 	int sb_remove_file(FileHandler **file);
 
-	FS * Vfs::find_fs_by_name(const std::string name);
+	FS * Vfs::find_fs_by_name(const std::string &name);
 };
 

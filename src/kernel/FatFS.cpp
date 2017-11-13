@@ -1,6 +1,6 @@
 #include "FatFS.h"
 
-FatFS::FatFS(char *memory, size_t memory_size, const std::string disk_id)
+FatFS::FatFS(char *memory, size_t memory_size, const std::string &disk_id)
 {
 	int result = fat_init(memory, memory_size);
 
@@ -73,7 +73,7 @@ int FatFS::init_fat_disk(char *memory, size_t memory_size, uint16_t cluster_size
 	return 0;
 }
 
-int FatFS::fs_create_dir(FileHandler **directory, const std::string absolute_path)
+int FatFS::fs_create_dir(FileHandler **directory, const std::string &absolute_path)
 {
 	struct dentry *m_dentry = NULL;
 	struct dentry *f_dentry = NULL;
@@ -157,7 +157,7 @@ int FatFS::fs_read_dir(FileHandler *file)
 	//TODO
 }
 
-int FatFS::fs_create_file(FileHandler **file, const std::string absolute_path)
+int FatFS::fs_create_file(FileHandler **file, const std::string &absolute_path)
 {
 	struct dentry *m_dentry = NULL;
 	struct dentry *f_dentry = NULL;
@@ -212,7 +212,7 @@ int FatFS::fs_create_file(FileHandler **file, const std::string absolute_path)
 	return ERR_SUCCESS;
 }
 
-int FatFS::fs_open_object(FileHandler **object, const std::string absolute_path, unsigned int type)
+int FatFS::fs_open_object(FileHandler **object, const std::string &absolute_path, unsigned int type)
 {
 	struct dentry *m_dentry = NULL;
 	struct dentry *f_dentry = NULL;
@@ -255,7 +255,7 @@ struct dentry *FatFS::find_object_in_directory(struct dentry *m_dentry, const st
 	return f_dentry;
 }
 
-dentry * FatFS::find_path(const std::string absolute_path, size_t * start, size_t * end)
+dentry * FatFS::find_path(const std::string &absolute_path, size_t * start, size_t * end)
 {
 	std::string delimeter = "/";
 	struct dentry *m_dentry = NULL;
