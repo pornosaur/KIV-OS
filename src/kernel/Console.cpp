@@ -26,7 +26,7 @@ Console::Console(kiv_os::THandle handle)
 
 }
 
-bool Console::read(char* buffer, size_t length, size_t& read) {
+uint16_t Console::read(char* buffer, size_t length, size_t& read) {
 
 	//Note that the following is such a tricky combination
 	//that the use of fread, setting length to zero with closed
@@ -53,22 +53,23 @@ bool Console::read(char* buffer, size_t length, size_t& read) {
 			//delete the sequence, if it is necessary
 
 			read = read_dw > 0 ? (size_t)read_dw : 0;
-			return res;
+			return res; // TODO return codes by api.h
 		}
 		
 		read = mStdInOpen ? (size_t)read_dw : 0;
 		mStdInOpen = true; //TODO only for testing, change it but how?
-		return res;
+		return res; // TODO return codes by api.h
 	}
 	else {
 		read = 0;		//TODO only for testing, change it but how? Console close after press ctrl+z in subshell and stay closed in init shell
 		mStdInOpen = true; //TODO only for testing, change it but how?
 		return false;	//stdin is no longer open
+						// TODO return codes by api.h
 	}
 		
 }
 
-bool Console::write(char* buffer, size_t length, size_t& written) 
+uint16_t Console::write(char* buffer, size_t length, size_t& written)
 {
 	if (mStdOutOpen || mStdError) {
 		DWORD write, lengthtrim = ULONG_MAX;
@@ -80,17 +81,17 @@ bool Console::write(char* buffer, size_t length, size_t& written)
 		HANDLE mStd = (mStdOutOpen) ? mStdOut : mStdError;
 		BOOL res = WriteFile(mStd, buffer, lengthtrim, &write, NULL);
 		written = res ? (size_t)write : 0;
-		return res;
+		return res; // TODO return codes by api.h
 	}
 	else
-		return false;
+		return false; // TODO return codes by api.h
 }
 
-int Console::fseek(long offset, uint8_t origin)
+uint16_t Console::fseek(long offset, uint8_t origin)
 {
 	Handler::position = (size_t)offset;
 	// TODO implement
-	return 0;
+	return kiv_os::erSuccess;
 }
 
 

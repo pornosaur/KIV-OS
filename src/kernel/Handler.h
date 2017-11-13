@@ -18,10 +18,10 @@ public:
 	Handler(uint8_t flags = 0, size_t position = 0, size_t count = 0) : flags(flags), position(position), count(count) {};
 	~Handler() {};
 	/* Len = size buff */
-	virtual bool read(char* buffer, size_t length, size_t& read) = 0;
-	virtual bool write(char* buffer, size_t length, size_t& written) = 0;
+	virtual uint16_t read(char* buffer, size_t length, size_t& read) = 0;
+	virtual uint16_t write(char* buffer, size_t length, size_t& written) = 0;
 	
-	virtual int fseek(long offset, uint8_t origin) = 0;
+	virtual uint16_t fseek(long offset, uint8_t origin) = 0;
 	
 	size_t ftell() { return position; }
 	uint8_t get_flags() { return flags; }

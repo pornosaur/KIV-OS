@@ -10,9 +10,9 @@ public:
 	Console(kiv_os::THandle);
 	~Console();
 
-	bool read(char* buffer, size_t length, size_t& read);
-	bool write(char* buffer, size_t length, size_t& written);
-	int fseek(long offset, uint8_t origin);
+	uint16_t read(char* buffer, size_t length, size_t& read);
+	uint16_t write(char* buffer, size_t length, size_t& written);
+	uint16_t fseek(long offset, uint8_t origin);
 
 private:
 	HANDLE mStdIn;

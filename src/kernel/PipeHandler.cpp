@@ -15,22 +15,24 @@ PipeHandler::~PipeHandler()
 	}
 }
 
-bool PipeHandler::read(char* buffer, size_t length, size_t& read) 
+uint16_t PipeHandler::read(char* buffer, size_t length, size_t& read)
 {
-	return pipe->pipe_read(buffer, position, length, read);
+	pipe->pipe_read(buffer, position, length, read);
+	return kiv_os::erSuccess; // TODO handle return codes from pipe_read
 }
 
 
 
-bool PipeHandler::write(char* buffer, size_t length, size_t& written)
+uint16_t PipeHandler::write(char* buffer, size_t length, size_t& written)
 {
-	return pipe->pipe_write(buffer, position, length, written);
+	pipe->pipe_write(buffer, position, length, written);
+	return kiv_os::erSuccess; // TODO handle return codes from pipe_write
 }
 
-int PipeHandler::fseek(long offset, uint8_t origin)
+uint16_t PipeHandler::fseek(long offset, uint8_t origin)
 {
 	Handler::position = (size_t)offset;
 	// TODO implement
-	return 0;
+	return kiv_os::erSuccess;
 }
 

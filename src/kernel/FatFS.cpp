@@ -70,7 +70,7 @@ int FatFS::init_fat_disk(char *memory, size_t memory_size, uint16_t cluster_size
 
 	delete[] fat_table;
 
-	return 0;
+	return ERR_SUCCESS;
 }
 
 int FatFS::fs_create_dir(FileHandler **directory, const std::string &absolute_path)
@@ -153,7 +153,7 @@ int FatFS::fs_remove_emtpy_dir(FileHandler **file)
 
 int FatFS::fs_read_dir(FileHandler *file)
 {
-	return NULL;
+	return ERR_SUCCESS;
 	//TODO
 }
 

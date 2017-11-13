@@ -9,8 +9,8 @@ private:
 public:
 	PipeHandler(Pipe* pipe, uint8_t flags) : Handler(flags), pipe(pipe) {};
 	~PipeHandler();
-	virtual bool read(char* buffer, size_t length, size_t& read);
-	virtual bool write(char* buffer, size_t length, size_t& written);
-	virtual int fseek(long offset, uint8_t origin);
+	virtual uint16_t read(char* buffer, size_t length, size_t& read);
+	virtual uint16_t write(char* buffer, size_t length, size_t& written);
+	virtual uint16_t fseek(long offset, uint8_t origin);
 
 };

@@ -4,52 +4,44 @@ FileHandler::~FileHandler()
 {
 }
 
-bool FileHandler::read(char * buffer, size_t length, size_t & read)
+uint16_t FileHandler::read(char * buffer, size_t length, size_t & read)
 {
 	if (dentry == NULL || dentry->d_fs == NULL) {
-		//return FS::ERR_INVALID_ARGUMENTS;
-		return false;
+		return kiv_os::erInvalid_Argument;
 	}
 
 	FS * m_fs = dentry->d_fs;
-	int result = m_fs->fs_read_file(this, &read, buffer, length);
+	int ret_code = m_fs->fs_read_file(this, &read, buffer, length);
 
-	if (result == 0) {
-		return true;
+	if (ret_code == FS::ERR_SUCCESS) {
+		return kiv_os::erSuccess;
 	}
-	else {
-		return false;
-	}
+	
+	return kiv_os::erInvalid_Argument;
+	
 }
 
-bool FileHandler::write(char * buffer, size_t length, size_t & written)
+uint16_t FileHandler::write(char * buffer, size_t length, size_t & written)
 {
 	if (dentry == NULL || dentry->d_fs == NULL) {
-		//return FS::ERR_INVALID_ARGUMENTS;
-		return false;
+		return kiv_os::erInvalid_Argument;
 	}
 	
 	FS * m_fs = dentry->d_fs;
-	int result = m_fs->fs_write_to_file(this, &written, buffer, length);
+	int ret_code = m_fs->fs_write_to_file(this, &written, buffer, length);
 
-	if (result == 0) {
-		return true;
+	if (ret_code == FS::ERR_SUCCESS) {
+		return kiv_os::erSuccess;
 	}
-	else {
-		return false;
-	}
+	
+	return kiv_os::erInvalid_Argument;
 }
 
-dentry * FileHandler::get_dentry()
-{
-	return dentry;
-}
-
-int FileHandler::fseek(long offset, uint8_t origin)
+uint16_t FileHandler::fseek(long offset, uint8_t origin)
 {
 	long new_position = (long)position;
 	if (dentry == NULL) {
-		return -1;
+		return kiv_os::erInvalid_Argument;
 	}
 
 	switch (origin) {
@@ -63,13 +55,18 @@ int FileHandler::fseek(long offset, uint8_t origin)
 			new_position = dentry->d_size + offset;
 			break;
 		default:
-			return -1;
+			return kiv_os::erInvalid_Argument;
 	}
 
 	if (new_position < 0 || (unsigned long)new_position > dentry->d_size) {
-		return -1;
+		return kiv_os::erInvalid_Argument;
 	}
 
 	position = (size_t)new_position;
-	return 0;
+	return kiv_os::erSuccess;
+}
+
+dentry * FileHandler::get_dentry()
+{
+	return dentry;
 }
