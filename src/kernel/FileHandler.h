@@ -11,7 +11,6 @@ class FileHandler : public Handler
 
 private:
 	struct dentry *dentry = NULL;
-	unsigned int count;
 	
 
 public:
