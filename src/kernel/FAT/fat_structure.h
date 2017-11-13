@@ -1,6 +1,8 @@
 #ifndef FAT_FAT_STRUCTURE_H
 #define FAT_FAT_STRUCTURE_H
 
+#define NAME_ALOC_SIZE 13
+
 #include <stdint.h>
 
 static const uint32_t FAT_UNUSED = INT32_MAX - 1;
@@ -9,7 +11,7 @@ static const uint32_t FAT_BAD_CLUSTER = INT32_MAX - 3;
 
 static const unsigned int OBJECT_DIRECTORY = 0;
 static const unsigned int OBJECT_FILE = 1;
-static const unsigned int NAME_SIZE = 11;
+static const unsigned int NAME_SIZE = NAME_ALOC_SIZE - 1;
 
 struct boot_record {
     char volume_descriptor[256];               //popis
@@ -24,7 +26,7 @@ struct boot_record {
 
 
 struct dir_file{
-    char file_name[12];             //8+3 format + '/0'
+    char file_name[NAME_ALOC_SIZE];             //NAME_SIZE + '/0' (8.3 format)
     uint8_t file_type;               //1 = soubor, 0 = adresar
     uint32_t file_size;              //pocet znaku v souboru
     uint32_t first_cluster;          //cluster ve FAT, kde soubor zacina

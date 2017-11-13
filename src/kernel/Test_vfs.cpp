@@ -277,36 +277,36 @@ void Test_vfs::create_existing_file()
 
 void Test_vfs::create_file_with_max_name()
 {
-	std::cout << "creating file with maximal name of file filname.txt" << std::endl;
+	std::cout << "creating file with maximal name of file filename.txt" << std::endl;
 
 	FileHandler *file = NULL;
-	int result = vfs->create_file(&file, "C:/filname.txt");
+	int result = vfs->create_file(&file, "C:/filename.txt");
 	assert(file != NULL);
 	assert(result == FS::ERR_SUCCESS);
 	assert(file->get_dentry() != NULL);
 	assert(file->get_dentry()->d_file_type == FS::FS_OBJECT_FILE);
 	assert(file->get_dentry()->d_count == 1);
-	assert(file->get_dentry()->d_name == "filname.txt");
+	assert(file->get_dentry()->d_name == "filename.txt");
 	assert(file->get_dentry()->d_mounted != 1);
 	assert(file->get_dentry()->d_size == 1);
 	assert(file->get_dentry()->d_blocks == 1);
 
-	std::cout << "closing filname.txt" << std::endl;
+	std::cout << "closing filename.txt" << std::endl;
 	result = vfs->close_file(&file);
 	assert(result == FS::ERR_SUCCESS);
 	file = NULL;
 
-	std::cout << "opening filname.txt" << std::endl;
-	result = vfs->open_object(&file, "C:/filname.txt", FS::FS_OBJECT_FILE);
+	std::cout << "opening filename.txt" << std::endl;
+	result = vfs->open_object(&file, "C:/filename.txt", FS::FS_OBJECT_FILE);
 	assert(file != NULL);
 	assert(result == FS::ERR_SUCCESS);
 	assert(file->get_dentry() != NULL);
-	assert(file->get_dentry()->d_name == "filname.txt");
+	assert(file->get_dentry()->d_name == "filename.txt");
 	assert(file->get_dentry()->d_mounted != 1);
 	assert(file->get_dentry()->d_size == 1);
 	assert(file->get_dentry()->d_blocks == 1);
 
-	std::cout << "removing filname.txt from FAT" << std::endl;
+	std::cout << "removing filename.txt from FAT" << std::endl;
 	result = vfs->remove_file(&file);
 	assert(result == FS::ERR_SUCCESS);
 	std::cout << "OK\n" << std::endl;
