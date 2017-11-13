@@ -387,7 +387,7 @@ void Test_vfs::try_remove_not_existing_file()
 {
 	std::cout << "removing not existing file(dentry == NULL)" << std::endl;
 
-	FileHandler *file = new FileHandler(0, NULL, 1, 2342);
+	FileHandler *file = new FileHandler(0, NULL, 2342);
 
 	int result = vfs->remove_file(&file);
 	assert(result == FS::ERR_INVALID_ARGUMENTS);
@@ -637,7 +637,7 @@ void Test_vfs::try_delete_not_exist_dir()
 {
 	std::cout << "removing not existing dir(dentry == NULL)" << std::endl;
 
-	FileHandler *dir = new FileHandler(0, NULL, 1, 2342);
+	FileHandler *dir = new FileHandler(0, NULL, 2342);
 
 	int result = vfs->remove_emtpy_dir(&dir);
 	assert(result == FS::ERR_INVALID_ARGUMENTS);

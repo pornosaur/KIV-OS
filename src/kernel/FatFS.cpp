@@ -116,7 +116,7 @@ int FatFS::fs_create_dir(FileHandler **directory, const std::string &absolute_pa
 	}
 
 	f_dentry->d_count++;
-	*directory = new FileHandler(0, f_dentry, 0, 0);
+	*directory = new FileHandler(0, f_dentry, 0);
 	return ERR_SUCCESS;
 }
 
@@ -208,7 +208,7 @@ int FatFS::fs_create_file(FileHandler **file, const std::string &absolute_path)
 	free(d_file);
 
 	f_dentry->d_count++;
-	*file = new FileHandler(0, f_dentry, 0, 0);
+	*file = new FileHandler(0, f_dentry, 0);
 	return ERR_SUCCESS;
 }
 
@@ -232,7 +232,7 @@ int FatFS::fs_open_object(FileHandler **object, const std::string &absolute_path
 	}
 	
 	f_dentry->d_count++;
-	*object = new FileHandler(0, f_dentry, 0, 0);
+	*object = new FileHandler(0, f_dentry, 0);
 	return ERR_SUCCESS;
 }
 

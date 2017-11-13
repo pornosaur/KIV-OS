@@ -14,7 +14,7 @@ private:
 	
 
 public:
-	FileHandler(uint8_t flags = 0, struct dentry *dentry = NULL, unsigned int count = 0, size_t position = 0) : Handler(flags, position), dentry(dentry), count(count) {};
+	FileHandler(uint8_t flags = 0, struct dentry *dentry = NULL, size_t position = 0) : Handler(flags, position), dentry(dentry) {};
 	~FileHandler();
 	bool read(char* buffer, size_t length, size_t& read);
 	bool write(char* buffer, size_t length, size_t& written);
