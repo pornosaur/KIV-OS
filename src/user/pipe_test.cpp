@@ -49,19 +49,22 @@ void pipe1(const kiv_os::THandle& writer)
 void pipe2(const kiv_os::THandle& reader)
 {
 	std::cout << "CREATE READER" << std::endl;
-	char *read = new char[400];
+	size_t size_read = 400;
+	char *read = new char[size_read];
 
 	size_t read_r;
 	int i = 1;
 
-	bool res = kiv_os_rtl::Read_File(reader, read, strlen(read), read_r);;
-	std::cout << "\tREADING(" << i << "): " << read << std::endl;
+	bool res = false;
 
-	while (res) {
-		i++;
-		std::cout << "\tREADING(" << i << "): " << read << std::endl;
-		res = kiv_os_rtl::Read_File(reader, read, strlen(read), read_r);
-	}
+	do {
+		res = kiv_os_rtl::Read_File(reader, read, 400, read_r);
+		if (res && read_r > 0) {
+			std::cout << "\tREADING(" << i << "): " << read << std::endl;
+			i++;
+		}
+	} while (res);
+
 	if (!res && read_r == 0) {
 		std::cout << "\tREADING(" << i << "): EOF" << std::endl;
 		kiv_os_rtl::Close_File(reader);

@@ -8,10 +8,8 @@ Pipe::~Pipe()
 	 delete[] buffer_pipe; 
 
 	 buffer_pipe = NULL;
-	 first = NULL;
-	 last = NULL;
 
-	 assert(!buffer_pipe && !first && !last);
+	 assert(!buffer_pipe);
 }
 
 bool Pipe::close_pipe_write() 
@@ -48,7 +46,10 @@ bool Pipe::pipe_write(char* buffer, size_t offset, size_t length, size_t& writte
 	
 	//TODO if is set offset need it is different size of writing
 	size_t new_offset = 0, write = length;
+	written = 0;
+
 	while (write > 0) {
+		assert(written_in_buff <= MAX_BUFFER_SIZE);
 		while (written_in_buff >= MAX_BUFFER_SIZE) {
 			if (!readers) {
 				close_pipe_write();
@@ -76,9 +77,11 @@ bool Pipe::pipe_write(char* buffer, size_t offset, size_t length, size_t& writte
 		new_offset += (to_write - new_write_byte);
 		written_in_buff += to_write;
 		write -= to_write;
+		written += to_write;
 
 		cv_read.notify_one();
 	}
+
 
 	//TODO write \0 at the end of writing
 	
@@ -89,6 +92,7 @@ bool Pipe::pipe_write(char* buffer, size_t offset, size_t length, size_t& writte
 bool Pipe::pipe_read(char* buffer, size_t offset, size_t length, size_t& read)
 {
 	std::unique_lock<std::mutex> lock(buff_m);
+	size_t new_length = length - 1;
 
 	while (written_in_buff == 0) {
 		if (!writers) {
@@ -101,10 +105,27 @@ bool Pipe::pipe_read(char* buffer, size_t offset, size_t length, size_t& read)
 	}
 
 	assert(readers);
-	strncpy_s(buffer, length, buffer_pipe, written_in_buff);		/* TODO discus about memcpy vs strncpy */
-	read = written_in_buff;
-	written_in_buff -= read;
-	cv_writer.notify_one();  //TODO: discus about it with team
+	
+	size_t new_offset = 0; //TODO it should be deneped on offset from param
+	size_t to_read = written_in_buff <= new_length ? written_in_buff : new_length;
+	size_t read_byte_pos = first + to_read;
+
+	if (read_byte_pos >= MAX_BUFFER_SIZE) {
+		size_t new_read_byte = MAX_BUFFER_SIZE - first;
+		memcpy(&buffer[new_offset], &buffer_pipe[first], new_read_byte);
+		memcpy(&buffer[new_offset + new_read_byte], &buffer_pipe[0], new_read_byte);
+		first = read_byte_pos % MAX_BUFFER_SIZE;
+	}
+	else {
+		memcpy(&buffer[new_offset], &buffer_pipe[first], to_read);
+		first += to_read;	//TODO MAYBE + 1 => NEED DEBUG
+	}
+
+	buffer[new_offset + to_read] = '\0'; //TODO BE AWARE SIZE OF MALLOC need calculate -1
+	read = to_read;
+	written_in_buff -= to_read;
+	assert(written_in_buff >= 0);
+	cv_writer.notify_one();
 	
 	return true;
 }
