@@ -152,7 +152,10 @@ void set_file_position(kiv_os::TRegisters &regs)
 	long offset = regs.rdi.r;
 	uint8_t origin = regs.rcx.l;
 
-	if (cons->fseek(offset, origin)) {
+	uint16_t ret_code = cons->fseek(offset, origin);
+	if (ret_code) {
+		regs.rax.r = ret_code;
+		regs.flags.carry = 1;
 		return; // not success
 	}
 
