@@ -17,8 +17,8 @@
 #define CMD_ARG			0
 #define CMD_INPUT		1
 
-#define WRITE_HANDLE		1
-#define READ_HANDLE			0
+#define WRITE_HANDLE		0
+#define READ_HANDLE			1
 
 #define ERR_INCORRECT_CMD	"The syntax of the command is incorrect!"
 #define ERR_UNKNOWN_CMD		"The command was not found!"
