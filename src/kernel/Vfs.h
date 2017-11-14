@@ -23,9 +23,6 @@ public:
 	uint16_t read_file(Handler *file, size_t *read_bytes, char *buffer, size_t buffer_size);
 	uint16_t remove_file(FileHandler **file);
 	uint16_t close_file(FileHandler **file);
-
-	uint16_t set_file_position(FileHandler * file, long offset, uint8_t origin);
-	size_t get_file_position(FileHandler *file);
 	
 	uint16_t register_fs(const std::string &name, FS * fs);
 

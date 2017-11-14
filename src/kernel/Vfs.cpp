@@ -40,7 +40,7 @@ uint16_t Vfs::remove_emtpy_dir(FileHandler ** file)
 	FS * m_fs = (*file)->get_dentry()->d_fs;
 	int ret_code = m_fs->fs_remove_emtpy_dir(file);
 	if (ret_code == FS::ERR_SUCCESS) {
-		Vfs::sb_remove_file(file);
+		(*file)->dec_count();
 	}
 	return translate_return_codes(ret_code);
 }
@@ -119,7 +119,7 @@ uint16_t Vfs::remove_file(FileHandler ** file)
 
 	int ret_code = m_fs->fs_remove_file(file);
 	if (ret_code == FS::ERR_SUCCESS) {
-		Vfs::sb_remove_file(file);
+		(*file)->dec_count();
 	}
 	return translate_return_codes(ret_code);
 }
@@ -134,7 +134,7 @@ uint16_t Vfs::close_file(FileHandler ** file)
 
 	int ret_code = m_fs->fs_close_file(file);
 	if (ret_code == FS::ERR_SUCCESS) {
-		Vfs::sb_remove_file(file);
+		(*file)->dec_count();
 	}
 	
 	return translate_return_codes(ret_code);
@@ -167,24 +167,6 @@ FS *Vfs::find_fs_by_name(const std::string &name)
 	}
 
 	return NULL;
-}
-
-int Vfs::sb_remove_file(FileHandler **file) { // TODO this could be in FileHandler destructor
-	if ((*file) == NULL) {
-		return -1;
-	}
-
-	if ((*file)->get_dentry() != NULL)
-	{
-		(*file)->get_dentry()->d_count--;
-		(*file)->get_dentry()->d_fs->sb_remove_dentry((*file)->get_dentry()); // nesmaze se kdyz na nej nekdo odkazuje
-		//(*file)->set_dentry(NULL);
-	}
-
-	delete *file;
-	(*file) = NULL;
-
-	return 0;
 }
 
 uint16_t Vfs::translate_return_codes(int fs_ret_code)
