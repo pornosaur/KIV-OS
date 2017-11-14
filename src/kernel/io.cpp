@@ -38,6 +38,16 @@ void HandleIO(kiv_os::TRegisters &regs) {
 			create_pipe(regs);
 			break;
 		}
+
+		case kiv_os::scSet_File_Position: {
+			set_file_position(regs);
+			break;
+		}
+
+		case kiv_os::scGet_File_Position: {
+			get_file_position(regs);
+			break;
+		}
 	}
 }
 
@@ -124,4 +134,29 @@ void create_pipe(kiv_os::TRegisters &regs)
 	
 	*pipe_handles = handles->add_handle(handle_write);
 	*(pipe_handles + 1) = handles->add_handle(handle_read);
+}
+
+void get_file_position(kiv_os::TRegisters &regs)
+{	
+	std::shared_ptr<Handler> cons = handles->get_handle_object(regs.rdx.x);
+	uint8_t origin = (uint8_t)regs.rcx.r;
+
+	size_t position = cons->ftell(); // TODO use origin
+
+	regs.rax.r = position;
+}
+
+void set_file_position(kiv_os::TRegisters &regs)
+{
+	std::shared_ptr<Handler> cons = handles->get_handle_object(regs.rdx.x);
+	long offset = regs.rdi.r;
+	uint8_t origin = regs.rcx.l;
+
+	if (cons->fseek(offset, origin)) {
+		return; // not success
+	}
+
+	if (regs.rcx.h) {
+		// TODO SET FILE SIZE TO POSITION
+	}
 }
