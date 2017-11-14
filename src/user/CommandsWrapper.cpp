@@ -8,7 +8,7 @@
 
 const std::regex kiv_os_cmd::CommandsWrapper::r_cmd_line("\\s*(\\w+)([^\\|]+)\\s*");
 const std::regex kiv_os_cmd::CommandsWrapper::r_split_pipe("\\s*([^\\|]+)");
-const std::regex kiv_os_cmd::CommandsWrapper::r_command("([^\\>^\\<^\\s]+)");
+const std::regex kiv_os_cmd::CommandsWrapper::r_command("([^\\>^\\<^\\s]+)\\s");
 
 
 kiv_os_cmd::CommandsWrapper::CommandsWrapper()
