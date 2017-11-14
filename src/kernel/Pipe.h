@@ -5,8 +5,9 @@
 #include <mutex>
 #include <cassert>
 
-#define MAX_BUFFER	4096	/* maximum size for the pipe buffer */
-#define MAX_BUFFER_SIZE		MAX_BUFFER - 1	/* maximum size for the pipe buffer */
+
+//#define MAX_BUFFER_SIZE		4096	/* maximum size for the pipe buffer */
+#define MAX_BUFFER_SIZE		8	/* FOR TEST */ //TODO RESET MAX SIZE BUFFER
 
 class Pipe {
 

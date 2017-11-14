@@ -17,16 +17,14 @@ PipeHandler::~PipeHandler()
 
 uint16_t PipeHandler::read(char* buffer, size_t length, size_t& read)
 {
-	pipe->pipe_read(buffer, position, length, read);
-	return kiv_os::erSuccess; // TODO handle return codes from pipe_read
+	return pipe->pipe_read(buffer, position, length, read);
 }
 
 
 
 uint16_t PipeHandler::write(char* buffer, size_t length, size_t& written)
 {
-	pipe->pipe_write(buffer, position, length, written);
-	return kiv_os::erSuccess; // TODO handle return codes from pipe_write
+	return pipe->pipe_write(buffer, position, length, written);
 }
 
 uint16_t PipeHandler::fseek(long offset, uint8_t origin)
