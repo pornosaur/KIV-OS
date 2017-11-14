@@ -29,6 +29,7 @@ public:
 	static const int ERR_DISK_ERROR = -8;
 	static const int ERR_FS_EXISTS = -9;
 	static const int ERR_OUT_OF_MEMORY = -10;
+	static const int ERR_PERMISSION_DENIED = -11;
 
 	// METHODS FOR WORK WITH FILES
 	virtual int fs_create_dir(FileHandler **directory, const std::string &absolute_path) = 0;
@@ -39,7 +40,6 @@ public:
 	virtual int fs_write_to_file(FileHandler *file, size_t *writed_bytes, char *buffer, size_t buffer_size) = 0;
 	virtual int fs_read_file(FileHandler *file, size_t *read_bytes, char *buffer, size_t buffer_size) = 0;
 	virtual int fs_remove_file(FileHandler *file) = 0;
-	virtual int fs_close_file(FileHandler *file) = 0;
 
 	int sb_remove_dentry(struct dentry * dentry);
 

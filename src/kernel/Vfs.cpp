@@ -31,28 +31,26 @@ uint16_t Vfs::create_dir(FileHandler ** directory, const std::string &absolute_p
 	return translate_return_codes(ret_code);
 }
 
-uint16_t Vfs::remove_emtpy_dir(FileHandler * file)
+uint16_t Vfs::remove_emtpy_dir(const std::string &absolute_path)
 {
+	FileHandler *file = NULL;
+	uint16_t ret_code1 = open_object(&file, absolute_path, FS::FS_OBJECT_DIRECTORY);
+
+	if (ret_code1 != kiv_os::erSuccess) {
+		return ret_code1;
+	}
+
 	if (file == NULL || file->get_dentry() == NULL || file->get_dentry()->d_fs == NULL) {
 		return kiv_os::erInvalid_Argument;
 	}
 
 	FS * m_fs = file->get_dentry()->d_fs;
-	int ret_code = m_fs->fs_remove_emtpy_dir(file);
+	int ret_code2 = m_fs->fs_remove_emtpy_dir(file);
 
-	return translate_return_codes(ret_code);
-}
+	assert(file->get_count() == 1);
+	delete file;
 
-uint16_t Vfs::read_dir(FileHandler * file)
-{
-	if (file == NULL || file->get_dentry() == NULL || file->get_dentry()->d_fs == NULL) {
-		return kiv_os::erInvalid_Argument;
-	}
-
-	FS * m_fs = file->get_dentry()->d_fs;
-	int ret_code = m_fs->fs_read_dir(file);
-	
-	return translate_return_codes(ret_code);
+	return translate_return_codes(ret_code2);
 }
 
 uint16_t Vfs::open_object(FileHandler ** object, const std::string &absolute_path, unsigned int type)
@@ -89,48 +87,27 @@ uint16_t Vfs::create_file(FileHandler ** file, const std::string &absolute_path)
 	return translate_return_codes(ret_code);
 }
 
-uint16_t Vfs::write_to_file(Handler * file, size_t * writed_bytes, char * buffer, size_t buffer_size)
+uint16_t Vfs::remove_file(const std::string &absolute_path)
 {
-	if (file == NULL) {
-		return kiv_os::erInvalid_Handle;
+
+	FileHandler *file = NULL;
+	uint16_t ret_code1 = open_object(&file, absolute_path, FS::FS_OBJECT_FILE);
+
+	if (ret_code1 != FS::ERR_SUCCESS) {
+		return ret_code1;
 	}
 
-	return file->write(buffer, buffer_size, *writed_bytes);
-}
-
-uint16_t Vfs::read_file(Handler * file, size_t * read_bytes, char * buffer, size_t buffer_size)
-{
-	if (file == NULL) {
-		return kiv_os::erInvalid_Handle;
-	}
-
-	return file->read(buffer, buffer_size, *read_bytes);
-}
-
-uint16_t Vfs::remove_file(FileHandler * file)
-{
 	if (file == NULL || file->get_dentry() == NULL || file->get_dentry()->d_fs == NULL) {
 		return kiv_os::erInvalid_Argument;
 	}
 
 	FS * m_fs = file->get_dentry()->d_fs;
 
-	int ret_code = m_fs->fs_remove_file(file);
+	int ret_code2 = m_fs->fs_remove_file(file);
+	assert(file->get_count() == 1);
+	delete file;
 
-	return translate_return_codes(ret_code);
-}
-
-uint16_t Vfs::close_file(FileHandler * file)
-{
-	if (file == NULL || file->get_dentry() == NULL || file->get_dentry()->d_fs == NULL) {
-		return kiv_os::erInvalid_Argument;
-	}
-
-	FS * m_fs = file->get_dentry()->d_fs;
-
-	int ret_code = m_fs->fs_close_file(file);
-	
-	return translate_return_codes(ret_code);
+	return translate_return_codes(ret_code2);
 }
 
 uint16_t Vfs::register_fs(const std::string &name, FS * fs)
@@ -181,6 +158,7 @@ uint16_t Vfs::translate_return_codes(int fs_ret_code)
 		return kiv_os::erNo_Left_Space;
 
 	case FS::ERR_FILE_OPEN_BY_OTHER:
+	case FS::ERR_PERMISSION_DENIED:
 		return kiv_os::erPermission_Denied;
 
 	case FS::ERR_INVALID_ARGUMENTS:

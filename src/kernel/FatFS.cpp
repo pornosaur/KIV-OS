@@ -127,7 +127,7 @@ int FatFS::fs_remove_emtpy_dir(FileHandler *file)
 	}
 
 	if (file->get_dentry()->d_parent == NULL || file->get_dentry()->d_mounted == 1) {
-		return ERR_INVALID_PATH;
+		return ERR_PERMISSION_DENIED;
 	}
 
 	if (file->get_dentry()->d_count > 1) {
@@ -138,7 +138,6 @@ int FatFS::fs_remove_emtpy_dir(FileHandler *file)
 
 	switch (result) {
 		case 0:
-			file->dec_count();
 			return ERR_SUCCESS;
 		case 3:
 			return ERR_FILE_NOT_FOUND;
@@ -345,7 +344,6 @@ int FatFS::fs_remove_file(FileHandler *file)
 
 	switch (result) {
 	case 0:
-		file->dec_count();
 		return ERR_SUCCESS;
 	case 3:
 		return ERR_FILE_NOT_FOUND;
@@ -355,14 +353,4 @@ int FatFS::fs_remove_file(FileHandler *file)
 	default:
 		return ERR_DISK_ERROR;
 	}
-}
-
-int FatFS::fs_close_file(FileHandler * file)
-{
-	if (file == NULL) {
-		return ERR_INVALID_ARGUMENTS;
-	}
-
-	file->dec_count();
-	return ERR_SUCCESS;
 }
