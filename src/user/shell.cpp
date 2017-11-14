@@ -14,7 +14,7 @@ size_t __stdcall shell(const kiv_os::TRegisters &regs) {
 	int run_shell = 1;
 	const char* hello = "****KIV-OS****\n";
 	kiv_os_rtl::Write_File(kiv_os::stdOutput, hello, strlen(hello), written);
-	kiv_os::TProcess_Startup_Info tsi;
+	
 
 	
 	char *input = (char *)calloc(MAX_SIZE_BUFFER_IN, sizeof(char));
@@ -31,13 +31,11 @@ size_t __stdcall shell(const kiv_os::TRegisters &regs) {
 				continue;
 			}
 
-			tsi.stdin_t = kiv_os::stdInput; //nastaveni std - jiz presmerovanych
-			tsi.stdout_t = kiv_os::stdOutput;
-			tsi.stderr_t = kiv_os::stdError;
+			
 			
 			kiv_os::THandle proc_handle;
 
-			std::vector<kiv_os::THandle> proc_handles = cmd_w.Run_Commands(&tsi);
+			std::vector<kiv_os::THandle> proc_handles = cmd_w.Run_Commands();
 			kiv_os_rtl::Wait_For(proc_handles, proc_handles.size());
 			cmd_w.Clear();
 		}

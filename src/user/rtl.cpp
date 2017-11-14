@@ -64,11 +64,11 @@ bool kiv_os_rtl::Read_File(const kiv_os::THandle file_handle, void *buffer, cons
 	return result;
 }
 
-bool kiv_os_rtl::Create_Process(const char *program_name, kiv_os::TProcess_Startup_Info *tso, kiv_os::THandle &process_handle) {
+bool kiv_os_rtl::Create_Process(const char *program_name, kiv_os::TProcess_Startup_Info tsi, kiv_os::THandle &process_handle) {
 	kiv_os::TRegisters regs = Prepare_SysCall_Context(kiv_os::scProc, kiv_os::scClone);
 	regs.rcx.l = kiv_os::clCreate_Process;
 	regs.rdx.r = reinterpret_cast<decltype(regs.rdx.r)>(program_name);
-	regs.rdi.r = reinterpret_cast<decltype(regs.rdi.r)>(tso);
+	regs.rdi.r = reinterpret_cast<decltype(regs.rdi.r)>(&tsi);
 	
 	const bool result = Do_SysCall(regs);
 	process_handle = static_cast<kiv_os::THandle>(regs.rax.x);

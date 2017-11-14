@@ -17,6 +17,8 @@
 #define CMD_ARG			0
 #define CMD_INPUT		1
 
+#define WRITE_HANDLE		1
+#define READ_HANDLE			0
 
 #define ERR_INCORRECT_CMD	"The syntax of the command is incorrect!"
 #define ERR_UNKNOWN_CMD		"The command was not found!"
@@ -60,7 +62,7 @@ namespace kiv_os_cmd {
 		bool Run_Parse(std::string& line);
 		void Print_Error();
 		void Clear();
-		std::vector<kiv_os::THandle> kiv_os_cmd::CommandsWrapper::Run_Commands(kiv_os::TProcess_Startup_Info *tsi);
+		std::vector<kiv_os::THandle> kiv_os_cmd::CommandsWrapper::Run_Commands();
 
 	}; //class CommandsWrapper
 
