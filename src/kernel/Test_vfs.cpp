@@ -87,8 +87,11 @@ void Test_vfs::open_existing_file()
 	uint16_t result = vfs->create_file(&file, "C:/file.text");
 	assert(file != NULL);
 	assert(result == kiv_os::erSuccess);
-	result = vfs->close_file(&file);
+	result = vfs->close_file(file);
 	assert(result == kiv_os::erSuccess);
+	assert(file->get_count() == 0);
+	delete file;
+	file = NULL;
 
 	result = vfs->open_object(&file, "C:/file.text", FS::FS_OBJECT_FILE);
 	assert(file != NULL);
@@ -98,8 +101,10 @@ void Test_vfs::open_existing_file()
 	assert(file->get_dentry()->d_count == 1);
 
 	std::cout << "removing file" << std::endl;
-	result = vfs->remove_file(&file);
+	result = vfs->remove_file(file);
 	assert(result == kiv_os::erSuccess);
+	assert(file->get_count() == 0);
+	delete file;
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -146,8 +151,10 @@ void Test_vfs::create_new_file()
 	assert(file->get_dentry()->d_blocks == 1);
 
 	std::cout << "closing new.txt" << std::endl;
-	result = vfs->close_file(&file);
+	result = vfs->close_file(file);
 	assert(result == kiv_os::erSuccess);
+	assert(file->get_count() == 0);
+	delete file;
 	file = NULL;
 
 	std::cout << "opening new.txt" << std::endl;
@@ -161,8 +168,11 @@ void Test_vfs::create_new_file()
 	assert(file->get_dentry()->d_blocks == 1);
 
 	std::cout << "removing new.txt from FAT" << std::endl;
-	result = vfs->remove_file(&file);
+	result = vfs->remove_file(file);
 	assert(result == kiv_os::erSuccess);
+	assert(file->get_count() == 0);
+	delete file;
+
 	std::cout << "OK\n" << std::endl;
 }
 
@@ -191,8 +201,10 @@ void Test_vfs::create_new_file_not_in_root()
 	assert(file->get_dentry()->d_blocks == 1);
 
 	std::cout << "closing new.txt" << std::endl;
-	result = vfs->close_file(&file);
+	result = vfs->close_file(file);
 	assert(result == kiv_os::erSuccess);
+	assert(file->get_count() == 0);
+	delete file;
 	file = NULL;
 
 	std::cout << "opening new.txt" << std::endl;
@@ -206,10 +218,16 @@ void Test_vfs::create_new_file_not_in_root()
 	assert(file->get_dentry()->d_blocks == 1);
 
 	std::cout << "removing file adn folder" << std::endl;
-	result = vfs->remove_file(&file);
+	result = vfs->remove_file(file);
 	assert(result == kiv_os::erSuccess);
-	result = vfs->remove_emtpy_dir(&dir);
+	assert(file->get_count() == 0);
+	delete file;
+
+	result = vfs->remove_emtpy_dir(dir);
 	assert(result == kiv_os::erSuccess);
+	assert(dir->get_count() == 0);
+	delete dir;
+
 	std::cout << "OK\n" << std::endl;
 }
 
@@ -251,15 +269,18 @@ void Test_vfs::create_existing_file()
 
 	std::cout << "write data to file new.txt" << std::endl;
 	size_t bytes = 0;
-	result = vfs->write_to_file(file, &bytes, buffer, buff_size);
+	result = vfs->write_to_file(reinterpret_cast<Handler*>(file), &bytes, buffer, buff_size);
 	assert(file->get_dentry()->d_size > 1);
 	assert(file->get_dentry()->d_blocks == 1);
 	assert(result == kiv_os::erSuccess);
 	assert(bytes == buff_size);
 
 	std::cout << "closing file new.txt" << std::endl;
-	result = vfs->close_file(&file);
+	result = vfs->close_file(file);
 	assert(result == kiv_os::erSuccess);
+	assert(file->get_count() == 0);
+	delete file;
+	file = NULL;
 
 	std::cout << "creating same file again" << std::endl;
 	result = vfs->create_file(&file, "C:/new.txt");
@@ -270,8 +291,11 @@ void Test_vfs::create_existing_file()
 	assert(file->get_dentry()->d_blocks == 1);
 
 	std::cout << "removing new.txt from FAT" << std::endl;
-	result = vfs->remove_file(&file);
+	result = vfs->remove_file(file);
 	assert(result == kiv_os::erSuccess);
+	assert(file->get_count() == 0);
+	delete file;
+
 	std::cout << "OK\n" << std::endl;
 }
 
@@ -292,8 +316,10 @@ void Test_vfs::create_file_with_max_name()
 	assert(file->get_dentry()->d_blocks == 1);
 
 	std::cout << "closing filename.txt" << std::endl;
-	result = vfs->close_file(&file);
+	result = vfs->close_file(file);
 	assert(result == kiv_os::erSuccess);
+	assert(file->get_count() == 0);
+	delete file;
 	file = NULL;
 
 	std::cout << "opening filename.txt" << std::endl;
@@ -307,8 +333,11 @@ void Test_vfs::create_file_with_max_name()
 	assert(file->get_dentry()->d_blocks == 1);
 
 	std::cout << "removing filename.txt from FAT" << std::endl;
-	result = vfs->remove_file(&file);
+	result = vfs->remove_file(file);
 	assert(result == kiv_os::erSuccess);
+	assert(file->get_count() == 0);
+	delete file;
+
 	std::cout << "OK\n" << std::endl;
 }
 
@@ -322,8 +351,10 @@ void Test_vfs::remomve_file()
 	assert(result == kiv_os::erSuccess);
 
 	std::cout << "closing file.txt" << std::endl;
-	result = vfs->close_file(&file);
+	result = vfs->close_file(file);
 	assert(result == kiv_os::erSuccess);
+	assert(file->get_count() == 0);
+	delete file;
 	file = NULL;
 
 	std::cout << "opening file.txt" << std::endl;
@@ -332,8 +363,10 @@ void Test_vfs::remomve_file()
 	assert(result == kiv_os::erSuccess);
 
 	std::cout << "removing file.txt from FAT" << std::endl;
-	result = vfs->remove_file(&file);
+	result = vfs->remove_file(file);
 	assert(result == kiv_os::erSuccess);
+	assert(file->get_count() == 0);
+	delete file;
 
 	std::cout << "opening file.txt" << std::endl;
 	result = vfs->open_object(&file, "C:/file.txt", FS::FS_OBJECT_FILE);
@@ -356,14 +389,16 @@ void Test_vfs::remove_file_bigger_than_cluster()
 	int buff_size = 208;
 
 	size_t bytes = 0;
-	result = vfs->write_to_file(file, &bytes, buffer, buff_size);
+	result = vfs->write_to_file(reinterpret_cast<Handler*>(file), &bytes, buffer, buff_size);
 	assert(result == kiv_os::erSuccess);
 	assert(bytes == buff_size);
 
 	std::cout << "closing file.txt" << std::endl;
-	result = vfs->close_file(&file);
+	result = vfs->close_file(file);
 	assert(result == kiv_os::erSuccess);
-	assert(file == NULL);
+	assert(file->get_count() == 0);
+	delete file;
+	file = NULL;
 
 	std::cout << "opening file.txt" << std::endl;
 	result = vfs->open_object(&file, "C:/file.txt", FS::FS_OBJECT_FILE);
@@ -372,8 +407,10 @@ void Test_vfs::remove_file_bigger_than_cluster()
 	assert(file->get_dentry()->d_size == buff_size);
 
 	std::cout << "removing file.txt from FAT" << std::endl;
-	result = vfs->remove_file(&file);
+	result = vfs->remove_file(file);
 	assert(result == kiv_os::erSuccess);
+	assert(file->get_count() == 0);
+	delete file;
 
 	std::cout << "opening file.txt" << std::endl;
 	result = vfs->open_object(&file, "C:/file.txt", FS::FS_OBJECT_FILE);
@@ -389,10 +426,12 @@ void Test_vfs::try_remove_not_existing_file()
 
 	FileHandler *file = new FileHandler(0, NULL, 2342);
 
-	uint16_t result = vfs->remove_file(&file);
+	uint16_t result = vfs->remove_file(file);
 	assert(result == kiv_os::erInvalid_Argument);
 
-	vfs->close_file(&file);
+	vfs->close_file(file);
+	assert(file->get_count() == 0);
+	delete file;
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -409,8 +448,10 @@ void Test_vfs::create_dir_in_root()
 	assert(dir->get_dentry()->d_file_type == FS::FS_OBJECT_DIRECTORY);
 
 	std::cout << "removing direcotry" << std::endl;
-	result = vfs->remove_emtpy_dir(&dir);
+	result = vfs->remove_emtpy_dir(dir);
 	assert(result == kiv_os::erSuccess);
+	assert(dir->get_count() == 0);
+	delete dir;
 
 	result = vfs->open_object(&dir, "C:/directory", FS::FS_OBJECT_DIRECTORY);
 	assert(dir == NULL);
@@ -431,8 +472,10 @@ void Test_vfs::create_dir_with_existing_name()
 	assert(dir->get_dentry()->d_file_type == FS::FS_OBJECT_DIRECTORY);
 
 	std::cout << "closing direcotry" << std::endl;
-	result = vfs->close_file(&dir);
+	result = vfs->close_file(dir);
 	assert(result == kiv_os::erSuccess);
+	assert(dir->get_count() == 0);
+	delete dir;
 
 	std::cout << "createing dir with same name (directory)" << std::endl;
 	result = vfs->create_dir(&dir, "C:/directory");
@@ -442,8 +485,10 @@ void Test_vfs::create_dir_with_existing_name()
 	assert(dir->get_dentry()->d_file_type == FS::FS_OBJECT_DIRECTORY);
 
 	std::cout << "removing direcotry" << std::endl;
-	result = vfs->remove_emtpy_dir(&dir);
+	result = vfs->remove_emtpy_dir(dir);
 	assert(result == kiv_os::erSuccess);
+	assert(dir->get_count() == 0);
+	delete dir;
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -486,16 +531,30 @@ void Test_vfs::create_dir_in_full_directory()
 	assert(result == kiv_os::erNo_Left_Space);
 
 	std::cout << "removing direcotry1" << std::endl;
-	result = vfs->remove_emtpy_dir(&dir1);
+	result = vfs->remove_emtpy_dir(dir1);
 	assert(result == kiv_os::erSuccess);
-	result = vfs->remove_file(&file1);
+	assert(dir1->get_count() == 0);
+	delete dir1;
+
+	result = vfs->remove_file(file1);
 	assert(result == kiv_os::erSuccess);
-	result = vfs->remove_file(&file2);
+	assert(file1->get_count() == 0);
+	delete file1;
+
+	result = vfs->remove_file(file2);
 	assert(result == kiv_os::erSuccess);
-	result = vfs->remove_file(&file3);
+	assert(file2->get_count() == 0);
+	delete file2;
+
+	result = vfs->remove_file(file3);
 	assert(result == kiv_os::erSuccess);
-	result = vfs->remove_file(&file4);
+	assert(file3->get_count() == 0);
+	delete file3;
+
+	result = vfs->remove_file(file4);
 	assert(result == kiv_os::erSuccess);
+	assert(file4->get_count() == 0);
+	delete file4;
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -522,10 +581,14 @@ void Test_vfs::create_dir_not_in_root()
 
 	assert(dir1->get_dentry()->d_subdirectories != NULL);
 
-	result = vfs->close_file(&dir1);
+	result = vfs->close_file(dir1);
 	assert(result == 0);
-	result = vfs->close_file(&dir2);
+	assert(dir1->get_count() == 0);
+	delete dir1;
+	result = vfs->close_file(dir2);
 	assert(result == 0);
+	assert(dir2->get_count() == 0);
+	delete dir2;
 
 	result = vfs->open_object(&dir2, "C:/directory/directory", FS::FS_OBJECT_DIRECTORY);
 	assert(dir2 != NULL);
@@ -537,12 +600,16 @@ void Test_vfs::create_dir_not_in_root()
 	assert(dir1->get_dentry()->d_subdirectories != NULL);
 
 	std::cout << "removing dir2" << std::endl;
-	result = vfs->remove_emtpy_dir(&dir2);
+	result = vfs->remove_emtpy_dir(dir2);
 	assert(result == 0);
+	assert(dir2->get_count() == 0);
+	delete dir2;
 
 	std::cout << "removing dir1" << std::endl;
-	result = vfs->remove_emtpy_dir(&dir1);
+	result = vfs->remove_emtpy_dir(dir1);
 	assert(result == 0);
+	assert(dir1->get_count() == 0);
+	delete dir1;
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -583,9 +650,10 @@ void Test_vfs::remove_dir()
 	assert(dir->get_dentry()->d_file_type == FS::FS_OBJECT_DIRECTORY);
 
 	std::cout << "removing direcotry" << std::endl;
-	result = vfs->remove_emtpy_dir(&dir);
+	result = vfs->remove_emtpy_dir(dir);
 	assert(result == kiv_os::erSuccess);
-	assert(dir == NULL);
+	assert(dir->get_count() == 0);
+	delete dir;
 
 	result = vfs->open_object(&dir, "C:/directory", FS::FS_OBJECT_DIRECTORY);
 	assert(result == kiv_os::erFile_Not_Found);
@@ -610,25 +678,31 @@ void Test_vfs::try_delete_not_empty_dir()
 	assert(dir2->get_dentry() != NULL);
 
 	std::cout << "removing direcotry" << std::endl;
-	result = vfs->remove_emtpy_dir(&dir1);
+	result = vfs->remove_emtpy_dir(dir1);
 	assert(result == kiv_os::erPermission_Denied);
 
-	result = vfs->close_file(&dir2);
+	result = vfs->close_file(dir2);
 	assert(result == kiv_os::erSuccess);
+	assert(dir2->get_count() == 0);
+	delete dir2;
 
-	result = vfs->remove_emtpy_dir(&dir1);
+	result = vfs->remove_emtpy_dir(dir1);
 	assert(result == kiv_os::erDir_Not_Empty);
 
 	result = vfs->open_object(&dir2, "C:/directory/directory", FS::FS_OBJECT_DIRECTORY);
 	assert(result == kiv_os::erSuccess);
 
 	std::cout << "removing direcotry" << std::endl;
-	result = vfs->remove_emtpy_dir(&dir2);
+	result = vfs->remove_emtpy_dir(dir2);
 	assert(result == kiv_os::erSuccess);
+	assert(dir2->get_count() == 0);
+	delete dir2;
 	
 	std::cout << "removing direcotry" << std::endl;
-	result = vfs->remove_emtpy_dir(&dir1);
+	result = vfs->remove_emtpy_dir(dir1);
 	assert(result == kiv_os::erSuccess);
+	assert(dir1->get_count() == 0);
+	delete dir1;
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -639,10 +713,12 @@ void Test_vfs::try_delete_not_exist_dir()
 
 	FileHandler *dir = new FileHandler(0, NULL, 2342);
 
-	uint16_t result = vfs->remove_emtpy_dir(&dir);
+	uint16_t result = vfs->remove_emtpy_dir(dir);
 	assert(result == kiv_os::erInvalid_Argument);
 
-	vfs->close_file(&dir);
+	vfs->close_file(dir);
+	assert(dir->get_count() == 0);
+	delete dir;
 
 
 	std::cout << "OK\n" << std::endl;
@@ -664,8 +740,10 @@ void Test_vfs::open_normal_dir()
 	assert(dir->get_dentry() != NULL);
 	assert(dir->get_dentry()->d_file_type == FS::FS_OBJECT_DIRECTORY);
 
-	result = vfs->close_file(&dir);
+	result = vfs->close_file(dir);
 	assert(result == kiv_os::erSuccess);
+	assert(dir->get_count() == 0);
+	delete dir;
 
 	result = vfs->open_object(&dir, "C:/directory", FS::FS_OBJECT_DIRECTORY);
 	assert(dir != NULL);
@@ -674,8 +752,10 @@ void Test_vfs::open_normal_dir()
 	assert(dir->get_dentry()->d_file_type == FS::FS_OBJECT_DIRECTORY);
 
 	std::cout << "removing direcotry" << std::endl;
-	result = vfs->remove_emtpy_dir(&dir);
+	result = vfs->remove_emtpy_dir(dir);
 	assert(result == kiv_os::erSuccess);
+	assert(dir->get_count() == 0);
+	delete dir;
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -717,23 +797,24 @@ void Test_vfs::write_read_file()
 	char buffer[100];
 
 	size_t bytes = 0;
-	result = vfs->read_file(file, &bytes, buffer, buff_size);
+	result = vfs->read_file(reinterpret_cast<Handler*>(file), &bytes, buffer, buff_size);
 	assert(bytes == 1);
 	assert(result == kiv_os::erSuccess);
 
 	char text[] = "small text";
-	result = vfs->write_to_file(file, &bytes, text, 10);
+	result = vfs->write_to_file(reinterpret_cast<Handler*>(file), &bytes, text, 10);
 	assert(bytes == 10);
 	assert(result == kiv_os::erSuccess);
 
-	result = vfs->read_file(file, &bytes, buffer, buff_size);
+	result = vfs->read_file(reinterpret_cast<Handler*>(file), &bytes, buffer, buff_size);
 	assert(result == kiv_os::erSuccess);
 	assert(bytes == 10);
 	assert(strncmp(buffer, text, 10) == 0);
 
-	result = vfs->remove_file(&file);
+	result = vfs->remove_file(file);
 	assert(result == kiv_os::erSuccess);;
-	assert(file == NULL);
+	assert(file->get_count() == 0);
+	delete file;
 	
 	std::cout << "OK\n" << std::endl;
 }
@@ -753,20 +834,21 @@ void Test_vfs::read_file_from_exact_position()
 
 	std::cout << "writing text to file" << std::endl;
 	char *text = "text which contains exactly 36 words";
-	result = vfs->write_to_file(file, &bytes, text, 36);
+	result = vfs->write_to_file(reinterpret_cast<Handler*>(file), &bytes, text, 36);
 	assert(result == kiv_os::erSuccess);
 	assert(bytes == 36);
 
 	
 	file->fseek(10, kiv_os::fsBeginning);
-	result = vfs->read_file(file, &bytes, buffer, buff_size);
+	result = vfs->read_file(reinterpret_cast<Handler*>(file), &bytes, buffer, buff_size);
 	assert(bytes == 26);
 	assert(result == kiv_os::erSuccess);
 	assert(strncmp(buffer, text + 10, 26) == 0);
 
-	result = vfs->remove_file(&file);
+	result = vfs->remove_file(file);
 	assert(result == kiv_os::erSuccess);
-	assert(file == NULL);
+	assert(file->get_count() == 0);
+	delete file;
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -785,18 +867,19 @@ void Test_vfs::write_read_file_bigger_than_one_cluster()
 	size_t bytes = 0;
 
 	char text[] = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque condimentum diam et urna tincidunt vestibulum malesuada ac dolor. Phasellus vel neque vitae erat ultrices luctus fermentum vitae metus.";
-	result = vfs->write_to_file(file, &bytes, text, 200);
+	result = vfs->write_to_file(reinterpret_cast<Handler*>(file), &bytes, text, 200);
 	assert(bytes == 200);
 	assert(result == kiv_os::erSuccess);
 
-	result = vfs->read_file(file, &bytes, buffer, buff_size);
+	result = vfs->read_file(reinterpret_cast<Handler*>(file), &bytes, buffer, buff_size);
 	assert(bytes == 200);
 	assert(result == kiv_os::erSuccess);
 	assert(strncmp(buffer, text, 200) == 0);
 
-	result = vfs->remove_file(&file);
+	result = vfs->remove_file(file);
 	assert(result == kiv_os::erSuccess);
-	assert(file == NULL);
+	assert(file->get_count() == 0);
+	delete file;
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -815,18 +898,19 @@ void Test_vfs::write_read_exactly_one_cluster()
 	size_t bytes = 0;
 
 	char text[] = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque condimentum diam et urna tincidunt vestibulum malesuada ac dolor.";
-	result = vfs->write_to_file(file, &bytes, text, 128);
+	result = vfs->write_to_file(reinterpret_cast<Handler*>(file), &bytes, text, 128);
 	assert(bytes == 128);
 	assert(result == kiv_os::erSuccess);
 
-	result = vfs->read_file(file, &bytes, buffer, buff_size);
+	result = vfs->read_file(reinterpret_cast<Handler*>(file), &bytes, buffer, buff_size);
 	assert(bytes == 128);
 	assert(result == kiv_os::erSuccess);
 	assert(strncmp(buffer, text, 128) == 0);
 
-	result = vfs->remove_file(&file);
+	result = vfs->remove_file(file);
 	assert(result == kiv_os::erSuccess);
-	assert(file == NULL);
+	assert(file->get_count() == 0);
+	delete file;
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -845,19 +929,20 @@ void Test_vfs::read_small_piece_of_file()
 	size_t bytes = 0;
 
 	char text[] = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque condimentum diam et urna tincidunt vestibulum malesuada ac dolor. Phasellus vel neque vitae erat ultrices luctus fermentum vitae metus.";
-	result = vfs->write_to_file(file, &bytes, text, 200);
+	result = vfs->write_to_file(reinterpret_cast<Handler*>(file), &bytes, text, 200);
 	assert(bytes == 200);
 	assert(result == kiv_os::erSuccess);
 
 	file->fseek(120, kiv_os::fsBeginning);
-	result = vfs->read_file(file, &bytes, buffer, buff_size);
+	result = vfs->read_file(reinterpret_cast<Handler*>(file), &bytes, buffer, buff_size);
 	assert(bytes == 30);
 	assert(result == kiv_os::erSuccess);
 	assert(strncmp(buffer, text + 120, 30) == 0);
 
-	result = vfs->remove_file(&file);
+	result = vfs->remove_file(file);
 	assert(result == kiv_os::erSuccess);
-	assert(file == NULL);
+	assert(file->get_count() == 0);
+	delete file;
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -877,7 +962,7 @@ void Test_vfs::read_all_file_by_pieces()
 	int shuld_read = 0;
 
 	char text[] = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque condimentum diam et urna tincidunt vestibulum malesuada ac dolor. Phasellus vel neque vitae erat ultrices luctus fermentum vitae metus.";
-	result = vfs->write_to_file(file, &bytes, text, 200);
+	result = vfs->write_to_file(reinterpret_cast<Handler*>(file), &bytes, text, 200);
 	assert(bytes == 200);
 	assert(result == kiv_os::erSuccess);
 
@@ -889,15 +974,16 @@ void Test_vfs::read_all_file_by_pieces()
 			shuld_read = 200 - i;
 		}
 
-		result = vfs->read_file(file, &bytes, buffer, buff_size);
+		result = vfs->read_file(reinterpret_cast<Handler*>(file), &bytes, buffer, buff_size);
 		assert(bytes == shuld_read);
 		assert(result == kiv_os::erSuccess);
 		assert(strncmp(buffer, text + i, shuld_read) == 0);
 	}
 
-	result = vfs->remove_file(&file);
+	result = vfs->remove_file(file);
 	assert(result == kiv_os::erSuccess);
-	assert(file == NULL);
+	assert(file->get_count() == 0);
+	delete file;
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -918,11 +1004,11 @@ void Test_vfs::rewrite_file()
 
 	std::cout << "writing short text" << std::endl;
 	char text1[] = "small text";
-	result = vfs->write_to_file(file, &bytes, text1, 10);
+	result = vfs->write_to_file(reinterpret_cast<Handler*>(file), &bytes, text1, 10);
 	assert(bytes == 10);
 	assert(result == kiv_os::erSuccess);
 
-	result = vfs->read_file(file, &bytes, buffer, buff_size);
+	result = vfs->read_file(reinterpret_cast<Handler*>(file), &bytes, buffer, buff_size);
 	assert(bytes == 10);
 	assert(result == kiv_os::erSuccess);
 	assert(strncmp(buffer, text1, 10) == 0);
@@ -930,32 +1016,33 @@ void Test_vfs::rewrite_file()
 
 	std::cout << "writing long text" << std::endl;
 	char text[] = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque condimentum diam et urna tincidunt vestibulum malesuada ac dolor. Phasellus vel neque vitae erat ultrices luctus fermentum vitae metus.";
-	result = vfs->write_to_file(file, &bytes, text, 200);
+	result = vfs->write_to_file(reinterpret_cast<Handler*>(file), &bytes, text, 200);
 	assert(bytes == 200);
 	assert(result == kiv_os::erSuccess);
 
-	result = vfs->read_file(file, &bytes, buffer, buff_size);
+	result = vfs->read_file(reinterpret_cast<Handler*>(file), &bytes, buffer, buff_size);
 	assert(bytes == 200);
 	assert(result == kiv_os::erSuccess);
 	assert(strncmp(buffer, text, 200) == 0);
 
 	std::cout << "writing short text" << std::endl;
 	file->fseek(10, kiv_os::fsBeginning);
-	result = vfs->write_to_file(file, &bytes, text1, 10);
+	result = vfs->write_to_file(reinterpret_cast<Handler*>(file), &bytes, text1, 10);
 	assert(bytes == 10);
 	assert(result == kiv_os::erSuccess);
 	assert(file->get_dentry()->d_size == 20);
 
 	file->fseek(0, kiv_os::fsBeginning);
-	result = vfs->read_file(file, &bytes, buffer, buff_size);
+	result = vfs->read_file(reinterpret_cast<Handler*>(file), &bytes, buffer, buff_size);
 	assert(bytes == 20);
 	assert(result == kiv_os::erSuccess);
 	assert(strncmp(buffer, text, 10) == 0);
 	assert(strncmp(buffer + 10, text1, 10) == 0);
 
-	result = vfs->remove_file(&file);
+	result = vfs->remove_file(file);
 	assert(result == kiv_os::erSuccess);
-	assert(file == NULL);
+	assert(file->get_count() == 0);
+	delete file;
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -974,17 +1061,18 @@ void Test_vfs::write_zero_bytes_to_file()
 	size_t bytes = 0;
 
 	char text[] = "";
-	result = vfs->write_to_file(file, &bytes, text, 0);
+	result = vfs->write_to_file(reinterpret_cast<Handler*>(file), &bytes, text, 0);
 	assert(bytes == 0);
 	assert(result == kiv_os::erSuccess);
 
-	result = vfs->read_file(file, &bytes, buffer, buff_size);
+	result = vfs->read_file(reinterpret_cast<Handler*>(file), &bytes, buffer, buff_size);
 	assert(bytes == 1);
 	assert(result == kiv_os::erSuccess);
 
-	result = vfs->remove_file(&file);
+	result = vfs->remove_file(file);
 	assert(result == kiv_os::erSuccess);
-	assert(file == NULL);
+	assert(file->get_count() == 0);
+	delete file;
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -999,9 +1087,11 @@ void Test_vfs::create_file_with_space_in_name()
 	assert(result == kiv_os::erSuccess);
 	assert(strcmp("my file.txt", file->get_dentry()->d_name.c_str()) == 0);
 
-	result = vfs->close_file(&file);
+	result = vfs->close_file(file);
 	assert(result == 0);
-	assert(file == NULL);
+	assert(file->get_count() == 0);
+	delete file;
+	file = NULL;
 
 	result = vfs->open_object(&file, "C:/my file.txt", FS::FS_OBJECT_FILE);
 	assert(file != NULL);
@@ -1009,19 +1099,20 @@ void Test_vfs::create_file_with_space_in_name()
 	
 	char text[] = "short text";
 	size_t bytes = 0;
-	result  = vfs->write_to_file(file, &bytes, text, 10);
+	result  = vfs->write_to_file(reinterpret_cast<Handler*>(file), &bytes, text, 10);
 	assert(bytes == 10);
 	assert(result == kiv_os::erSuccess);
 
 	char buffer[20];
-	result = vfs->read_file(file, &bytes, buffer, 20);
+	result = vfs->read_file(reinterpret_cast<Handler*>(file), &bytes, buffer, 20);
 	assert(bytes == 10);
 	assert(result == kiv_os::erSuccess);
 	assert(strncmp(text, buffer, 10) == 0);
 
-	result = vfs->remove_file(&file);
+	result = vfs->remove_file(file);
 	assert(result == kiv_os::erSuccess);
-	assert(file == NULL);
+	assert(file->get_count() == 0);
+	delete file;
 
 	result = vfs->open_object(&file, "C:/my file.txt", FS::FS_OBJECT_FILE);
 	assert(file == NULL);
@@ -1040,17 +1131,20 @@ void Test_vfs::create_dir_with_space_in_name()
 	assert(result == kiv_os::erSuccess);
 	assert(strcmp("my dir", dir->get_dentry()->d_name.c_str()) == 0);
 
-	result = vfs->close_file(&dir);
+	result = vfs->close_file(dir);
 	assert(result == kiv_os::erSuccess);
-	assert(dir == NULL);
+	assert(dir->get_count() == 0);
+	delete dir;
+	dir = NULL;
 
 	result = vfs->open_object(&dir, "C:/my dir", FS::FS_OBJECT_DIRECTORY);
 	assert(dir != NULL);
 	assert(result == kiv_os::erSuccess);
 
-	result = vfs->remove_emtpy_dir(&dir);
+	result = vfs->remove_emtpy_dir(dir);
 	assert(result == kiv_os::erSuccess);
-	assert(dir == NULL);
+	assert(dir->get_count() == 0);
+	delete dir;
 
 	result = vfs->open_object(&dir, "C:/my dir", FS::FS_OBJECT_DIRECTORY);
 	assert(dir == NULL);
@@ -1075,10 +1169,14 @@ void Test_vfs::folder_dir_same_name()
 	assert(result == kiv_os::erSuccess);
 	assert(dir->get_dentry()->d_file_type == FS::FS_OBJECT_DIRECTORY);
 
-	result = vfs->close_file(&file);
+	result = vfs->close_file(file);
 	assert(result == kiv_os::erSuccess);
-	result = vfs->close_file(&dir);
+	assert(file->get_count() == 0);
+	delete file;
+	result = vfs->close_file(dir);
 	assert(result == kiv_os::erSuccess);
+	assert(dir->get_count() == 0);
+	delete dir;
 
 	result = vfs->open_object(&dir, "C:/name", FS::FS_OBJECT_DIRECTORY);
 	assert(dir != NULL);
@@ -1090,13 +1188,15 @@ void Test_vfs::folder_dir_same_name()
 	assert(result == kiv_os::erSuccess);
 	assert(file->get_dentry()->d_file_type == FS::FS_OBJECT_FILE);
 
-	result = vfs->remove_emtpy_dir(&dir);
+	result = vfs->remove_emtpy_dir(dir);
 	assert(result == kiv_os::erSuccess);
-	assert(dir == NULL);
+	assert(dir->get_count() == 0);
+	delete dir;
 
-	result = vfs->remove_file(&file);
+	result = vfs->remove_file(file);
 	assert(result == kiv_os::erSuccess);
-	assert(file == NULL);
+	assert(file->get_count() == 0);
+	delete file;
 	
 	std::cout << "OK\n" << std::endl;
 }
@@ -1110,12 +1210,13 @@ void Test_vfs::remove_root()
 	assert(root != NULL);
 	assert(result == kiv_os::erSuccess);
 
-	result = vfs->remove_emtpy_dir(&root);
+	result = vfs->remove_emtpy_dir(root);
 	assert(result == kiv_os::erFile_Not_Found);
 
-	result = vfs->close_file(&root);
+	result = vfs->close_file(root);
 	assert(result == kiv_os::erSuccess);
-	assert(result == NULL);
+	assert(root->get_count() == 0);
+	delete root;
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -1168,33 +1269,57 @@ void Test_vfs::test_more_subfiles()
 	result = vfs->create_dir(&dir11, "C:/dir10/dir11");
 	assert(result == kiv_os::erSuccess);
 
-	result = vfs->close_file(&dir1);
+	result = vfs->close_file(dir1);
 	assert(result == kiv_os::erSuccess);
-	result = vfs->close_file(&dir2);
+	assert(dir1->get_count() == 0);
+	delete dir1;
+	result = vfs->close_file(dir2);
 	assert(result == kiv_os::erSuccess);
-	result = vfs->close_file(&dir3);
+	assert(dir2->get_count() == 0);
+	delete dir2;
+	result = vfs->close_file(dir3);
 	assert(result == kiv_os::erSuccess);
-	result = vfs->close_file(&dir4);
+	assert(dir3->get_count() == 0);
+	delete dir3;
+	result = vfs->close_file(dir4);
 	assert(result == kiv_os::erSuccess);
-	result = vfs->close_file(&dir5);
+	assert(dir4->get_count() == 0);
+	delete dir4;
+	result = vfs->close_file(dir5);
 	assert(result == kiv_os::erSuccess);
-	result = vfs->close_file(&dir6);
+	assert(dir5->get_count() == 0);
+	delete dir5;
+	result = vfs->close_file(dir6);
 	assert(result == kiv_os::erSuccess);
-	result = vfs->close_file(&dir7);
+	assert(dir6->get_count() == 0);
+	delete dir6;
+	result = vfs->close_file(dir7);
 	assert(result == kiv_os::erSuccess);
-	result = vfs->close_file(&dir8);
+	assert(dir7->get_count() == 0);
+	delete dir7;
+	result = vfs->close_file(dir8);
 	assert(result == kiv_os::erSuccess);
-	result = vfs->close_file(&dir9);
+	assert(dir8->get_count() == 0);
+	delete dir8;
+	result = vfs->close_file(dir9);
 	assert(result == kiv_os::erSuccess);
-	result = vfs->close_file(&dir10);
+	assert(dir9->get_count() == 0);
+	delete dir9;
+	result = vfs->close_file(dir10);
 	assert(result == kiv_os::erSuccess);
-	result = vfs->close_file(&dir11);
+	assert(dir10->get_count() == 0);
+	delete dir10;
+	result = vfs->close_file(dir11);
 	assert(result == kiv_os::erSuccess);
+	assert(dir11->get_count() == 0);
+	delete dir11;
 
 	result = vfs->open_object(&dir8, "C:/dir2/dir5/dir7/dir8", FS::FS_OBJECT_DIRECTORY);
 	assert(result == kiv_os::erSuccess);
-	result = vfs->remove_emtpy_dir(&dir8);
+	result = vfs->remove_emtpy_dir(dir8);
 	assert(result == kiv_os::erSuccess);
+	assert(dir8->get_count() == 0);
+	delete dir8;
 
 	result = vfs->open_object(&dir2, "C:/dir2", FS::FS_OBJECT_DIRECTORY);
 	assert(result == kiv_os::erSuccess);
@@ -1203,49 +1328,69 @@ void Test_vfs::test_more_subfiles()
 
 	result = vfs->open_object(&dir7, "C:/dir2/dir5/dir7", FS::FS_OBJECT_DIRECTORY);
 	assert(result == kiv_os::erSuccess);
-	result = vfs->remove_emtpy_dir(&dir7);
+	result = vfs->remove_emtpy_dir(dir7);
 	assert(result == kiv_os::erSuccess);
+	assert(dir7->get_count() == 0);
+	delete dir7;
 
 	result = vfs->open_object(&dir9, "C:/dir2/dir5/dir9", FS::FS_OBJECT_DIRECTORY);
 	assert(result == kiv_os::erSuccess);
-	result = vfs->remove_emtpy_dir(&dir9);
+	result = vfs->remove_emtpy_dir(dir9);
 	assert(result == kiv_os::erSuccess);
+	assert(dir9->get_count() == 0);
+	delete dir9;
 
 	result = vfs->open_object(&dir11, "C:/dir10/dir11", FS::FS_OBJECT_DIRECTORY);
 	assert(result == kiv_os::erSuccess);
-	result = vfs->remove_emtpy_dir(&dir11);
+	result = vfs->remove_emtpy_dir(dir11);
 	assert(result == kiv_os::erSuccess);
+	assert(dir11->get_count() == 0);
+	delete dir11;
 
 	result = vfs->open_object(&dir3, "C:/dir1/dir3", FS::FS_OBJECT_DIRECTORY);
 	assert(result == kiv_os::erSuccess);
-	result = vfs->remove_emtpy_dir(&dir3);
+	result = vfs->remove_emtpy_dir(dir3);
 	assert(result == kiv_os::erSuccess);
+	assert(dir3->get_count() == 0);
+	delete dir3;
 
 	result = vfs->open_object(&dir4, "C:/dir2/dir4", FS::FS_OBJECT_DIRECTORY);
 	assert(result == kiv_os::erSuccess);
-	result = vfs->remove_emtpy_dir(&dir4);
+	result = vfs->remove_emtpy_dir(dir4);
 	assert(result == kiv_os::erSuccess);
+	assert(dir4->get_count() == 0);
+	delete dir4;
 
 	result = vfs->open_object(&dir1, "C:/dir1", FS::FS_OBJECT_DIRECTORY);
 	assert(result == kiv_os::erSuccess);
-	result = vfs->remove_emtpy_dir(&dir1);
+	result = vfs->remove_emtpy_dir(dir1);
 	assert(result == kiv_os::erSuccess);
+	assert(dir1->get_count() == 0);
+	delete dir1;
 
 	result = vfs->open_object(&dir5, "C:/dir2/dir5", FS::FS_OBJECT_DIRECTORY);
 	assert(result == kiv_os::erSuccess);
-	result = vfs->remove_emtpy_dir(&dir5);
+	result = vfs->remove_emtpy_dir(dir5);
 	assert(result == kiv_os::erSuccess);
+	assert(dir5->get_count() == 0);
+	delete dir5;
 
 	result = vfs->open_object(&dir6, "C:/dir2/dir6", FS::FS_OBJECT_DIRECTORY);
 	assert(result == kiv_os::erSuccess);
-	result = vfs->remove_emtpy_dir(&dir6);
+	result = vfs->remove_emtpy_dir(dir6);
 	assert(result == kiv_os::erSuccess);
+	assert(dir6->get_count() == 0);
+	delete dir6;
 
-	result = vfs->remove_emtpy_dir(&dir2);
+	result = vfs->remove_emtpy_dir(dir2);
 	assert(result == kiv_os::erSuccess);
+	assert(dir2->get_count() == 0);
+	delete dir2;
 
-	result = vfs->remove_emtpy_dir(&dir10);
+	result = vfs->remove_emtpy_dir(dir10);
 	assert(result == kiv_os::erSuccess);
+	assert(dir10->get_count() == 0);
+	delete dir10;
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -1336,22 +1481,26 @@ void Test_vfs::write_to_twice_open_file()
 	char text[] = "text which will be written to file";
 
 	size_t bytes = 0;
-	result = vfs->write_to_file(file1, &bytes, text, 34);
+	result = vfs->write_to_file(reinterpret_cast<Handler*>(file1), &bytes, text, 34);
 	assert(bytes == 34);
 	assert(result == kiv_os::erSuccess);
 
-	result = vfs->read_file(file2, &bytes, buffer, 200);
+	result = vfs->read_file(reinterpret_cast<Handler*>(file2), &bytes, buffer, 200);
 	assert(bytes == 34);
 	assert(result == kiv_os::erSuccess);
 	assert(strncmp(buffer, text, 34) == 0);
 
-	result = vfs->close_file(&file1);
+	result = vfs->close_file(file1);
 	assert(result == kiv_os::erSuccess);
-	assert(file1 == NULL);
+	assert(file1->get_count() == 0);
+	delete file1;
+	file1 = NULL;
 
-	result = vfs->remove_file(&file2);
+	result = vfs->remove_file(file2);
 	assert(result == kiv_os::erSuccess);
-	assert(file2 == NULL);
+	assert(file2->get_count() == 0);
+	delete file2;
+	file2 = NULL;
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -1375,15 +1524,20 @@ void Test_vfs::open_dir_twice()
 	assert(dir1->get_dentry() == dir2->get_dentry());
 	assert(dir1->get_dentry()->d_count == 2);
 
-	result = vfs->close_file(&dir1);
+	result = vfs->close_file(dir1);
 	assert(result == kiv_os::erSuccess);
+	assert(dir1->get_count() == 0);
+	delete dir1;
+	dir1 = NULL;
+
 	assert(dir1 == NULL);
 	assert(dir2 != NULL);
 	assert(dir2->get_dentry() != NULL);
 
-	result = vfs->remove_emtpy_dir(&dir2);
+	result = vfs->remove_emtpy_dir(dir2);
 	assert(result == kiv_os::erSuccess);
-	assert(dir2 == NULL);
+	assert(dir2->get_count() == 0);
+	delete dir2;
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -1407,21 +1561,24 @@ void Test_vfs::remove_twice_open_file()
 	assert(file1->get_dentry() == file2->get_dentry());
 	assert(file1->get_dentry()->d_count == 2);
 
-	result = vfs->remove_file(&file1);
+	result = vfs->remove_file(file1);
 	assert(result == kiv_os::erPermission_Denied);
 	assert(file1 != NULL);
 
-	result = vfs->remove_file(&file2);
+	result = vfs->remove_file(file2);
 	assert(result == kiv_os::erPermission_Denied);
 	assert(file2 != NULL);
 
-	result = vfs->close_file(&file2);
+	result = vfs->close_file(file2);
 	assert(result == kiv_os::erSuccess);
-	assert(file2 == NULL);
+	assert(file2->get_count() == 0);
+	delete file2;
+	file2 = NULL;
 
-	result = vfs->remove_file(&file1);
+	result = vfs->remove_file(file1);
 	assert(result == kiv_os::erSuccess);
-	assert(file1 == NULL);
+	assert(file1->get_count() == 0);
+	delete file1;
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -1445,25 +1602,30 @@ void Test_vfs::remove_twice_open_dir()
 	assert(dir1->get_dentry() == dir2->get_dentry());
 	assert(dir1->get_dentry()->d_count == 2);
 
-	result = vfs->remove_emtpy_dir(&dir1);
+	result = vfs->remove_emtpy_dir(dir1);
 	assert(result == kiv_os::erPermission_Denied);
 	assert(dir1 != NULL);
 	assert(dir1->get_dentry() != NULL);
 
-	result = vfs->remove_emtpy_dir(&dir2);
+	result = vfs->remove_emtpy_dir(dir2);
 	assert(result == kiv_os::erPermission_Denied);
 	assert(dir2 != NULL);
 	assert(dir2->get_dentry() != NULL);
 
-	result = vfs->close_file(&dir1);
+	result = vfs->close_file(dir1);
 	assert(result == kiv_os::erSuccess);
+	assert(dir1->get_count() == 0);
+	delete dir1;
+	dir1 = NULL;
+
 	assert(dir1 == NULL);
 	assert(dir2 != NULL);
 	assert(dir2->get_dentry() != NULL);
 
-	result = vfs->remove_emtpy_dir(&dir2);
+	result = vfs->remove_emtpy_dir(dir2);
 	assert(result == kiv_os::erSuccess);
-	assert(dir2 == NULL);
+	assert(dir2->get_count() == 0);
+	delete dir2;
 
 	std::cout << "OK\n" << std::endl;
 }
@@ -1486,9 +1648,10 @@ void Test_vfs::create_file_over_open_file()
 
 	assert(file2 == NULL);
 
-	result = vfs->remove_file(&file1);
+	result = vfs->remove_file(file1);
 	assert(result == kiv_os::erSuccess);
-	assert(file1 == NULL);
+	assert(file1->get_count() == 0);
+	delete file1;
 
 	std::cout << "OK\n" << std::endl;
 }

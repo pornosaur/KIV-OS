@@ -120,24 +120,25 @@ int FatFS::fs_create_dir(FileHandler **directory, const std::string &absolute_pa
 	return ERR_SUCCESS;
 }
 
-int FatFS::fs_remove_emtpy_dir(FileHandler **file)
+int FatFS::fs_remove_emtpy_dir(FileHandler *file)
 {
-	if (*file == NULL || (*file)->get_dentry() == NULL || (*file)->get_dentry()->d_file_type != FS::FS_OBJECT_DIRECTORY) {
+	if (file == NULL || file->get_dentry() == NULL || file->get_dentry()->d_file_type != FS::FS_OBJECT_DIRECTORY) {
 		return ERR_INVALID_ARGUMENTS;
 	}
 
-	if ((*file)->get_dentry()->d_parent == NULL || (*file)->get_dentry()->d_mounted == 1) {
+	if (file->get_dentry()->d_parent == NULL || file->get_dentry()->d_mounted == 1) {
 		return ERR_INVALID_PATH;
 	}
 
-	if ((*file)->get_dentry()->d_count > 1) {
+	if (file->get_dentry()->d_count > 1) {
 		return ERR_FILE_OPEN_BY_OTHER;
 	}
 
-	int result = fat_delete_empty_dir((*file)->get_dentry()->d_name.c_str(), (*file)->get_dentry()->d_parent->d_position);
+	int result = fat_delete_empty_dir(file->get_dentry()->d_name.c_str(), file->get_dentry()->d_parent->d_position);
 
 	switch (result) {
 		case 0:
+			file->dec_count();
 			return ERR_SUCCESS;
 		case 3:
 			return ERR_FILE_NOT_FOUND;
@@ -330,20 +331,21 @@ int FatFS::fs_read_file(FileHandler *file, size_t *read_bytes, char *buffer, siz
 	return ERR_SUCCESS;
 }
 
-int FatFS::fs_remove_file(FileHandler **file)
+int FatFS::fs_remove_file(FileHandler *file)
 {
-	if (*file == NULL || (*file)->get_dentry() == NULL || (*file)->get_dentry()->d_file_type != FS::FS_OBJECT_FILE) {
+	if (file == NULL || file->get_dentry() == NULL || file->get_dentry()->d_file_type != FS::FS_OBJECT_FILE) {
 		return ERR_INVALID_ARGUMENTS;
 	}
-	if ((*file)->get_dentry()->d_count > 1) {
+	if (file->get_dentry()->d_count > 1) {
 		return ERR_FILE_OPEN_BY_OTHER;
 	}
 
-	int result = fat_delete_file_by_name((*file)->get_dentry()->d_name.c_str(), (*file)->get_dentry()->d_parent->d_position);
+	int result = fat_delete_file_by_name(file->get_dentry()->d_name.c_str(), file->get_dentry()->d_parent->d_position);
 
 
 	switch (result) {
 	case 0:
+		file->dec_count();
 		return ERR_SUCCESS;
 	case 3:
 		return ERR_FILE_NOT_FOUND;
@@ -355,12 +357,12 @@ int FatFS::fs_remove_file(FileHandler **file)
 	}
 }
 
-int FatFS::fs_close_file(FileHandler **file)
+int FatFS::fs_close_file(FileHandler * file)
 {
-	if (*file == NULL)
-	{
+	if (file == NULL) {
 		return ERR_INVALID_ARGUMENTS;
 	}
 
+	file->dec_count();
 	return ERR_SUCCESS;
 }

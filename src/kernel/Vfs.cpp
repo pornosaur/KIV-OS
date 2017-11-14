@@ -31,17 +31,15 @@ uint16_t Vfs::create_dir(FileHandler ** directory, const std::string &absolute_p
 	return translate_return_codes(ret_code);
 }
 
-uint16_t Vfs::remove_emtpy_dir(FileHandler ** file)
+uint16_t Vfs::remove_emtpy_dir(FileHandler * file)
 {
-	if (*file == NULL || (*file)->get_dentry() == NULL || (*file)->get_dentry()->d_fs == NULL) {
+	if (file == NULL || file->get_dentry() == NULL || file->get_dentry()->d_fs == NULL) {
 		return kiv_os::erInvalid_Argument;
 	}
 
-	FS * m_fs = (*file)->get_dentry()->d_fs;
+	FS * m_fs = file->get_dentry()->d_fs;
 	int ret_code = m_fs->fs_remove_emtpy_dir(file);
-	if (ret_code == FS::ERR_SUCCESS) {
-		(*file)->dec_count();
-	}
+
 	return translate_return_codes(ret_code);
 }
 
@@ -109,33 +107,28 @@ uint16_t Vfs::read_file(Handler * file, size_t * read_bytes, char * buffer, size
 	return file->read(buffer, buffer_size, *read_bytes);
 }
 
-uint16_t Vfs::remove_file(FileHandler ** file)
+uint16_t Vfs::remove_file(FileHandler * file)
 {
-	if (*file == NULL || (*file)->get_dentry() == NULL || (*file)->get_dentry()->d_fs == NULL) {
+	if (file == NULL || file->get_dentry() == NULL || file->get_dentry()->d_fs == NULL) {
 		return kiv_os::erInvalid_Argument;
 	}
 
-	FS * m_fs = (*file)->get_dentry()->d_fs;
+	FS * m_fs = file->get_dentry()->d_fs;
 
 	int ret_code = m_fs->fs_remove_file(file);
-	if (ret_code == FS::ERR_SUCCESS) {
-		(*file)->dec_count();
-	}
+
 	return translate_return_codes(ret_code);
 }
 
-uint16_t Vfs::close_file(FileHandler ** file)
+uint16_t Vfs::close_file(FileHandler * file)
 {
-	if (*file == NULL || (*file)->get_dentry() == NULL || (*file)->get_dentry()->d_fs == NULL) {
+	if (file == NULL || file->get_dentry() == NULL || file->get_dentry()->d_fs == NULL) {
 		return kiv_os::erInvalid_Argument;
 	}
 
-	FS * m_fs = (*file)->get_dentry()->d_fs;
+	FS * m_fs = file->get_dentry()->d_fs;
 
 	int ret_code = m_fs->fs_close_file(file);
-	if (ret_code == FS::ERR_SUCCESS) {
-		(*file)->dec_count();
-	}
 	
 	return translate_return_codes(ret_code);
 }
