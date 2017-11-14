@@ -45,9 +45,8 @@ bool Pipe::pipe_write(char* buffer, size_t offset, size_t length, size_t& writte
 	}
 	
 	written = 0;
-	offset = 0;		//TODO I CAN NOT SET OFFSET FROM USER
+	offset = 0;
 	assert(offset <= length);
-	length -= offset;
 
 	while (written < length) {
 		while (written_in_buff >= MAX_BUFFER_SIZE) {
@@ -87,8 +86,7 @@ bool Pipe::pipe_write(char* buffer, size_t offset, size_t length, size_t& writte
 bool Pipe::pipe_read(char* buffer, size_t offset, size_t length, size_t& read)
 {
 	std::unique_lock<std::mutex> lock(buff_m);
-	offset = 0;		//TODO I CAN NOT SET OFFSET FROM USER
-	length -= offset;
+	offset = 0;	
 	length -= 1;	/* need add \0 to the end of buff */
 
 	while (written_in_buff == 0) {

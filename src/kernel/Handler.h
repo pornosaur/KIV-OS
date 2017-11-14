@@ -4,12 +4,10 @@
 class Handler
 {
 
-private:
-	uint8_t flags;
-
 protected:
-	size_t position;
-	size_t count;
+	size_t position;	/* Represents position in file */
+	size_t count;		/* Represents how much processes have this handler */
+	uint8_t flags;		/* Represents how handler is opened - read, write, always_open */
 
 public:
 	static const uint8_t fmOpen_Write = 2;
@@ -17,9 +15,9 @@ public:
 
 	Handler(uint8_t flags = 0, size_t position = 0, size_t count = 0) : flags(flags), position(position), count(count) {};
 	~Handler() {};
-	/* Len = size buff */
-	virtual uint16_t read(char* buffer, size_t length, size_t& read) = 0;
-	virtual uint16_t write(char* buffer, size_t length, size_t& written) = 0;
+	
+	virtual uint16_t read(char* buffer, size_t length, size_t& read) = 0;		/* length = size buff */
+	virtual uint16_t write(char* buffer, size_t length, size_t& written) = 0;	/* length = size buffer*/
 	
 	virtual uint16_t fseek(long offset, uint8_t origin) = 0;
 	

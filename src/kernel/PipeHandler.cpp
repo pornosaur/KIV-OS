@@ -27,10 +27,3 @@ uint16_t PipeHandler::write(char* buffer, size_t length, size_t& written)
 	return pipe->pipe_write(buffer, position, length, written);
 }
 
-uint16_t PipeHandler::fseek(long offset, uint8_t origin)
-{
-	Handler::position = (size_t)offset;
-	// TODO implement
-	return kiv_os::erSuccess;
-}
-
