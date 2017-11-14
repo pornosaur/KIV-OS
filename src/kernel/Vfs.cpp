@@ -140,25 +140,6 @@ uint16_t Vfs::close_file(FileHandler ** file)
 	return translate_return_codes(ret_code);
 }
 
-uint16_t Vfs::set_file_position(FileHandler * file, long offset, uint8_t origin)
-{
-	if (file == NULL || file->get_dentry() == NULL) {
-		return kiv_os::erInvalid_Argument;
-	}
-
-	return file->fseek(offset, origin);
-}
-
-size_t Vfs::get_file_position(FileHandler * file)
-{
-	if (file == NULL) {
-		return 0;
-	}
-	else {
-		return file->ftell();
-	}
-}
-
 uint16_t Vfs::register_fs(const std::string &name, FS * fs)
 {
 	if (fs == NULL) {

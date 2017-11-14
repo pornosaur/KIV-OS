@@ -35,8 +35,6 @@ private:
 
 	FS * Vfs::find_fs_by_name(const std::string &name);
 
-	int sb_remove_file(FileHandler **file);
-
 	uint16_t translate_return_codes(int fs_ret_code);
 };
 

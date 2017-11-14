@@ -2,6 +2,12 @@
 
 FileHandler::~FileHandler()
 {
+	if (dentry != NULL)
+	{
+		dentry->d_count--;
+		dentry->d_fs->sb_remove_dentry(dentry); // nesmaze se kdyz na nej nekdo odkazuje
+		dentry = NULL;
+	}
 }
 
 uint16_t FileHandler::read(char * buffer, size_t length, size_t & read)
