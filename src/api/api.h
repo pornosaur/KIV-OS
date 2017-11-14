@@ -54,7 +54,7 @@ struct TDir_Entry {
 
 struct TProcess_Startup_Info {
 	char *arg;			//pointer na parametry
-	THandle stdin_t, stdout_t, stderr_t;	//kazdy, ktery bude erInvalid_Handle, bude mit vychozi hodnotu
+	THandle stdin, stdout, stderr;	//kazdy, ktery bude erInvalid_Handle, bude mit vychozi hodnotu
 };
 
 /*
@@ -77,26 +77,28 @@ struct TProcess_Startup_Info {
 			3 - cti ze souboru
 											 IN: dx je handle souboru, rdi je pointer na buffer, kam zapsat, rcx je velikost bufferu v bytech
 											OUT: rax je pocet prectenych bytu
-			4 - nastav pozici v souboru		 IN: dx je handle souboru, rdi je nova pozice v souboru
+			5 - nastav pozici v souboru		 IN: dx je handle souboru, rdi je nova pozice v souboru
 												cl konstatna je typ pozice (jedna z fs konstant),
 												ch == 0 jenom nastavn pozici (fsSet_Position)
 												ch == 1 nastav pozici a nastav velikost souboru na tuto pozici (fsSet_Size)
+			
+			4 - smaz soubor				IN: rdx je pointer na null-terminated ANSI char string udavajici file_name
 
-			5 - cti  pozici v souboru		 IN: dx je handle souboru, rcx je typ pozice (jedna z fs konstant),
+			6 - cti  pozici v souboru		 IN: dx je handle souboru, rcx je typ pozice (jedna z fs konstant),
 											 OUT: rax je pozice v souboru
 								//u AL == 5 | 6 plati ze rcx je
 											fsBeginning: od zacatku souboru
 											fsCurrent: od aktualni pozice v souboru
 											fsEnd: od konce souboru
 
-			6 - zavri handle			 IN: dx  je handle libovolneho typu k zavreni
+			7 - zavri handle			 IN: dx  je handle libovolneho typu k zavreni
 
-			7 - ziskej pracovni adresar		IN: rdx je pointer na ANSI char buffer, rcx je velikost buffer
+			8 - ziskej pracovni adresar		IN: rdx je pointer na ANSI char buffer, rcx je velikost buffer
 										   OUT: rax pocet zapsanych znaku
 
-			8 - nastav pracovni adresar    IN: rdx je pointer na null-terminated ANSI char string udavajici novy adresar (muze byt relativni cesta)
+			9 - nastav pracovni adresar    IN: rdx je pointer na null-terminated ANSI char string udavajici novy adresar (muze byt relativni cesta)
 
-			9 - vytvore pipe				IN: rdx je pointer na pole dvou Thandle - prvni zapis a druhy pro cteni z pipy
+			10 - vytvore pipe				IN: rdx je pointer na pole dvou Thandle - prvni zapis a druhy pro cteni z pipy
 
 			vytvoreni adresare - vytvori se soubor s atributem adresar
 			smazani adresare - smaze se soubor
@@ -114,6 +116,7 @@ struct TProcess_Startup_Info {
 
 										OUT: ax je handle nove vytvoreneho procesu
 			2 - cekej na handle			 IN: rdx pointer na pole THandle, na ktere se ma cekat, rcx je pocet handlu
+											funkce se vraci jakmile je signalizovan prvni handle
 										OUT: rax je index handle, ktery byl signalizovan
 
 
@@ -137,12 +140,13 @@ const uint8_t scIO = 1;		//IO operace
 const uint8_t scCreate_File = 1;
 const uint8_t scWrite_File = 2;
 const uint8_t scRead_File = 3;
-const uint8_t scSet_File_Position = 4;
-const uint8_t scGet_File_Position = 5;
-const uint8_t scClose_Handle = 6;
-const uint8_t scGet_Current_Directory = 7;
-const uint8_t scSet_Current_Directory = 8;
-const uint8_t scCreate_Pipe = 9;
+const uint8_t scDelete_File = 4;
+const uint8_t scSet_File_Position = 5;
+const uint8_t scGet_File_Position = 6;
+const uint8_t scClose_Handle = 7;
+const uint8_t scGet_Current_Directory = 8;
+const uint8_t scSet_Current_Directory = 9;
+const uint8_t scCreate_Pipe = 10;
 
 
 const uint8_t scProc = 2;	//sprava procesu a vlaken
