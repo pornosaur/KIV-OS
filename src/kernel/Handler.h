@@ -25,11 +25,16 @@ public:
 	uint8_t get_flags() { return flags; }
 	size_t get_count() { return count; }
 	void inc_count() { count++; }
-	void dec_count()
-	{ 
+	
+	void dec_count() { 
 		if (count > 0) {
 			count--;
 		}
+	}
+
+	bool close_handler() {
+		dec_count();
+		return get_count() <= 0;
 	}
 };
 
