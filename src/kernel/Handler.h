@@ -14,7 +14,7 @@ public:
 	static const uint8_t fmOpen_Read = 3;
 
 	Handler(uint8_t flags = 0, size_t position = 0, size_t count = 0) : flags(flags), position(position), count(count) {};
-	~Handler() {};
+	virtual ~Handler() {};
 	
 	virtual uint16_t read(char* buffer, size_t length, size_t& read) = 0;		/* length = size buff */
 	virtual uint16_t write(char* buffer, size_t length, size_t& written) = 0;	/* length = size buffer*/

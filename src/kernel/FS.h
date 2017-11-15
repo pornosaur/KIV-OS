@@ -11,7 +11,7 @@ class FS
 public:
 
 	FS();
-	~FS();
+	virtual ~FS();
 
 	// FILE TYPE CONSTANTS
 	static const int FS_OBJECT_DIRECTORY = 0;
