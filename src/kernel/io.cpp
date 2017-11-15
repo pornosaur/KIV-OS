@@ -54,8 +54,8 @@ void HandleIO(kiv_os::TRegisters &regs) {
 void create_file(kiv_os::TRegisters &regs) {
 	
 	char *path = reinterpret_cast<char*>(regs.rdx.r);
-	uint8_t open_always = regs.rcx.r;
-	uint8_t file_atributes = regs.rdi.r;
+	uint8_t open_always = (uint8_t)regs.rcx.r;
+	uint8_t file_atributes = (uint8_t)regs.rdi.r;
 
 	FileHandler * handler = NULL;
 	uint16_t ret_code = 0;
@@ -81,9 +81,9 @@ void create_file(kiv_os::TRegisters &regs) {
 	}
 
 	std::shared_ptr<Handler> shared_handler(handler);
-	handles->add_handle(shared_handler);
+	kiv_os::THandle t_handle = handles->add_handle(shared_handler);
 
-	regs.rax.x = reinterpret_cast<uint16_t>(shared_handler.get);
+	regs.rax.x = t_handle;
 
 	//pro stdout/in/err neni potreba vytvaret soubor
 	//TODO volani FS pro otevreni souboru
@@ -189,7 +189,7 @@ void set_file_position(kiv_os::TRegisters &regs)
 		return;
 	}
 
-	long offset = regs.rdi.r;
+	long offset = (long)regs.rdi.r;
 	uint8_t origin = regs.rcx.l;
 
 	uint16_t ret_code = handler->fseek(offset, origin);
