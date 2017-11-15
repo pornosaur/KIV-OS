@@ -116,8 +116,12 @@ void write_file(kiv_os::TRegisters &regs) {
 	size_t written;
 
 	std::shared_ptr<Handler> cons = handles->get_handle_object(regs.rdx.x);
-	uint16_t ret_code = cons->write(reinterpret_cast<char*>(regs.rdi.r), (size_t)regs.rcx.r, written);
+	if (cons) {
+		set_error(regs, kiv_os::erInvalid_Handle);
+		return;
+	}
 
+	uint16_t ret_code = cons->write(reinterpret_cast<char*>(regs.rdi.r), (size_t)regs.rcx.r, written);
 	if (ret_code) {
 		set_error(regs, ret_code);
 		return;
@@ -140,9 +144,12 @@ void read_file(kiv_os::TRegisters &regs) {
 	size_t read;
 	//Unlock_Kernel();	//TODO: Can I allow to interruption while reading a file?
 	std::shared_ptr<Handler> cons = handles->get_handle_object(regs.rdx.x);
+	if (cons) {
+		set_error(regs, kiv_os::erInvalid_Handle);
+		return;
+	}
 	
 	uint16_t ret_code = cons->read(reinterpret_cast<char*>(regs.rdi.r), (size_t)regs.rcx.r, read);
-	
 	if (ret_code) {
 		set_error(regs, ret_code);
 		return;
@@ -165,7 +172,6 @@ void delete_file(kiv_os::TRegisters &regs) {
 
 void set_file_position(kiv_os::TRegisters &regs)
 {
-
 	std::shared_ptr<Handler> handler = handles->get_handle_object(regs.rdx.x);
 	if (handler) {
 		set_error(regs, kiv_os::erInvalid_Handle);
