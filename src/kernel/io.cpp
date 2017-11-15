@@ -138,28 +138,41 @@ void create_pipe(kiv_os::TRegisters &regs)
 
 void get_file_position(kiv_os::TRegisters &regs)
 {	
-	std::shared_ptr<Handler> cons = handles->get_handle_object(regs.rdx.x);
-	uint8_t origin = (uint8_t)regs.rcx.r;
+	std::shared_ptr<Handler> handler = handles->get_handle_object(regs.rdx.x);
+	if (handler) {
+		set_error(regs, kiv_os::erInvalid_Handle);
+		return;
+	}
 
-	size_t position = cons->ftell(); // TODO use origin
-
-	regs.rax.r = position;
+	regs.rax.r = handler->ftell();
 }
 
 void set_file_position(kiv_os::TRegisters &regs)
 {
-	std::shared_ptr<Handler> cons = handles->get_handle_object(regs.rdx.x);
+	
+	std::shared_ptr<Handler> handler = handles->get_handle_object(regs.rdx.x);
+	if (handler) {
+		set_error(regs, kiv_os::erInvalid_Handle);
+		return;
+	}
+
 	long offset = regs.rdi.r;
 	uint8_t origin = regs.rcx.l;
 
-	uint16_t ret_code = cons->fseek(offset, origin);
+	uint16_t ret_code = handler->fseek(offset, origin);
 	if (ret_code) {
-		regs.rax.r = ret_code;
-		regs.flags.carry = 1;
+		set_error(regs, ret_code);
 		return; // not success
 	}
 
 	if (regs.rcx.h) {
 		// TODO SET FILE SIZE TO POSITION
 	}
+}
+
+
+void set_error(kiv_os::TRegisters &regs, uint16_t code) {
+	regs.rax.r = code;
+	regs.flags.carry = 1;
+	return;
 }
