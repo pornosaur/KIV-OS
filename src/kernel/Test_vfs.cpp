@@ -47,6 +47,10 @@ Test_vfs::Test_vfs()
 	remove_twice_open_file();
 	remove_twice_open_dir();
 	create_file_over_open_file();
+	set_size_for_empty_file();
+	set_size_in_one_cluster();
+	set_size_more_than_one_cluster();
+	set_size_more_than_file_size();
 
 	system("pause");
 }
@@ -1734,6 +1738,182 @@ void Test_vfs::create_file_over_open_file()
 
 	result = vfs->remove_file("C:/file.txt");
 	assert(result == kiv_os::erSuccess);
+
+	std::cout << "OK\n" << std::endl;
+}
+
+void Test_vfs::set_size_for_empty_file()
+{
+	std::cout << "seting size for empty file" << std::endl;
+
+	FileHandler *file = NULL;
+	uint16_t result = vfs->create_file(&file, "C:/text.txt");
+	assert(file != NULL);
+	assert(result == kiv_os::erSuccess);
+	assert(file->get_dentry()->d_size == 1);
+
+	result = vfs->set_file_size(file, 0);
+	assert(result == kiv_os::erSuccess);
+	assert(file->get_dentry()->d_size == 1);
+
+	if (file->close_handler()) {
+		delete file;
+		file = NULL;
+	}
+	assert(file == NULL);
+
+	result = vfs->remove_file("C:/text.txt");
+	assert(result == kiv_os::erSuccess);;
+
+	std::cout << "OK\n" << std::endl;
+}
+
+void Test_vfs::set_size_in_one_cluster()
+{
+	std::cout << "setting size in one cluster" << std::endl;
+
+	FileHandler *file = NULL;
+	uint16_t result = vfs->create_file(&file, "C:/text.txt");
+	assert(file != NULL);
+	assert(result == kiv_os::erSuccess);
+
+	size_t bytes = 0;
+
+	char text[] = "small text small text small text small text";
+	result = file->write(text, 40, bytes);
+	assert(bytes == 40);
+	assert(result == kiv_os::erSuccess);
+
+	assert(file->get_dentry()->d_size == 40);
+
+	result = vfs->set_file_size(file, 22);
+	assert(result == kiv_os::erSuccess);
+	assert(file->get_dentry()->d_size == 22);
+
+	int buff_size = 100;
+	char buffer[100];
+	
+	result = file->read(buffer, buff_size, bytes);
+	assert(bytes == 22);
+	assert(result == kiv_os::erSuccess);
+	assert(strncmp(buffer, text, 22) == 0);
+
+	result = vfs->set_file_size(file, 0);
+	assert(result == kiv_os::erSuccess);
+	assert(file->get_dentry()->d_size == 1);
+	assert(file->get_dentry()->d_blocks == 1);
+
+	file->fseek(1, kiv_os::fsBeginning);
+	result = file->read(buffer, buff_size, bytes);
+	assert(bytes == 0);
+	assert(result == kiv_os::erSuccess);
+
+	if (file->close_handler()) {
+		delete file;
+		file = NULL;
+	}
+	assert(file == NULL);
+
+	result = vfs->remove_file("C:/text.txt");
+	assert(result == kiv_os::erSuccess);;
+
+	std::cout << "OK\n" << std::endl;
+}
+
+void Test_vfs::set_size_more_than_one_cluster()
+{
+	std::cout << "setting size in more than one cluster" << std::endl;
+
+	FileHandler *file = NULL;
+	uint16_t result = vfs->create_file(&file, "C:/text.txt");
+	assert(file != NULL);
+	assert(result == kiv_os::erSuccess);
+
+	size_t bytes = 0;
+
+	char text[] = "very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very very long text";
+	result = file->write(text, 220, bytes);
+	assert(bytes == 220);
+	assert(result == kiv_os::erSuccess);
+	assert(file->get_dentry()->d_blocks == 2);
+	assert(file->get_dentry()->d_size == 220);
+
+	result = vfs->set_file_size(file, 182);
+	assert(result == kiv_os::erSuccess);
+	assert(file->get_dentry()->d_size == 182);
+
+	int buff_size = 200;
+	char buffer[200];
+
+	result = file->read(buffer, buff_size, bytes);
+	assert(bytes == 182);
+	assert(result == kiv_os::erSuccess);
+	assert(strncmp(buffer, text, 182) == 0);
+
+	result = vfs->set_file_size(file, 60);
+	assert(result == kiv_os::erSuccess);
+	assert(file->get_dentry()->d_size == 60);
+	assert(file->get_dentry()->d_blocks == 1);
+
+	result = file->read(buffer, buff_size, bytes);
+	assert(bytes == 60);
+	assert(result == kiv_os::erSuccess);
+	assert(strncmp(buffer, text, 60) == 0);
+
+	if (file->close_handler()) {
+		delete file;
+		file = NULL;
+	}
+	assert(file == NULL);
+
+	result = vfs->remove_file("C:/text.txt");
+	assert(result == kiv_os::erSuccess);;
+
+	std::cout << "OK\n" << std::endl;
+}
+
+void Test_vfs::set_size_more_than_file_size()
+{
+	std::cout << "setting size more than file size" << std::endl;
+
+	FileHandler *file = NULL;
+	uint16_t result = vfs->create_file(&file, "C:/text.txt");
+	assert(file != NULL);
+	assert(result == kiv_os::erSuccess);
+
+	size_t bytes = 0;
+
+	char text[] = "small text small text small text small text";
+	result = file->write(text, 40, bytes);
+	assert(bytes == 40);
+	assert(result == kiv_os::erSuccess);
+	assert(file->get_dentry()->d_size == 40);
+
+	result = vfs->set_file_size(file, 70);
+	assert(result == kiv_os::erInvalid_Argument);
+	assert(file->get_dentry()->d_size == 40);
+
+	result = vfs->set_file_size(file, 40);
+	assert(result == kiv_os::erSuccess);
+	assert(file->get_dentry()->d_size == 40);
+
+	int buff_size = 200;
+	char buffer[200];
+
+	result = file->read(buffer, buff_size, bytes);
+	assert(bytes == 40);
+	assert(result == kiv_os::erSuccess);
+	assert(strncmp(buffer, text, 40) == 0);
+
+
+	if (file->close_handler()) {
+		delete file;
+		file = NULL;
+	}
+	assert(file == NULL);
+
+	result = vfs->remove_file("C:/text.txt");
+	assert(result == kiv_os::erSuccess);;
 
 	std::cout << "OK\n" << std::endl;
 }

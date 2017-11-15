@@ -361,10 +361,14 @@ int FatFS::fs_set_file_size(FileHandler * file, size_t file_size)
 
 	int result = fat_set_file_size(d_file, file_size, file->get_dentry()->d_dentry_position);
 
+	uint32_t new_size = d_file->file_size;
 	delete d_file;
+	
 
 	switch (result) {
 		case 0:
+			file->get_dentry()->d_size = new_size;
+			file->get_dentry()->d_blocks = (unsigned long)ceil((double)new_size / get_cluster_size());
 			return ERR_SUCCESS;
 
 		case 8:

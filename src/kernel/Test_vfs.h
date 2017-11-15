@@ -83,4 +83,10 @@ class Test_vfs
 		void remove_twice_open_file();
 		void remove_twice_open_dir();
 		void create_file_over_open_file();
+
+		// SET_FILE_SIZE
+		void set_size_for_empty_file();
+		void set_size_in_one_cluster();
+		void set_size_more_than_one_cluster();
+		void set_size_more_than_file_size();
 };
