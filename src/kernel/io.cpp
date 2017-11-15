@@ -106,7 +106,7 @@ void read_file(kiv_os::TRegisters &regs) {
 void close_handle(kiv_os::TRegisters &regs) { //TODO close pro konzoli? 
 	std::shared_ptr<Handler> cons = handles->get_handle_object(regs.rdx.x);
 	regs.flags.carry = !cons;
-	if (!regs.flags.carry) {
+	if (!regs.flags.carry && cons->close_handler()) {
 		handles->Remove_Handle(regs.rdx.x);
 		assert(cons.get());
 		cons.reset();	/* Free a handler */
