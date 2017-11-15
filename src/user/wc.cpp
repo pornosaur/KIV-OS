@@ -29,7 +29,8 @@ size_t __stdcall wc(const kiv_os::TRegisters &regs) {
 		characters += read;
 	} while (res && read > 0);
 
-	std::string out = "\t" + std::to_string(lines) + " \t" + std::to_string(words) + " \t" + std::to_string(characters) + "\n";	//TODO FILE NAME
+	std::string out = "\t" + std::to_string(lines) + " \t" + std::to_string(words)
+		+ " \t" + std::to_string(characters) + " " + str +"\n";
 	const char *output = kiv_os_str::copy_string(out);
 
 	size_t written;
