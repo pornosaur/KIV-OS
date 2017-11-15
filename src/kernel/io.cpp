@@ -203,15 +203,21 @@ void get_file_position(kiv_os::TRegisters &regs)
 	regs.rax.r = handler->ftell();
 }
 
-void close_handle(kiv_os::TRegisters &regs) { //TODO close pro konzoli? 
+void close_handle(kiv_os::TRegisters &regs) //TODO close pro konzoli? 
+{ 
 	std::shared_ptr<Handler> cons = handles->get_handle_object(regs.rdx.x);
-	regs.flags.carry = !cons;
-	if (!regs.flags.carry && cons->close_handler()) {
+	if (cons) {
+		set_error(regs, kiv_os::erInvalid_Handle);
+		return;
+	}
+
+	if (cons->close_handler()) {
 		handles->Remove_Handle(regs.rdx.x);
 		assert(cons.get());
 		cons.reset();	/* Free a handler */
 	}
 	else {
+		// Handle is used by other process
 		//TODO: Last Error here !!
 	}
 
