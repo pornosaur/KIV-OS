@@ -20,6 +20,7 @@ public:
 	uint16_t open_object(FileHandler **object, const std::string &absolute_path, unsigned int type);
 	uint16_t create_file(FileHandler **file, const std::string &absolute_path);
 	uint16_t remove_file(const std::string &absolute_path);
+	uint16_t set_file_size(FileHandler *file, size_t size);
 	
 	uint16_t register_fs(const std::string &name, FS * fs);
 

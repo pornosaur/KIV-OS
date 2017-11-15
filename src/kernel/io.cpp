@@ -202,7 +202,12 @@ void set_file_position(kiv_os::TRegisters &regs)
 	}
 
 	if (regs.rcx.h) {
-		// TODO SET FILE SIZE TO POSITION
+		ret_code = vfs->set_file_size(reinterpret_cast<FileHandler*>(handler.get()), handler->ftell());
+	}
+	
+	if (ret_code) {
+		set_error(regs, ret_code);
+		return; // not success
 	}
 }
 

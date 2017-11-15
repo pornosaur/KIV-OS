@@ -40,6 +40,7 @@ public:
 	virtual int fs_write_to_file(FileHandler *file, size_t *writed_bytes, char *buffer, size_t buffer_size) = 0;
 	virtual int fs_read_file(FileHandler *file, size_t *read_bytes, char *buffer, size_t buffer_size) = 0;
 	virtual int fs_remove_file(FileHandler *file) = 0;
+	virtual int fs_set_file_size(FileHandler *file, size_t file_size) = 0;
 
 	int sb_remove_dentry(struct dentry * dentry);
 

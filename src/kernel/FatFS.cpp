@@ -293,11 +293,7 @@ int FatFS::fs_write_to_file(FileHandler *file, size_t *writed_bytes, char *buffe
 		return ERR_INVALID_ARGUMENTS;
 	}
 
-	struct dir_file *d_file = new struct dir_file();
-	strcpy_s(d_file -> file_name, file->get_dentry()->d_name.c_str());
-	d_file -> file_size = file->get_dentry()->d_size;
-	d_file -> file_type = file->get_dentry()->d_file_type;
-	d_file -> first_cluster = file->get_dentry()->d_position;
+	struct dir_file *d_file = create_dir_file(file->get_dentry());
 
 	*writed_bytes = fat_write_file(d_file, file->get_dentry()->d_dentry_position, buffer, (unsigned int) buffer_size, (unsigned long)file->ftell());
 
@@ -316,17 +312,14 @@ int FatFS::fs_read_file(FileHandler *file, size_t *read_bytes, char *buffer, siz
 		return ERR_INVALID_ARGUMENTS;
 	}
 
-	struct dir_file d_file;
-	strcpy_s(d_file.file_name, file->get_dentry()->d_name.c_str());
-	d_file.file_size = file->get_dentry()->d_size;
-	d_file.file_type = file->get_dentry()->d_file_type;
-	d_file.first_cluster = file->get_dentry()->d_position;
+	struct dir_file *d_file = create_dir_file(file->get_dentry());
 
 	*read_bytes = fat_read_file(d_file, buffer, (unsigned int) buffer_size, (unsigned long)file->ftell());
 	if (*read_bytes < 0) {
 		return ERR_INVALID_ARGUMENTS;
 	}
 
+	delete d_file;
 	return ERR_SUCCESS;
 }
 
@@ -353,4 +346,43 @@ int FatFS::fs_remove_file(FileHandler *file)
 	default:
 		return ERR_DISK_ERROR;
 	}
+}
+
+int FatFS::fs_set_file_size(FileHandler * file, size_t file_size)
+{
+	if (file == NULL || 
+		file->get_dentry() == NULL || 
+		file->get_dentry()->d_file_type != FS::FS_OBJECT_FILE ||
+		file->get_dentry()->d_size < file_size) {
+		return ERR_INVALID_ARGUMENTS;
+	}
+
+	struct dir_file *d_file = create_dir_file(file->get_dentry());
+
+	int result = fat_set_file_size(d_file, file_size, file->get_dentry()->d_dentry_position);
+
+	delete d_file;
+
+	switch (result) {
+		case 0:
+			return ERR_SUCCESS;
+
+		case 8:
+			return ERR_INVALID_ARGUMENTS;
+
+		default:
+			return ERR_DISK_ERROR;
+	}
+}
+
+
+struct dir_file *FatFS::create_dir_file(struct dentry *dentry)
+{	
+	struct dir_file *d_file = new struct dir_file();
+	strcpy_s(d_file->file_name, dentry->d_name.c_str());
+	d_file->file_size = dentry->d_size;
+	d_file->file_type = dentry->d_file_type;
+	d_file->first_cluster = dentry->d_position;
+
+	return d_file;
 }

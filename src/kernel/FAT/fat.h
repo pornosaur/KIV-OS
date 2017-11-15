@@ -29,12 +29,14 @@ struct dir_file *fat_get_object_info_by_name(const char *file_name, unsigned int
 int fat_delete_file_by_name(const char *file_name, uint32_t act_fat_position);
 int fat_delete_file_by_file(struct dir_file *file, unsigned long position);
 
-size_t fat_read_file(struct dir_file file, char *buffer, unsigned int buffer_size, unsigned long offset);
+size_t fat_read_file(struct dir_file *file, char *buffer, unsigned int buffer_size, unsigned long offset);
 size_t fat_write_file(struct dir_file *file, unsigned long dir_position, char *buffer, unsigned int buffer_size, unsigned long offset);
 
 int fat_create_dir(struct dir_file **new_dir, const char *dir_name, uint32_t act_fat_position, unsigned long *dir_position);
 int fat_delete_empty_dir(const char *dir_name, uint32_t act_fat_position);
 struct dir_file *fat_read_dir(uint32_t act_fat_position, uint32_t *files);
+
+int fat_set_file_size(struct dir_file * file, size_t file_size, unsigned long dir_position);
 
 
 int is_boot_record_init();
