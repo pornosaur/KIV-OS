@@ -166,8 +166,22 @@ void read_file(kiv_os::TRegisters &regs) {
 
 }
 
-void delete_file(kiv_os::TRegisters &regs) {
-	 // TODO implement
+void delete_file(kiv_os::TRegisters &regs)
+{
+	char *path = reinterpret_cast<char*>(regs.rdx.r);
+
+	// TODO(nice to have) remove file or dentry by one call
+
+	uint16_t ret_code = vfs->remove_file(std::string(path)); // remove file
+
+	if (ret_code == kiv_os::erFile_Not_Found) {
+		ret_code = vfs->remove_emtpy_dir(std::string(path)); // remove directory
+	}
+
+	if (ret_code) {
+		set_error(regs, ret_code);
+		return;
+	}
 }
 
 void set_file_position(kiv_os::TRegisters &regs)

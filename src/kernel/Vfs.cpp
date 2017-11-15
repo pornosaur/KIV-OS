@@ -93,7 +93,7 @@ uint16_t Vfs::remove_file(const std::string &absolute_path)
 	FileHandler *file = NULL;
 	uint16_t ret_code1 = open_object(&file, absolute_path, FS::FS_OBJECT_FILE);
 
-	if (ret_code1 != FS::ERR_SUCCESS) {
+	if (ret_code1 != kiv_os::erSuccess) {
 		return ret_code1;
 	}
 
