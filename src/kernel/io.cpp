@@ -101,8 +101,12 @@ void write_file(kiv_os::TRegisters &regs) {
 	size_t written;
 
 	std::shared_ptr<Handler> cons = handles->get_handle_object(regs.rdx.x);
-	cons->fseek(0, kiv_os::fsBeginning);//TODO offset(0) zmenit na promenou
-	bool result = cons->write(reinterpret_cast<char*>(regs.rdi.r), (size_t)regs.rcx.r, written); //TODO offset(0) zmenit na promenou
+	uint16_t ret_code = cons->write(reinterpret_cast<char*>(regs.rdi.r), (size_t)regs.rcx.r, written);
+
+	if (ret_code) {
+		set_error(regs, ret_code);
+		return;
+	}
 	
 	regs.rax.r = written;
 
@@ -121,11 +125,15 @@ void read_file(kiv_os::TRegisters &regs) {
 	size_t read;
 	//Unlock_Kernel();	//TODO: Can I allow to interruption while reading a file?
 	std::shared_ptr<Handler> cons = handles->get_handle_object(regs.rdx.x);
-	cons->fseek(0, kiv_os::fsBeginning); //TODO offset(0) zmenit na promenou, nastavovat offset pro konzoli?
-	bool result = cons->read(reinterpret_cast<char*>(regs.rdi.r), (size_t)regs.rcx.r, read); //TODO offset(0) zmenit na promenou, nastavovat offset pro konzoli?
+	
+	uint16_t ret_code = cons->read(reinterpret_cast<char*>(regs.rdi.r), (size_t)regs.rcx.r, read);
+	
+	if (ret_code) {
+		set_error(regs, ret_code);
+		return;
+	}
+
 	regs.rax.r = read;
-	regs.flags.carry = !result; //TODO Erro like this?
-		//TODO Cteni z fs
 
 		/*HANDLE hnd = Resolve_kiv_os_Handle(regs.rdx.x);
 		regs.flags.carry = hnd == INVALID_HANDLE_VALUE;
