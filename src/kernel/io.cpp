@@ -16,26 +16,21 @@ void HandleIO(kiv_os::TRegisters &regs) {
 	switch (regs.rax.l) {
 		case kiv_os::scCreate_File: {
 			create_file(regs);
-			break;	//scCreateFile
+			break;
 		}
 
 		case kiv_os::scWrite_File: {
 			write_file(regs);
-			break; //scWriteFile
-		}
-
-		case kiv_os::scClose_Handle: {
-			close_handle(regs);
-			break;	//CloseFile
-		}
-			
-		case kiv_os::scRead_File: {
-			read_file(regs);			
 			break;
 		}
 
-		case kiv_os::scCreate_Pipe: {
-			create_pipe(regs);
+		case kiv_os::scRead_File: {
+			read_file(regs);
+			break;
+		}
+
+		case kiv_os::scDelete_File: {
+			delete_file(regs);
 			break;
 		}
 
@@ -46,6 +41,26 @@ void HandleIO(kiv_os::TRegisters &regs) {
 
 		case kiv_os::scGet_File_Position: {
 			get_file_position(regs);
+			break;
+		}
+
+		case kiv_os::scClose_Handle: {
+			close_handle(regs);
+			break;
+		}
+
+		case kiv_os::scGet_Current_Directory: {
+			get_current_directory(regs);
+			break;
+		}
+
+		case kiv_os::scSet_Current_Directory: {
+			set_current_directory(regs);
+			break;
+		}
+			
+		case kiv_os::scCreate_Pipe: {
+			create_pipe(regs);
 			break;
 		}
 	}
@@ -144,53 +159,13 @@ void read_file(kiv_os::TRegisters &regs) {
 
 }
 
-void close_handle(kiv_os::TRegisters &regs) { //TODO close pro konzoli? 
-	std::shared_ptr<Handler> cons = handles->get_handle_object(regs.rdx.x);
-	regs.flags.carry = !cons;
-	if (!regs.flags.carry && cons->close_handler()) {
-		handles->Remove_Handle(regs.rdx.x);
-		assert(cons.get());
-		cons.reset();	/* Free a handler */
-	}
-	else {
-		//TODO: Last Error here !!
-	}
-
-	//HANDLE hnd = Resolve_kiv_os_Handle(regs.rdx.x);
-	//regs.flags.carry = !CloseHandle(hnd);
-	//if (!regs.flags.carry) Remove_Handle(regs.rdx.x);
-	//else regs.rax.r = GetLastError();
-}
-
-void create_pipe(kiv_os::TRegisters &regs)
-{
-	//TODO debug auto
-	//TODO return errors
-	kiv_os::THandle* pipe_handles = reinterpret_cast<kiv_os::THandle*>(regs.rdx.r);
-
-	Pipe *pipe = new Pipe();
-
-	std::shared_ptr<PipeHandler> handle_write = std::make_shared<PipeHandler>(pipe, PipeHandler::fmOpen_Write);
-	std::shared_ptr<PipeHandler> handle_read = std::make_shared<PipeHandler>(pipe, PipeHandler::fmOpen_Read);
-	
-	*pipe_handles = handles->add_handle(handle_write);
-	*(pipe_handles + 1) = handles->add_handle(handle_read);
-}
-
-void get_file_position(kiv_os::TRegisters &regs)
-{	
-	std::shared_ptr<Handler> handler = handles->get_handle_object(regs.rdx.x);
-	if (handler) {
-		set_error(regs, kiv_os::erInvalid_Handle);
-		return;
-	}
-
-	regs.rax.r = handler->ftell();
+void delete_file(kiv_os::TRegisters &regs) {
+	 // TODO implement
 }
 
 void set_file_position(kiv_os::TRegisters &regs)
 {
-	
+
 	std::shared_ptr<Handler> handler = handles->get_handle_object(regs.rdx.x);
 	if (handler) {
 		set_error(regs, kiv_os::erInvalid_Handle);
@@ -209,6 +184,58 @@ void set_file_position(kiv_os::TRegisters &regs)
 	if (regs.rcx.h) {
 		// TODO SET FILE SIZE TO POSITION
 	}
+}
+
+void get_file_position(kiv_os::TRegisters &regs)
+{
+	std::shared_ptr<Handler> handler = handles->get_handle_object(regs.rdx.x);
+	if (handler) {
+		set_error(regs, kiv_os::erInvalid_Handle);
+		return;
+	}
+
+	regs.rax.r = handler->ftell();
+}
+
+void close_handle(kiv_os::TRegisters &regs) { //TODO close pro konzoli? 
+	std::shared_ptr<Handler> cons = handles->get_handle_object(regs.rdx.x);
+	regs.flags.carry = !cons;
+	if (!regs.flags.carry && cons->close_handler()) {
+		handles->Remove_Handle(regs.rdx.x);
+		assert(cons.get());
+		cons.reset();	/* Free a handler */
+	}
+	else {
+		//TODO: Last Error here !!
+	}
+
+	//HANDLE hnd = Resolve_kiv_os_Handle(regs.rdx.x);
+	//regs.flags.carry = !CloseHandle(hnd);
+	//if (!regs.flags.carry) Remove_Handle(regs.rdx.x);
+	//else regs.rax.r = GetLastError();
+}
+
+void get_current_directory(kiv_os::TRegisters &regs) {
+	// TODO implement
+}
+
+void set_current_directory(kiv_os::TRegisters &regs) {
+	// TODO implement
+}
+
+void create_pipe(kiv_os::TRegisters &regs)
+{
+	//TODO debug auto
+	//TODO return errors
+	kiv_os::THandle* pipe_handles = reinterpret_cast<kiv_os::THandle*>(regs.rdx.r);
+
+	Pipe *pipe = new Pipe();
+
+	std::shared_ptr<PipeHandler> handle_write = std::make_shared<PipeHandler>(pipe, PipeHandler::fmOpen_Write);
+	std::shared_ptr<PipeHandler> handle_read = std::make_shared<PipeHandler>(pipe, PipeHandler::fmOpen_Read);
+	
+	*pipe_handles = handles->add_handle(handle_write);
+	*(pipe_handles + 1) = handles->add_handle(handle_read);
 }
 
 
