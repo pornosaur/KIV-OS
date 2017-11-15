@@ -6,6 +6,9 @@ ProcessManager *processManager;
 std::shared_ptr<Handles> handles;
 BinSemaphore interrupt_sem;
 HMODULE User_Programs;
+Vfs *vfs;
+char *fat_memory;
+
 void Set_Error(const bool failed, kiv_os::TRegisters &regs) {
 	if (failed) {
 		regs.flags.carry = true;
@@ -31,10 +34,24 @@ void Initialize_Kernel() {
 	processManager = new ProcessManager();
 	handles->init_console_handles();
 	
+	// virtual memory initialization
+	size_t memory_size = 4096;
+	fat_memory = new char[memory_size];
+
+	// intialization FAT
+	FatFS::init_fat_disk(fat_memory, memory_size, 128u);
+	FS *fs = new FatFS(fat_memory, memory_size, "C:");
+	
+	// register FAT in VFS
+	vfs = new Vfs();
+	vfs->register_fs("C:", fs);
 }
 
 void Shutdown_Kernel() {
 	FreeLibrary(User_Programs);
+
+	delete[] fat_memory;
+	delete vfs;
 }
 
 void __stdcall Sys_Call(kiv_os::TRegisters &regs) 

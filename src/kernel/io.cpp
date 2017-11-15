@@ -52,6 +52,39 @@ void HandleIO(kiv_os::TRegisters &regs) {
 }
 
 void create_file(kiv_os::TRegisters &regs) {
+	
+	char *path = reinterpret_cast<char*>(regs.rdx.r);
+	uint8_t open_always = regs.rcx.r;
+	uint8_t file_atributes = regs.rdi.r;
+
+	FileHandler * handler = NULL;
+	uint16_t ret_code = 0;
+	
+	if (file_atributes & kiv_os::faDirectory) { 
+		// create/open directory
+		ret_code = vfs->create_dir(&handler, std::string(path));
+	}
+	else {
+		if (open_always) {
+			// open file
+			ret_code = vfs->open_object(&handler, std::string(path), FS::FS_OBJECT_FILE);
+		}
+		else {
+			// crate file
+			ret_code = vfs->create_file(&handler, std::string(path));
+		}
+	}
+
+	if (ret_code) {
+		set_error(regs, ret_code);
+		return;
+	}
+
+	std::shared_ptr<Handler> shared_handler(handler);
+	handles->add_handle(shared_handler);
+
+	regs.rax.x = reinterpret_cast<uint16_t>(shared_handler.get);
+
 	//pro stdout/in/err neni potreba vytvaret soubor
 	//TODO volani FS pro otevreni souboru
 	//TODO catch errors
