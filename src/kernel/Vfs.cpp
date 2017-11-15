@@ -8,8 +8,7 @@ Vfs::Vfs()
 
 Vfs::~Vfs()
 {
-	// TODO remove list of FS
-	// Use shared pointer will be solution (FS is created somewhere and add to Vfs by register_FS)
+	for (std::pair<std::string, FS*> pair : file_systems) delete pair.second;
 }
 
 uint16_t Vfs::create_dir(FileHandler ** directory, const std::string &absolute_path)
