@@ -27,9 +27,6 @@ size_t __stdcall echo(const kiv_os::TRegisters &regs) {
 	return writen;
 }
 
-size_t __stdcall wc(const kiv_os::TRegisters &regs) {
-	return 0;
-}
 
 size_t __stdcall sort(const kiv_os::TRegisters &regs) {
 	return 0;
