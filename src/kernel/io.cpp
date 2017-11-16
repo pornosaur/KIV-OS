@@ -115,13 +115,13 @@ void create_file(kiv_os::TRegisters &regs) {
 void write_file(kiv_os::TRegisters &regs) {
 	size_t written;
 
-	std::shared_ptr<Handler> cons = handles->get_handle_object(regs.rdx.x);
-	if (cons) {
+	std::shared_ptr<Handler> handle = handles->get_handle_object(regs.rdx.x);
+	if (!handle) {
 		set_error(regs, kiv_os::erInvalid_Handle);
 		return;
 	}
 
-	uint16_t ret_code = cons->write(reinterpret_cast<char*>(regs.rdi.r), (size_t)regs.rcx.r, written);
+	uint16_t ret_code = handle->write(reinterpret_cast<char*>(regs.rdi.r), (size_t)regs.rcx.r, written);
 	if (ret_code) {
 		set_error(regs, ret_code);
 		return;
@@ -143,13 +143,13 @@ void write_file(kiv_os::TRegisters &regs) {
 void read_file(kiv_os::TRegisters &regs) {
 	size_t read;
 	//Unlock_Kernel();	//TODO: Can I allow to interruption while reading a file?
-	std::shared_ptr<Handler> cons = handles->get_handle_object(regs.rdx.x);
-	if (cons) {
+	std::shared_ptr<Handler> handle = handles->get_handle_object(regs.rdx.x);
+	if (!handle) {
 		set_error(regs, kiv_os::erInvalid_Handle);
 		return;
 	}
 	
-	uint16_t ret_code = cons->read(reinterpret_cast<char*>(regs.rdi.r), (size_t)regs.rcx.r, read);
+	uint16_t ret_code = handle->read(reinterpret_cast<char*>(regs.rdi.r), (size_t)regs.rcx.r, read);
 	if (ret_code) {
 		set_error(regs, ret_code);
 		return;
@@ -215,16 +215,16 @@ void get_file_position(kiv_os::TRegisters &regs)
 
 void close_handle(kiv_os::TRegisters &regs) //TODO close pro konzoli? 
 { 
-	std::shared_ptr<Handler> cons = handles->get_handle_object(regs.rdx.x);
-	if (cons) {
+	std::shared_ptr<Handler> handle = handles->get_handle_object(regs.rdx.x);
+	if (!handle) {
 		set_error(regs, kiv_os::erInvalid_Handle);
 		return;
 	}
 
-	if (cons->close_handler()) {
+	if (handle->close_handler()) {
 		handles->Remove_Handle(regs.rdx.x);
-		assert(cons.get());
-		cons.reset();	/* Free a handler */
+		assert(handle.get());
+		handle.reset();	/* Free a handler */
 	}
 	else {
 		// Handle is used by other process
