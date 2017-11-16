@@ -6,19 +6,22 @@
 
 size_t __stdcall wc(const kiv_os::TRegisters &regs) {
 	kiv_os::TProcess_Startup_Info *tsi = reinterpret_cast<kiv_os::TProcess_Startup_Info*> (regs.rdi.r);
+	
 	char *str = tsi->arg;		
 
-	kiv_os::THandle handle = kiv_os::stdInput;		//TODO DELETE this definition, only declaration;
-	if (strlen(str) == 0) {
-		handle = kiv_os::stdInput;
+	kiv_os::THandle handle = tsi->stdin_t;		//TODO DELETE this definition, only declaration;
+	/*if (strlen(str) == 0) {
+		handle = tsi->stdin_t;
 	}
 	else {
 		//handle = kiv_os_rtl::Create_File(str, kiv_os::fmOpen_Always);		//TODO open file on disk
 	}
+	//shandle = kiv_os::stdInput;*/
 
 	size_t read, lines = 0, words = 0, characters = 0;
 
 	char *input = (char *)malloc(1024 * sizeof(char));
+
 	bool res = true;
 	do {
 		res = kiv_os_rtl::Read_File(handle, input, 1024, read);
@@ -42,7 +45,7 @@ size_t __stdcall wc(const kiv_os::TRegisters &regs) {
 	return 0;
 }
 
-void calculate(std::string &str, size_t &lines, size_t &words)
+void calculate(std::string &str, size_t &lines, size_t &words/*, size_t &characters*/)
 {
 	std::smatch match;
 	static std::regex reg("([^\\s]*)(\\s*)");
@@ -50,10 +53,13 @@ void calculate(std::string &str, size_t &lines, size_t &words)
 	while (!str.empty() && std::regex_search(str, match, reg)) {
 		if (!match[2].str().empty()) {
 			std::string tmp = match[2].str();
-			lines += std::count(tmp.begin(), tmp.end(), '\n');
+			size_t a = std::count(tmp.begin(), tmp.end(), '\n');
+			lines += a;
+			//characters++;
 		}
 
 		words++;
+		//characters += str.size();
 		str = match.suffix();
 	}
 }
