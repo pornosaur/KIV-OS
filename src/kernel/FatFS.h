@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <cassert>
 
 #include "VfsStructures.h"
 #include "FileHandler.h"
@@ -19,7 +20,7 @@ public:
 
 	int fs_create_dir(FileHandler **directory, const std::string &absolute_path);
 	int fs_remove_emtpy_dir(FileHandler *file);
-	int fs_read_dir(FileHandler *file);
+	int fs_read_dir(FileHandler *file, size_t *read_bytes, char *buffer, size_t buffer_size);
 	int fs_open_object(FileHandler **object, const std::string &absolute_path, unsigned int type);
 	int fs_create_file(FileHandler **file, const std::string &absolute_path); /* smaze jiz existujici soubor, existuje-li*/
 	int fs_write_to_file(FileHandler *file, size_t *writed_bytes, char *buffer, size_t buffer_size);

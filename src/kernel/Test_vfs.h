@@ -89,4 +89,10 @@ class Test_vfs
 		void set_size_in_one_cluster();
 		void set_size_more_than_one_cluster();
 		void set_size_more_than_file_size();
+
+		// READ DIRECTORY
+		void read_empty_dir();
+		void read_full_dir();
+		void read_half_full_dir();
+		void read_dir_with_small_buffer();
 };

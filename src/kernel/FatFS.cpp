@@ -157,10 +157,52 @@ int FatFS::fs_remove_emtpy_dir(FileHandler *file)
 	}
 }
 
-int FatFS::fs_read_dir(FileHandler *file)
+int FatFS::fs_read_dir(FileHandler *file, size_t *read_bytes, char *buffer, size_t buffer_size)
 {
+	if (file == NULL || file->get_dentry() == NULL || file->get_dentry()->d_file_type != FS::FS_OBJECT_DIRECTORY || buffer == NULL || buffer_size == 0) {
+		return ERR_INVALID_ARGUMENTS;
+	}
+
+	size_t i = 0;
+	size_t buffer_position = 0;
+	size_t record_size = sizeof(kiv_os::TDir_Entry);
+
+	uint32_t read_size = 0;
+	unsigned long *positions = new unsigned long[FatFS::f_data->max_dir_entries];
+	struct dir_file *files = fat_read_dir(FatFS::f_data, file->get_dentry()->d_position, &read_size, positions);
+	assert(read_size <= FatFS::f_data->max_dir_entries);
+
+	size_t file_position = FatFS::f_data->start_of_root_dir + (file->get_dentry()->d_position * FatFS::f_data->boot_record->cluster_size);
+
+	kiv_os::TDir_Entry dir_entry;
+	for (i = 0; i < read_size; i++) {
+		
+		if (buffer_position + record_size > buffer_size) {
+			break;
+		}
+		
+		if (file_position + file->ftell() <= positions[i]) {
+			strncpy_s(dir_entry.file_name, files[i].file_name, NAME_SIZE);
+			dir_entry.file_attributes = 0;
+
+			if (files[i].file_type == OBJECT_DIRECTORY) {
+				dir_entry.file_attributes |= kiv_os::faDirectory;
+			}
+
+			memcpy(buffer + buffer_position, &dir_entry, record_size);
+			buffer_position += record_size;
+
+			file->fseek(sizeof(struct dir_file) + positions[i] - file_position, kiv_os::fsBeginning, kiv_os::fsSet_Position);
+		}
+		
+	}
+
+	free(files);
+	delete[] positions;
+
+	*read_bytes = buffer_position;
+
 	return ERR_SUCCESS;
-	//TODO
 }
 
 int FatFS::fs_create_file(FileHandler **file, const std::string &absolute_path)

@@ -350,7 +350,7 @@ int fat_create_dir(struct fat_data *f_data, struct dir_file **new_dir, const cha
 		return 12; // OUT OF MEMORY
 	}
 
-    init_object(*new_dir, dir_name, 0, OBJECT_DIRECTORY, clusters[0]);
+    init_object(*new_dir, dir_name, f_data->boot_record->dir_clusters * f_data->boot_record->cluster_size, OBJECT_DIRECTORY, clusters[0]);
 
     write_empty_dir_to_fat(f_data->memory, f_data->memory_size, clusters, (uint32_t) file_cluster_count, f_data->start_of_root_dir, f_data->boot_record->cluster_size);
     write_to_dir(f_data->memory, f_data->memory_size, *new_dir, (uint32_t) *dir_position);
@@ -695,7 +695,7 @@ size_t write_same_file(struct fat_data *f_data, uint32_t *old_clusters, uint32_t
     return write_bytes_to_fat(f_data->memory, f_data->memory_size, buffer, buffer_size, offset, old_clusters,  new_file_clusters_size, f_data->start_of_root_dir, f_data->boot_record->cluster_size);
 }
 
-struct dir_file *fat_read_dir(struct fat_data *f_data, uint32_t act_fat_position, uint32_t *files) {
+struct dir_file *fat_read_dir(struct fat_data *f_data, uint32_t act_fat_position, uint32_t *files, unsigned long * positions) {
 	if (f_data == NULL || f_data->boot_record == NULL) {
         return NULL;
     }
@@ -704,7 +704,8 @@ struct dir_file *fat_read_dir(struct fat_data *f_data, uint32_t act_fat_position
         return NULL;
     }
 
-    return get_all_in_dir(f_data->memory, f_data->memory_size, files, NULL, act_fat_position, f_data->max_dir_entries);
+    return get_all_in_dir(f_data->memory, f_data->memory_size, files, positions, 
+		f_data->start_of_root_dir + (act_fat_position * f_data->boot_record->cluster_size), f_data->max_dir_entries);
 }
 
 int fat_set_file_size(struct fat_data *f_data, struct dir_file * file, size_t file_size, unsigned long dir_position)

@@ -35,7 +35,7 @@ size_t fat_write_file(struct fat_data *f_data, struct dir_file *file, unsigned l
 
 int fat_create_dir(struct fat_data *f_data, struct dir_file **new_dir, const char *dir_name, uint32_t act_fat_position, unsigned long *dir_position);
 int fat_delete_empty_dir(struct fat_data *f_data, const char *dir_name, uint32_t act_fat_position);
-struct dir_file *fat_read_dir(struct fat_data *f_data, uint32_t act_fat_position, uint32_t *files);
+struct dir_file *fat_read_dir(struct fat_data *f_data, uint32_t act_fat_position, uint32_t *files, unsigned long * positions);
 
 int fat_set_file_size(struct fat_data *f_data, struct dir_file * file, size_t file_size, unsigned long dir_position);
 

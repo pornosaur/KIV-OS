@@ -17,7 +17,13 @@ uint16_t FileHandler::read(char * buffer, size_t length, size_t & read)
 	}
 
 	FS * m_fs = dentry->d_fs;
-	int ret_code = m_fs->fs_read_file(this, &read, buffer, length);
+	int ret_code = 0;
+	
+	if (dentry->d_file_type == FS::FS_OBJECT_DIRECTORY) {
+		ret_code = m_fs->fs_read_dir(this, &read, buffer, length); // directory
+	} else {
+		ret_code = m_fs->fs_read_file(this, &read, buffer, length); // not directory
+	}
 
 	if (ret_code == FS::ERR_SUCCESS) {
 		return kiv_os::erSuccess;

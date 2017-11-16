@@ -41,7 +41,6 @@ Test_vfs::Test_vfs()
 	create_dir_with_space_in_name();
 	folder_dir_same_name();
 	test_more_subfiles();
-	test_close_all_dentry_memory_leak();
 	write_to_twice_open_file();
 	open_dir_twice();
 	remove_twice_open_file();
@@ -51,6 +50,13 @@ Test_vfs::Test_vfs()
 	set_size_in_one_cluster();
 	set_size_more_than_one_cluster();
 	set_size_more_than_file_size();
+	read_empty_dir();
+	read_full_dir();
+	read_half_full_dir();
+	read_dir_with_small_buffer();
+
+
+	test_close_all_dentry_memory_leak(); // At the end. Left data in memory
 
 	system("pause");
 }
@@ -1929,6 +1935,242 @@ void Test_vfs::set_size_more_than_file_size()
 
 	result = vfs->remove_file("C:/text.txt");
 	assert(result == kiv_os::erSuccess);;
+
+	std::cout << "OK\n" << std::endl;
+}
+
+void Test_vfs::read_empty_dir()
+{
+	std::cout << "reading empty directory" << std::endl;
+
+	FileHandler *dir= NULL;
+	uint16_t result = vfs->open_object(&dir, "C:", FS::FS_OBJECT_DIRECTORY);
+	assert(dir != NULL);
+	assert(result == kiv_os::erSuccess);
+
+	int buff_size = 300;
+	char buffer[300];
+
+	size_t bytes = 0;
+	result = dir->read(buffer, buff_size, bytes);
+	assert(bytes == 0);
+	assert(result == kiv_os::erSuccess);
+
+	if (dir->close_handler()) {
+		delete dir;
+		dir = NULL;
+	}
+	assert(dir == NULL);
+
+	std::cout << "OK\n" << std::endl;
+}
+
+void Test_vfs::read_full_dir()
+{
+	std::cout << "reading full directory" << std::endl;
+
+	FileHandler *file = NULL;
+	uint16_t result = vfs->create_file(&file, "C:/text1.txt");
+	assert(file != NULL);
+	assert(result == kiv_os::erSuccess);
+	if (file->close_handler()) {
+		delete file;
+		file = NULL;
+	}
+
+	result = vfs->create_file(&file, "C:/text2.txt");
+	assert(file != NULL);
+	assert(result == kiv_os::erSuccess);
+	if (file->close_handler()) {
+		delete file;
+		file = NULL;
+	}
+
+	result = vfs->create_dir(&file, "C:/directory1");
+	assert(file != NULL);
+	assert(result == kiv_os::erSuccess);
+	if (file->close_handler()) {
+		delete file;
+		file = NULL;
+	}
+
+	result = vfs->create_file(&file, "C:/text3.txt");
+	assert(file != NULL);
+	assert(result == kiv_os::erSuccess);
+	if (file->close_handler()) {
+		delete file;
+		file = NULL;
+	}
+
+	result = vfs->create_dir(&file, "C:/directory2");
+	assert(file != NULL);
+	assert(result == kiv_os::erSuccess);
+	if (file->close_handler()) {
+		delete file;
+		file = NULL;
+	}
+
+	result = vfs->create_dir(&file, "C:/directory3");
+	assert(file == NULL);
+	assert(result == kiv_os::erNo_Left_Space);
+
+
+	FileHandler *dir = NULL;
+	result = vfs->open_object(&dir, "C:", FS::FS_OBJECT_DIRECTORY);
+	assert(dir != NULL);
+	assert(result == kiv_os::erSuccess);
+
+	int buff_size = 200;
+	char buffer[200];
+
+	size_t bytes = 0;
+	result = dir->read(buffer, buff_size, bytes);
+	assert(bytes == 5 * sizeof(kiv_os::TDir_Entry));
+	assert(result == kiv_os::erSuccess);
+
+	if (dir->close_handler()) {
+		delete dir;
+		dir = NULL;
+	}
+
+	result = vfs->remove_file("C:/text1.txt");
+	assert(result == kiv_os::erSuccess);
+	result = vfs->remove_file("C:/text2.txt");
+	assert(result == kiv_os::erSuccess);
+	result = vfs->remove_file("C:/text3.txt");
+	assert(result == kiv_os::erSuccess);
+	result = vfs->remove_emtpy_dir("C:/directory1");
+	assert(result == kiv_os::erSuccess);
+	result = vfs->remove_emtpy_dir("C:/directory2");
+	assert(result == kiv_os::erSuccess);
+
+	std::cout << "OK\n" << std::endl;
+}
+
+void Test_vfs::read_half_full_dir()
+{
+	std::cout << "reading half full directory" << std::endl;
+
+	FileHandler *file = NULL;
+	uint16_t result = vfs->create_dir(&file, "C:/directory");
+	assert(file != NULL);
+	assert(result == kiv_os::erSuccess);
+	if (file->close_handler()) {
+		delete file;
+		file = NULL;
+	}
+
+	result = vfs->create_file(&file, "C:/directory/text1.txt");
+	assert(file != NULL);
+	assert(result == kiv_os::erSuccess);
+	if (file->close_handler()) {
+		delete file;
+		file = NULL;
+	}
+
+	result = vfs->create_file(&file, "C:/directory/text2.txt");
+	assert(file != NULL);
+	assert(result == kiv_os::erSuccess);
+	if (file->close_handler()) {
+		delete file;
+		file = NULL;
+	}
+
+	FileHandler *dir = NULL;
+	result = vfs->open_object(&dir, "C:/directory", FS::FS_OBJECT_DIRECTORY);
+	assert(dir != NULL);
+	assert(result == kiv_os::erSuccess);
+
+	int buff_size = 200;
+	char buffer[200];
+
+	size_t bytes = 0;
+	result = dir->read(buffer, buff_size, bytes);
+	assert(bytes == 2 * sizeof(kiv_os::TDir_Entry));
+	assert(result == kiv_os::erSuccess);
+
+	if (dir->close_handler()) {
+		delete dir;
+		dir = NULL;
+	}
+
+	result = vfs->remove_file("C:/directory/text1.txt");
+	assert(result == kiv_os::erSuccess);
+	result = vfs->remove_file("C:/directory/text2.txt");
+	assert(result == kiv_os::erSuccess);
+	result = vfs->remove_emtpy_dir("C:/directory");
+	assert(result == kiv_os::erSuccess);
+
+	std::cout << "OK\n" << std::endl;
+}
+
+void Test_vfs::read_dir_with_small_buffer()
+{
+	std::cout << "reading direcotry with small buffer" << std::endl;
+
+	FileHandler *file = NULL;
+	uint16_t result = vfs->create_dir(&file, "C:/directory");
+	assert(file != NULL);
+	assert(result == kiv_os::erSuccess);
+	if (file->close_handler()) {
+		delete file;
+		file = NULL;
+	}
+
+	result = vfs->create_file(&file, "C:/directory/text1.txt");
+	assert(file != NULL);
+	assert(result == kiv_os::erSuccess);
+	if (file->close_handler()) {
+		delete file;
+		file = NULL;
+	}
+
+	result = vfs->create_file(&file, "C:/directory/text2.txt");
+	assert(file != NULL);
+	assert(result == kiv_os::erSuccess);
+	if (file->close_handler()) {
+		delete file;
+		file = NULL;
+	}
+
+	FileHandler *dir = NULL;
+	result = vfs->open_object(&dir, "C:/directory", FS::FS_OBJECT_DIRECTORY);
+	assert(dir != NULL);
+	assert(result == kiv_os::erSuccess);
+
+	int buff_size = 10;
+	char buffer[200];
+
+	size_t bytes = 0;
+	result = dir->read(buffer, buff_size, bytes);
+	assert(bytes == 0);
+	assert(result == kiv_os::erSuccess);
+
+	buff_size = 25;
+	bytes = 0;
+	result = dir->read(buffer, buff_size, bytes);
+	assert(bytes == sizeof(kiv_os::TDir_Entry));
+	assert(result == kiv_os::erSuccess);
+
+	result = dir->read(buffer, buff_size, bytes);
+	assert(bytes == sizeof(kiv_os::TDir_Entry));
+	assert(result == kiv_os::erSuccess);
+
+	result = dir->read(buffer, buff_size, bytes);
+	assert(bytes == 0);
+	assert(result == kiv_os::erSuccess);
+
+	if (dir->close_handler()) {
+		delete dir;
+		dir = NULL;
+	}
+
+	result = vfs->remove_file("C:/directory/text1.txt");
+	assert(result == kiv_os::erSuccess);
+	result = vfs->remove_file("C:/directory/text2.txt");
+	assert(result == kiv_os::erSuccess);
+	result = vfs->remove_emtpy_dir("C:/directory");
+	assert(result == kiv_os::erSuccess);
 
 	std::cout << "OK\n" << std::endl;
 }
