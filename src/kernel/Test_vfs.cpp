@@ -855,6 +855,7 @@ void Test_vfs::write_read_file()
 	result = file->read(buffer, buff_size, bytes);
 	assert(bytes == 1);
 	assert(result == kiv_os::erSuccess);
+	file->fseek(0, kiv_os::fsBeginning, kiv_os::fsSet_Position);
 
 	char text[] = "small text";
 	result = file->write(text, 10, bytes);
@@ -865,6 +866,7 @@ void Test_vfs::write_read_file()
 	assert(result == kiv_os::erSuccess);
 	assert(bytes == 10);
 	assert(strncmp(buffer, text, 10) == 0);
+	assert(file->ftell() == 10);
 
 	if (file->close_handler()) {
 		delete file;
@@ -903,6 +905,7 @@ void Test_vfs::read_file_from_exact_position()
 	assert(bytes == 26);
 	assert(result == kiv_os::erSuccess);
 	assert(strncmp(buffer, text + 10, 26) == 0);
+	assert(file->ftell() == 36);
 
 	if (file->close_handler()) {
 		delete file;
@@ -938,6 +941,7 @@ void Test_vfs::write_read_file_bigger_than_one_cluster()
 	assert(bytes == 200);
 	assert(result == kiv_os::erSuccess);
 	assert(strncmp(buffer, text, 200) == 0);
+	assert(file->ftell() == 200);
 
 	if (file->close_handler()) {
 		delete file;
@@ -973,6 +977,7 @@ void Test_vfs::write_read_exactly_one_cluster()
 	assert(bytes == 128);
 	assert(result == kiv_os::erSuccess);
 	assert(strncmp(buffer, text, 128) == 0);
+	assert(file->ftell() == 128);
 
 	if (file->close_handler()) {
 		delete file;
@@ -1009,6 +1014,7 @@ void Test_vfs::read_small_piece_of_file()
 	assert(bytes == 30);
 	assert(result == kiv_os::erSuccess);
 	assert(strncmp(buffer, text + 120, 30) == 0);
+	assert(file->ftell() == 150);
 
 	if (file->close_handler()) {
 		delete file;
@@ -1044,7 +1050,6 @@ void Test_vfs::read_all_file_by_pieces()
 
 	shuld_read = 31;
 	for (int i = 0; i < 200; i += 31) {
-		file->fseek(i, kiv_os::fsBeginning, 0);
 		if (200 - i < shuld_read) {
 			shuld_read = 200 - i;
 		}
@@ -1053,6 +1058,7 @@ void Test_vfs::read_all_file_by_pieces()
 		assert(bytes == shuld_read);
 		assert(result == kiv_os::erSuccess);
 		assert(strncmp(buffer, text + i, shuld_read) == 0);
+		assert(file->ftell() == i + shuld_read);
 	}
 
 	if (file->close_handler()) {
@@ -1091,6 +1097,8 @@ void Test_vfs::rewrite_file()
 	assert(bytes == 10);
 	assert(result == kiv_os::erSuccess);
 	assert(strncmp(buffer, text1, 10) == 0);
+	assert(file->ftell() == 10);
+	file->fseek(0, kiv_os::fsBeginning, kiv_os::fsSet_Position);
 
 
 	std::cout << "writing long text" << std::endl;
@@ -1103,6 +1111,7 @@ void Test_vfs::rewrite_file()
 	assert(bytes == 200);
 	assert(result == kiv_os::erSuccess);
 	assert(strncmp(buffer, text, 200) == 0);
+	assert(file->ftell() == 200);
 
 	std::cout << "writing short text" << std::endl;
 	file->fseek(10, kiv_os::fsBeginning, 0);
@@ -1117,6 +1126,7 @@ void Test_vfs::rewrite_file()
 	assert(result == kiv_os::erSuccess);
 	assert(strncmp(buffer, text, 10) == 0);
 	assert(strncmp(buffer + 10, text1, 10) == 0);
+	assert(file->ftell() == 20);
 
 	if (file->close_handler()) {
 		delete file;
@@ -1195,6 +1205,7 @@ void Test_vfs::create_file_with_space_in_name()
 	assert(bytes == 10);
 	assert(result == kiv_os::erSuccess);
 	assert(strncmp(text, buffer, 10) == 0);
+	assert(file->ftell() == 10);
 
 	if (file->close_handler()) {
 		delete file;
@@ -1568,6 +1579,7 @@ void Test_vfs::write_to_twice_open_file()
 	assert(bytes == 34);
 	assert(result == kiv_os::erSuccess);
 	assert(strncmp(buffer, text, 34) == 0);
+	assert(file2->ftell() == 34);
 
 	if (file1->close_handler()) {
 		delete file1;

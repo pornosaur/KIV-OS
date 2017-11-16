@@ -341,6 +341,10 @@ int FatFS::fs_write_to_file(FileHandler *file, size_t *writed_bytes, char *buffe
 		return ERR_INVALID_ARGUMENTS;
 	}
 
+	if (buffer_size == 0) {
+		return ERR_SUCCESS;
+	}
+
 	struct dir_file *d_file = create_dir_file(file->get_dentry());
 
 	int result =  fat_write_file(FatFS::f_data, d_file, file->get_dentry()->d_dentry_position, buffer, (unsigned int) buffer_size, writed_bytes, (unsigned long)file->ftell());
@@ -373,11 +377,11 @@ int FatFS::fs_read_file(FileHandler *file, size_t *read_bytes, char *buffer, siz
 	struct dir_file *d_file = create_dir_file(file->get_dentry());
 
 	int result = fat_read_file(FatFS::f_data, d_file, buffer, (unsigned int) buffer_size, read_bytes, (unsigned long)file->ftell());
-	
 	delete d_file;
 
 	switch (result) {
 	case 0:
+		file->fseek((long)(*read_bytes), kiv_os::fsCurrent, kiv_os::fsSet_Position);
 		return ERR_SUCCESS;
 	default:
 		return ERR_DISK_ERROR;
