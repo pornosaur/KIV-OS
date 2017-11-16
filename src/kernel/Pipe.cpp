@@ -34,7 +34,7 @@ bool Pipe::is_pipe_alive()
 }
 
 
-bool Pipe::pipe_write(char* buffer, size_t offset, size_t length, size_t& written)
+uint16_t Pipe::pipe_write(char* buffer, size_t offset, size_t length, size_t& written)
 {
 	std::unique_lock<std::mutex> lock(buff_m);
 	assert(writers);
@@ -52,7 +52,7 @@ bool Pipe::pipe_write(char* buffer, size_t offset, size_t length, size_t& writte
 		while (written_in_buff >= MAX_BUFFER_SIZE) {
 			if (!readers) {
 				close_pipe_write();
-				return false;
+				return kiv_os::erSuccess;
 			}
 
 			cv_writer.wait(lock);
@@ -80,10 +80,10 @@ bool Pipe::pipe_write(char* buffer, size_t offset, size_t length, size_t& writte
 
 	assert(written == length);
 	
-	return true;
+	return kiv_os::erSuccess;
 }
 
-bool Pipe::pipe_read(char* buffer, size_t offset, size_t length, size_t& read)
+uint16_t Pipe::pipe_read(char* buffer, size_t offset, size_t length, size_t& read)
 {
 	std::unique_lock<std::mutex> lock(buff_m);
 	offset = 0;	
@@ -92,7 +92,7 @@ bool Pipe::pipe_read(char* buffer, size_t offset, size_t length, size_t& read)
 		if (!writers) {
 			read = 0;
 			close_pipe_read();
-			return false;
+			return kiv_os::erSuccess;
 		}
 
 		cv_read.wait(lock);
@@ -118,5 +118,5 @@ bool Pipe::pipe_read(char* buffer, size_t offset, size_t length, size_t& read)
 	assert(written_in_buff >= 0);
 	cv_writer.notify_one();
 	
-	return true;
+	return kiv_os::erSuccess;
 }

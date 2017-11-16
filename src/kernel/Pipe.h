@@ -25,8 +25,8 @@ public:
 
 	bool is_pipe_alive();
 
-	bool pipe_write(char* buffer, size_t offset, size_t length, size_t& written);
-	bool pipe_read(char* buffer, size_t offset, size_t length, size_t& read);
+	uint16_t pipe_write(char* buffer, size_t offset, size_t length, size_t& written);
+	uint16_t pipe_read(char* buffer, size_t offset, size_t length, size_t& read);
 
 	Pipe() : readers(1), writers(1), written_in_buff(0), buffer_pipe(new char[MAX_BUFFER_SIZE]), last(0), first(0) {};
 	~Pipe();
