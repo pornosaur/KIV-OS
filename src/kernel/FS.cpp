@@ -143,3 +143,39 @@ struct dentry *FS::sb_find_dentry_in_dentry(struct dentry * f_dentry, const std:
 
 	return NULL;
 }
+
+uint16_t FS::translate_return_codes(int fs_ret_code)
+{
+	switch (fs_ret_code) {
+
+	case FS::ERR_SUCCESS:
+		return kiv_os::erSuccess;
+
+	case FS::ERR_FILE_NOT_FOUND:
+	case FS::ERR_INVALID_PATH:
+		return kiv_os::erFile_Not_Found;
+
+	case FS::ERR_DIRECTORY_IS_NOT_EMPTY:
+		return kiv_os::erDir_Not_Empty;
+
+	case FS::ERR_DIRECTORY_IS_FULL:
+	case FS::ERR_DISK_IS_FULL:
+		return kiv_os::erNo_Left_Space;
+
+	case FS::ERR_FILE_OPEN_BY_OTHER:
+	case FS::ERR_PERMISSION_DENIED:
+		return kiv_os::erPermission_Denied;
+
+	case FS::ERR_INVALID_ARGUMENTS:
+	case FS::ERR_FS_EXISTS:
+		return kiv_os::erInvalid_Argument;
+
+	case FS::ERR_DISK_ERROR:
+		return kiv_os::erIO;
+
+	case FS::ERR_OUT_OF_MEMORY:
+		return kiv_os::erOut_Of_Memory;
+	}
+
+	return kiv_os::erInvalid_Argument;
+}

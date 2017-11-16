@@ -7,11 +7,11 @@
 #include "library.h"
 #include "fat.h"
 
-size_t write_bigger_file(struct fat_data *f_data, uint32_t *old_clusters, uint32_t new_file_clusters_size, uint32_t old_file_clusters_size, char *buffer, unsigned int buffer_size, unsigned long offset);
+int write_bigger_file(struct fat_data *f_data, uint32_t *old_clusters, uint32_t new_file_clusters_size, uint32_t old_file_clusters_size, char *buffer, unsigned int buffer_size, size_t *writed, unsigned long offset);
 
-size_t write_smaller_file(struct fat_data *f_data, uint32_t *old_clusters, uint32_t new_file_clusters_size, uint32_t old_file_clusters_size, char *buffer, unsigned int buffer_size, unsigned long offset);
+int write_smaller_file(struct fat_data *f_data, uint32_t *old_clusters, uint32_t new_file_clusters_size, uint32_t old_file_clusters_size, char *buffer, unsigned int buffer_size, size_t *writed, unsigned long offset);
 
-size_t write_same_file(struct fat_data *f_data, uint32_t *old_clusters, uint32_t new_file_clusters_size, char *buffer, unsigned int buffer_size, unsigned long offset);
+int write_same_file(struct fat_data *f_data, uint32_t *old_clusters, uint32_t new_file_clusters_size, char *buffer, unsigned int buffer_size, size_t *writed, unsigned long offset);
 
 void create_values_from_clusters(const uint32_t *clusters, uint32_t *values, unsigned long size);
 
@@ -519,10 +519,9 @@ char* read_object(int *ret_code, int *data_size,const char file_name[], int32_t 
     return data;
 }*/
 
-size_t fat_read_file(struct fat_data *f_data, struct dir_file *file, char *buffer, unsigned int buffer_size, unsigned long offset) {
+int fat_read_file(struct fat_data *f_data, struct dir_file *file, char *buffer, unsigned int buffer_size, size_t *read, unsigned long offset) {
     uint32_t file_clusters_size = 0;
     uint32_t *clusters = NULL;
-	size_t writed_size = 0;
 
     if(
 			f_data == NULL ||
@@ -537,27 +536,27 @@ size_t fat_read_file(struct fat_data *f_data, struct dir_file *file, char *buffe
             file->file_size == 0
             ){
 
-        return -1;
+		return 1; // NOT INITIALIZE
     }
 
     clusters = get_file_clusters(file, &file_clusters_size, f_data->boot_record->cluster_size, f_data->fat1, f_data->boot_record->dir_clusters);
     if (clusters == NULL) {
-        return 0;
+		return 11; //CANT_GET_CLUSTERS
     }
 
-	writed_size = read_file(f_data->memory, f_data->memory_size, buffer, buffer_size, offset, file->file_size, f_data->boot_record->cluster_size, clusters, f_data->start_of_root_dir, file_clusters_size);
+	*read = read_file(f_data->memory, f_data->memory_size, buffer, buffer_size, offset, file->file_size, f_data->boot_record->cluster_size, clusters, f_data->start_of_root_dir, file_clusters_size);
 
     free(clusters);
 
-    return writed_size;
+    return 0; // SUCCESS
 }
 
-size_t fat_write_file(struct fat_data *f_data, struct dir_file *file, unsigned long dir_position, char *buffer, unsigned int buffer_size, unsigned long offset){
+int fat_write_file(struct fat_data *f_data, struct dir_file *file, unsigned long dir_position, char *buffer, unsigned int buffer_size, size_t *writed, unsigned long offset){
 
     uint32_t old_file_clusters_size = 0;
     uint32_t *old_clusters = NULL;
     unsigned long new_file_clusters_size = 0;
-    size_t writed_bytes = 0;
+	int result = 0;
 
     if(
 			f_data == NULL || 
@@ -573,7 +572,7 @@ size_t fat_write_file(struct fat_data *f_data, struct dir_file *file, unsigned l
             file -> first_cluster < 0
             ){
 
-        return 0;
+		return 1; // NOT INITIALIZE
     }
 
     // number of clusters of new file
@@ -585,53 +584,56 @@ size_t fat_write_file(struct fat_data *f_data, struct dir_file *file, unsigned l
     // get old clusters
     old_clusters = get_file_clusters(file, &old_file_clusters_size, f_data->boot_record->cluster_size, f_data->fat1, f_data->boot_record->dir_clusters);
     if (old_clusters == NULL) {
-        return 0;
+		return 11; //CANT_GET_CLUSTERS
     }
 
 
     if (old_file_clusters_size > new_file_clusters_size){
-        writed_bytes = write_smaller_file(f_data, old_clusters, new_file_clusters_size, old_file_clusters_size, buffer, buffer_size, offset);
+        result = write_smaller_file(f_data, old_clusters, new_file_clusters_size, old_file_clusters_size, buffer, buffer_size, writed, offset);
     } else if (old_file_clusters_size < new_file_clusters_size){
-        writed_bytes = write_bigger_file(f_data, old_clusters, new_file_clusters_size, old_file_clusters_size, buffer, buffer_size, offset);
+        result = write_bigger_file(f_data, old_clusters, new_file_clusters_size, old_file_clusters_size, buffer, buffer_size, writed, offset);
     } else {
-        writed_bytes = write_same_file(f_data, old_clusters, new_file_clusters_size, buffer, buffer_size, offset);
+        result = write_same_file(f_data, old_clusters, new_file_clusters_size, buffer, buffer_size, writed, offset);
     }
 
-    file -> file_size = (uint32_t) (writed_bytes + offset);
+	if (result) {
+		free(old_clusters);
+		return result;
+	}
 
-    if(writed_bytes >= 0){
+    if(*writed >= 0){
+		file->file_size = (uint32_t)(*writed + offset);
         write_to_dir(f_data->memory, f_data->memory_size, file, (uint32_t) dir_position);
     }
 
     free(old_clusters);
-    return writed_bytes;
+    return 0; // SUCCESS
 }
 
-size_t write_bigger_file(struct fat_data *f_data, uint32_t *old_clusters, uint32_t new_file_clusters_size, uint32_t old_file_clusters_size, char *buffer, unsigned int buffer_size, unsigned long offset){
+int write_bigger_file(struct fat_data *f_data, uint32_t *old_clusters, uint32_t new_file_clusters_size, uint32_t old_file_clusters_size, char *buffer, unsigned int buffer_size, size_t *writed, unsigned long offset){
 
     uint32_t *new_clusters = NULL;
     uint32_t *clusters = NULL;
     uint32_t *values = NULL;
     unsigned long number_of_new_clusters = 0;
-    size_t writed_bytes = 0;
     size_t i = 0;
 
     // search free space in fat ========================================================================================
     new_clusters = malloc(sizeof(uint32_t) * (new_file_clusters_size - old_file_clusters_size));
 	if (!new_clusters) {
-		return 0;
+		return 12; // OUT OF MEMORY
 	}
 
     if(find_empty_clusters(f_data->boot_record->usable_cluster_count, f_data->fat1, new_clusters, new_file_clusters_size - old_file_clusters_size) == -1){
         free(new_clusters);
-        return 0;
+        return 7; // FAT IS FULL
     }
 
     //write data =======================================================================================================
     clusters = malloc(sizeof(uint32_t) * new_file_clusters_size);
 	if (!clusters) {
 		free(new_clusters);
-		return 0;
+		return 12; // OUT OF MEMORY
 	}
 
     for(i = 0; i < new_file_clusters_size; i++){
@@ -642,7 +644,7 @@ size_t write_bigger_file(struct fat_data *f_data, uint32_t *old_clusters, uint32
             clusters[i] = new_clusters[i - old_file_clusters_size];
         }
     }
-    writed_bytes = write_bytes_to_fat(f_data->memory, f_data->memory_size, buffer, buffer_size, offset, clusters, new_file_clusters_size, f_data->start_of_root_dir, f_data->boot_record->cluster_size);
+    *writed = write_bytes_to_fat(f_data->memory, f_data->memory_size, buffer, buffer_size, offset, clusters, new_file_clusters_size, f_data->start_of_root_dir, f_data->boot_record->cluster_size);
     free(clusters);
 
 
@@ -652,7 +654,7 @@ size_t write_bigger_file(struct fat_data *f_data, uint32_t *old_clusters, uint32
     values = malloc(sizeof(uint32_t) * number_of_new_clusters);
 	if (!values) {
 		free(new_clusters);
-		return 0;
+		return 12; // OUT OF MEMORY
 	}
     create_values_from_clusters(new_clusters, values, number_of_new_clusters);
 
@@ -674,25 +676,24 @@ size_t write_bigger_file(struct fat_data *f_data, uint32_t *old_clusters, uint32
     // free pointers ===================================================================================================
     free(new_clusters);
     free(values);
-
-    return writed_bytes;
+	
+    return 0; // SUCCESS
 }
 
-size_t write_smaller_file(struct fat_data *f_data, uint32_t *old_clusters, uint32_t new_file_clusters_size, uint32_t old_file_clusters_size, char *buffer, unsigned int buffer_size, unsigned long offset){
+int write_smaller_file(struct fat_data *f_data, uint32_t *old_clusters, uint32_t new_file_clusters_size, uint32_t old_file_clusters_size, char *buffer, unsigned int buffer_size, size_t *writed, unsigned long offset){
 
-	size_t writed_bytes = 0;
 	int result = 0;
 
-    writed_bytes = write_bytes_to_fat(f_data->memory, f_data->memory_size, buffer, buffer_size, offset, old_clusters, new_file_clusters_size, f_data->start_of_root_dir, f_data->boot_record->cluster_size);
+    *writed = write_bytes_to_fat(f_data->memory, f_data->memory_size, buffer, buffer_size, offset, old_clusters, new_file_clusters_size, f_data->start_of_root_dir, f_data->boot_record->cluster_size);
 
  	result = remove_unused_clusters(f_data, old_clusters, old_file_clusters_size, new_file_clusters_size);
 
-	if (result) return 0;
-    return writed_bytes;
+	return result;
 }
 
-size_t write_same_file(struct fat_data *f_data, uint32_t *old_clusters, uint32_t new_file_clusters_size, char *buffer, unsigned int buffer_size, unsigned long offset){
-    return write_bytes_to_fat(f_data->memory, f_data->memory_size, buffer, buffer_size, offset, old_clusters,  new_file_clusters_size, f_data->start_of_root_dir, f_data->boot_record->cluster_size);
+int write_same_file(struct fat_data *f_data, uint32_t *old_clusters, uint32_t new_file_clusters_size, char *buffer, unsigned int buffer_size, size_t *writed, unsigned long offset){
+    *writed = write_bytes_to_fat(f_data->memory, f_data->memory_size, buffer, buffer_size, offset, old_clusters,  new_file_clusters_size, f_data->start_of_root_dir, f_data->boot_record->cluster_size);
+	return 0; // SUCCESS
 }
 
 struct dir_file *fat_read_dir(struct fat_data *f_data, uint32_t act_fat_position, uint32_t *files, unsigned long * positions) {

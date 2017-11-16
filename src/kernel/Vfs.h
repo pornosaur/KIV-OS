@@ -28,7 +28,5 @@ private:
 	std::map<std::string, FS*> file_systems;
 
 	FS * Vfs::find_fs_by_name(const std::string &name);
-
-	uint16_t translate_return_codes(int fs_ret_code);
 };
 

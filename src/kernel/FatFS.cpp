@@ -192,7 +192,7 @@ int FatFS::fs_read_dir(FileHandler *file, size_t *read_bytes, char *buffer, size
 			memcpy(buffer + buffer_position, &dir_entry, record_size);
 			buffer_position += record_size;
 
-			file->fseek(sizeof(struct dir_file) + positions[i] - file_position, kiv_os::fsBeginning, kiv_os::fsSet_Position);
+			file->fseek((long)(sizeof(struct dir_file) + positions[i] - file_position), kiv_os::fsBeginning, kiv_os::fsSet_Position);
 		}
 		
 	}
@@ -343,15 +343,25 @@ int FatFS::fs_write_to_file(FileHandler *file, size_t *writed_bytes, char *buffe
 
 	struct dir_file *d_file = create_dir_file(file->get_dentry());
 
-	*writed_bytes = fat_write_file(FatFS::f_data, d_file, file->get_dentry()->d_dentry_position, buffer, (unsigned int) buffer_size, (unsigned long)file->ftell());
+	int result =  fat_write_file(FatFS::f_data, d_file, file->get_dentry()->d_dentry_position, buffer, (unsigned int) buffer_size, writed_bytes, (unsigned long)file->ftell());
 
 	if (*writed_bytes != 0) {
-		file->get_dentry()->d_size = d_file -> file_size;
+		file->get_dentry()->d_size = d_file->file_size;
 		file->get_dentry()->d_blocks = (unsigned long) ceil((double)d_file -> file_size / FatFS::f_data->boot_record->cluster_size);
 	}
-
+	
 	delete d_file;
-	return ERR_SUCCESS;
+
+	switch (result) {
+	case 0:
+		return ERR_SUCCESS;
+	case 7:
+		return ERR_DISK_IS_FULL;
+	case 12:
+		return ERR_OUT_OF_MEMORY;
+	default:
+		return ERR_DISK_ERROR;
+	}
 }
 
 int FatFS::fs_read_file(FileHandler *file, size_t *read_bytes, char *buffer, size_t buffer_size)
@@ -362,13 +372,16 @@ int FatFS::fs_read_file(FileHandler *file, size_t *read_bytes, char *buffer, siz
 
 	struct dir_file *d_file = create_dir_file(file->get_dentry());
 
-	*read_bytes = fat_read_file(FatFS::f_data, d_file, buffer, (unsigned int) buffer_size, (unsigned long)file->ftell());
-	if (*read_bytes < 0) {
-		return ERR_INVALID_ARGUMENTS;
-	}
-
+	int result = fat_read_file(FatFS::f_data, d_file, buffer, (unsigned int) buffer_size, read_bytes, (unsigned long)file->ftell());
+	
 	delete d_file;
-	return ERR_SUCCESS;
+
+	switch (result) {
+	case 0:
+		return ERR_SUCCESS;
+	default:
+		return ERR_DISK_ERROR;
+	}
 }
 
 int FatFS::fs_remove_file(FileHandler *file)

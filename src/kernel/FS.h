@@ -3,6 +3,7 @@
 #include <string>
 
 #include "VfsStructures.h"
+#include "../api/api.h"
 
 class FileHandler;
 
@@ -30,6 +31,8 @@ public:
 	static const int ERR_FS_EXISTS = -9;
 	static const int ERR_OUT_OF_MEMORY = -10;
 	static const int ERR_PERMISSION_DENIED = -11;
+
+	static uint16_t translate_return_codes(int fs_ret_code);
 
 	// METHODS FOR WORK WITH FILES
 	virtual int fs_create_dir(FileHandler **directory, const std::string &absolute_path) = 0;

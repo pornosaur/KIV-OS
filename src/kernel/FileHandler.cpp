@@ -24,12 +24,8 @@ uint16_t FileHandler::read(char * buffer, size_t length, size_t & read)
 	} else {
 		ret_code = m_fs->fs_read_file(this, &read, buffer, length); // not directory
 	}
-
-	if (ret_code == FS::ERR_SUCCESS) {
-		return kiv_os::erSuccess;
-	}
 	
-	return kiv_os::erInvalid_Argument;
+	return FS::translate_return_codes(ret_code);
 	
 }
 
@@ -42,11 +38,7 @@ uint16_t FileHandler::write(char * buffer, size_t length, size_t & written)
 	FS * m_fs = dentry->d_fs;
 	int ret_code = m_fs->fs_write_to_file(this, &written, buffer, length);
 
-	if (ret_code == FS::ERR_SUCCESS) {
-		return kiv_os::erSuccess;
-	}
-	
-	return kiv_os::erInvalid_Argument;
+	return FS::translate_return_codes(ret_code);
 }
 
 uint16_t FileHandler::fseek(long offset, uint8_t origin, uint8_t set_size)
@@ -78,14 +70,7 @@ uint16_t FileHandler::fseek(long offset, uint8_t origin, uint8_t set_size)
 		FS * m_fs = dentry->d_fs;
 		int ret_code = m_fs->fs_set_file_size(this, (size_t)new_position);
 
-		switch (ret_code) {
-			case FS::ERR_INVALID_ARGUMENTS: {
-				return kiv_os::erInvalid_Argument;
-			}
-			case FS::ERR_DISK_ERROR: {
-				return kiv_os::erIO;
-			}
-		}
+		return FS::translate_return_codes(ret_code);
 	}
 
 	position = (size_t)new_position;

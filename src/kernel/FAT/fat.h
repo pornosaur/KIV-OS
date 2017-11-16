@@ -30,8 +30,8 @@ struct dir_file *fat_get_object_info_by_name(struct fat_data *f_data, const char
 int fat_delete_file_by_name(struct fat_data *f_data, const char *file_name, uint32_t act_fat_position);
 int fat_delete_file_by_file(struct fat_data *f_data, struct dir_file *file, unsigned long position);
 
-size_t fat_read_file(struct fat_data *f_data, struct dir_file *file, char *buffer, unsigned int buffer_size, unsigned long offset);
-size_t fat_write_file(struct fat_data *f_data, struct dir_file *file, unsigned long dir_position, char *buffer, unsigned int buffer_size, unsigned long offset);
+int fat_read_file(struct fat_data *f_data, struct dir_file *file, char *buffer, unsigned int buffer_size, size_t *read, unsigned long offset);
+int fat_write_file(struct fat_data *f_data, struct dir_file *file, unsigned long dir_position, char *buffer, unsigned int buffer_size, size_t *writed, unsigned long offset);
 
 int fat_create_dir(struct fat_data *f_data, struct dir_file **new_dir, const char *dir_name, uint32_t act_fat_position, unsigned long *dir_position);
 int fat_delete_empty_dir(struct fat_data *f_data, const char *dir_name, uint32_t act_fat_position);
