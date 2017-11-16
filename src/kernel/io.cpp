@@ -80,7 +80,7 @@ void create_file(kiv_os::TRegisters &regs) {
 		ret_code = vfs->create_dir(&handler, std::string(path));
 	}
 	else {
-		if (open_always) {
+		if (open_always == kiv_os::fmOpen_Always) {
 			// open file
 			ret_code = vfs->open_object(&handler, std::string(path), FS::FS_OBJECT_FILE);
 		}
@@ -90,7 +90,7 @@ void create_file(kiv_os::TRegisters &regs) {
 		}
 	}
 
-	if (ret_code) {
+	if (ret_code != kiv_os::erSuccess) {
 		set_error(regs, ret_code);
 		return;
 	}
@@ -122,7 +122,7 @@ void write_file(kiv_os::TRegisters &regs) {
 	}
 
 	uint16_t ret_code = handle->write(reinterpret_cast<char*>(regs.rdi.r), (size_t)regs.rcx.r, written);
-	if (ret_code) {
+	if (ret_code != kiv_os::erSuccess) {
 		set_error(regs, ret_code);
 		return;
 	}
@@ -150,7 +150,7 @@ void read_file(kiv_os::TRegisters &regs) {
 	}
 	
 	uint16_t ret_code = handle->read(reinterpret_cast<char*>(regs.rdi.r), (size_t)regs.rcx.r, read);
-	if (ret_code) {
+	if (ret_code != kiv_os::erSuccess) {
 		set_error(regs, ret_code);
 		return;
 	}
@@ -178,7 +178,7 @@ void delete_file(kiv_os::TRegisters &regs)
 		ret_code = vfs->remove_emtpy_dir(std::string(path)); // remove directory
 	}
 
-	if (ret_code) {
+	if (ret_code != kiv_os::erSuccess) {
 		set_error(regs, ret_code);
 		return;
 	}
@@ -187,7 +187,7 @@ void delete_file(kiv_os::TRegisters &regs)
 void set_file_position(kiv_os::TRegisters &regs)
 {
 	std::shared_ptr<Handler> handler = handles->get_handle_object(regs.rdx.x);
-	if (handler) {
+	if (!handler) {
 		set_error(regs, kiv_os::erInvalid_Handle);
 		return;
 	}
@@ -196,7 +196,7 @@ void set_file_position(kiv_os::TRegisters &regs)
 	uint8_t origin = regs.rcx.l;
 
 	uint16_t ret_code = handler->fseek(offset, origin, regs.rcx.h);
-	if (ret_code) {
+	if (ret_code != kiv_os::erSuccess) {
 		set_error(regs, ret_code);
 		return; // not success
 	}
@@ -205,7 +205,7 @@ void set_file_position(kiv_os::TRegisters &regs)
 void get_file_position(kiv_os::TRegisters &regs)
 {
 	std::shared_ptr<Handler> handler = handles->get_handle_object(regs.rdx.x);
-	if (handler) {
+	if (!handler) {
 		set_error(regs, kiv_os::erInvalid_Handle);
 		return;
 	}
