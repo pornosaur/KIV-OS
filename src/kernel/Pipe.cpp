@@ -87,7 +87,6 @@ bool Pipe::pipe_read(char* buffer, size_t offset, size_t length, size_t& read)
 {
 	std::unique_lock<std::mutex> lock(buff_m);
 	offset = 0;	
-	length -= 1;	/* need add \0 to the end of buff */
 
 	while (written_in_buff == 0) {
 		if (!writers) {
@@ -113,7 +112,6 @@ bool Pipe::pipe_read(char* buffer, size_t offset, size_t length, size_t& read)
 	}
 
 	first = (first + can_read) % MAX_BUFFER_SIZE;
-	buffer[offset + can_read] = '\0'; 
 	read = can_read;
 	written_in_buff -= can_read;
 
