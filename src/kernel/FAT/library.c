@@ -32,7 +32,7 @@ struct boot_record *get_boot_record(char *memory, size_t memory_size) {
  * @param fat_size velikost fat tabulky v bitech
  * @return pole obsahujici fat tabulku
  */
-int32_t *get_fat(char *memory, size_t memory_size, size_t start_of_fat, unsigned int fat_record_size, unsigned long cluster_count, unsigned long fat_size) {
+uint32_t *get_fat(char *memory, size_t memory_size, size_t start_of_fat, unsigned int fat_record_size, unsigned long cluster_count, unsigned long fat_size) {
 	uint32_t *fat = NULL;
 
 	if (memory_size < start_of_fat + fat_size) {

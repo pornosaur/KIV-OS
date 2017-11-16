@@ -6,7 +6,7 @@
 
 struct boot_record *get_boot_record(char *memory, size_t memory_size);
 
-int32_t *get_fat(char *memory, size_t memory_size, size_t start_of_fat, unsigned int fat_record_size, unsigned long cluster_count, unsigned long fat_size);
+uint32_t *get_fat(char *memory, size_t memory_size, size_t start_of_fat, unsigned int fat_record_size, unsigned long cluster_count, unsigned long fat_size);
 
 void delete_cluster(char *memory, size_t memory_size, unsigned int start_of_cluster, uint16_t cluster_size);
 

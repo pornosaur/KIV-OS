@@ -30,6 +30,8 @@ public:
 	static int FatFS::init_fat_disk(char *memory, size_t memory_size, uint16_t cluster_size);
 
 private:
+	struct fat_data *f_data = NULL;
+
 	struct dentry *FatFS::find_object_in_directory(struct dentry *m_dentry, const std::string& dentry_name, unsigned int type);
 
 	struct dentry *FatFS::find_path(const std::string &absolute_path, size_t *start, size_t *end);
