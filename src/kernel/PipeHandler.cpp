@@ -28,7 +28,7 @@ uint16_t PipeHandler::write(char* buffer, size_t length, size_t& written)
 }
 
 
-uint16_t PipeHandler::fseek(long offset, uint8_t origin)
+uint16_t PipeHandler::fseek(long offset, uint8_t origin, uint8_t set_size)
 {
 	 return kiv_os::erSuccess;
 }

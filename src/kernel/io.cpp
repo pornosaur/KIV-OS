@@ -195,16 +195,7 @@ void set_file_position(kiv_os::TRegisters &regs)
 	long offset = (long)regs.rdi.r;
 	uint8_t origin = regs.rcx.l;
 
-	uint16_t ret_code = handler->fseek(offset, origin);
-	if (ret_code) {
-		set_error(regs, ret_code);
-		return; // not success
-	}
-
-	if (regs.rcx.h) {
-		ret_code = vfs->set_file_size(reinterpret_cast<FileHandler*>(handler.get()), handler->ftell());
-	}
-	
+	uint16_t ret_code = handler->fseek(offset, origin, regs.rcx.h);
 	if (ret_code) {
 		set_error(regs, ret_code);
 		return; // not success

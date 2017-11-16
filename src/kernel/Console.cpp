@@ -87,7 +87,7 @@ uint16_t Console::write(char* buffer, size_t length, size_t& written)
 		return false; // TODO return codes by api.h
 }
 
-uint16_t Console::fseek(long offset, uint8_t origin)
+uint16_t Console::fseek(long offset, uint8_t origin, uint8_t set_size)
 {
 	Handler::position = (size_t)offset;
 	// TODO implement

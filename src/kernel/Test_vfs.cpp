@@ -892,7 +892,7 @@ void Test_vfs::read_file_from_exact_position()
 	assert(bytes == 36);
 
 	
-	file->fseek(10, kiv_os::fsBeginning);
+	file->fseek(10, kiv_os::fsBeginning, 0);
 	result = file->read(buffer, buff_size, bytes);
 	assert(bytes == 26);
 	assert(result == kiv_os::erSuccess);
@@ -998,7 +998,7 @@ void Test_vfs::read_small_piece_of_file()
 	assert(bytes == 200);
 	assert(result == kiv_os::erSuccess);
 
-	file->fseek(120, kiv_os::fsBeginning);
+	file->fseek(120, kiv_os::fsBeginning, 0);
 	result = file->read(buffer, buff_size, bytes);
 	assert(bytes == 30);
 	assert(result == kiv_os::erSuccess);
@@ -1038,7 +1038,7 @@ void Test_vfs::read_all_file_by_pieces()
 
 	shuld_read = 31;
 	for (int i = 0; i < 200; i += 31) {
-		file->fseek(i, kiv_os::fsBeginning);
+		file->fseek(i, kiv_os::fsBeginning, 0);
 		if (200 - i < shuld_read) {
 			shuld_read = 200 - i;
 		}
@@ -1099,13 +1099,13 @@ void Test_vfs::rewrite_file()
 	assert(strncmp(buffer, text, 200) == 0);
 
 	std::cout << "writing short text" << std::endl;
-	file->fseek(10, kiv_os::fsBeginning);
+	file->fseek(10, kiv_os::fsBeginning, 0);
 	result = file->write(text1, 10, bytes);
 	assert(bytes == 10);
 	assert(result == kiv_os::erSuccess);
 	assert(file->get_dentry()->d_size == 20);
 
-	file->fseek(0, kiv_os::fsBeginning);
+	file->fseek(0, kiv_os::fsBeginning, 0);
 	result = file->read(buffer, buff_size, bytes);
 	assert(bytes == 20);
 	assert(result == kiv_os::erSuccess);
@@ -1752,7 +1752,7 @@ void Test_vfs::set_size_for_empty_file()
 	assert(result == kiv_os::erSuccess);
 	assert(file->get_dentry()->d_size == 1);
 
-	result = vfs->set_file_size(file, 0);
+	result = file->fseek(0, kiv_os::fsBeginning, 1);
 	assert(result == kiv_os::erSuccess);
 	assert(file->get_dentry()->d_size == 1);
 
@@ -1786,9 +1786,12 @@ void Test_vfs::set_size_in_one_cluster()
 
 	assert(file->get_dentry()->d_size == 40);
 
-	result = vfs->set_file_size(file, 22);
+	result = file->fseek(22, kiv_os::fsBeginning, 1);
 	assert(result == kiv_os::erSuccess);
 	assert(file->get_dentry()->d_size == 22);
+	
+	result = file->fseek(0, kiv_os::fsBeginning, 0);
+	assert(result == kiv_os::erSuccess);
 
 	int buff_size = 100;
 	char buffer[100];
@@ -1798,12 +1801,12 @@ void Test_vfs::set_size_in_one_cluster()
 	assert(result == kiv_os::erSuccess);
 	assert(strncmp(buffer, text, 22) == 0);
 
-	result = vfs->set_file_size(file, 0);
+	result = file->fseek(0, kiv_os::fsBeginning, 1);
 	assert(result == kiv_os::erSuccess);
 	assert(file->get_dentry()->d_size == 1);
 	assert(file->get_dentry()->d_blocks == 1);
 
-	file->fseek(1, kiv_os::fsBeginning);
+	file->fseek(1, kiv_os::fsBeginning, 0);
 	result = file->read(buffer, buff_size, bytes);
 	assert(bytes == 0);
 	assert(result == kiv_os::erSuccess);
@@ -1838,9 +1841,12 @@ void Test_vfs::set_size_more_than_one_cluster()
 	assert(file->get_dentry()->d_blocks == 2);
 	assert(file->get_dentry()->d_size == 220);
 
-	result = vfs->set_file_size(file, 182);
+	result = file->fseek(182, kiv_os::fsBeginning, 1);
 	assert(result == kiv_os::erSuccess);
 	assert(file->get_dentry()->d_size == 182);
+
+	result = file->fseek(0, kiv_os::fsBeginning, 0);
+	assert(result == kiv_os::erSuccess);
 
 	int buff_size = 200;
 	char buffer[200];
@@ -1850,10 +1856,13 @@ void Test_vfs::set_size_more_than_one_cluster()
 	assert(result == kiv_os::erSuccess);
 	assert(strncmp(buffer, text, 182) == 0);
 
-	result = vfs->set_file_size(file, 60);
+	result = file->fseek(60, kiv_os::fsBeginning, 1);
 	assert(result == kiv_os::erSuccess);
 	assert(file->get_dentry()->d_size == 60);
 	assert(file->get_dentry()->d_blocks == 1);
+
+	result = file->fseek(0, kiv_os::fsBeginning, 0);
+	assert(result == kiv_os::erSuccess);
 
 	result = file->read(buffer, buff_size, bytes);
 	assert(bytes == 60);
@@ -1889,13 +1898,19 @@ void Test_vfs::set_size_more_than_file_size()
 	assert(result == kiv_os::erSuccess);
 	assert(file->get_dentry()->d_size == 40);
 
-	result = vfs->set_file_size(file, 70);
+	result = file->fseek(70, kiv_os::fsBeginning, 1);
 	assert(result == kiv_os::erInvalid_Argument);
 	assert(file->get_dentry()->d_size == 40);
 
-	result = vfs->set_file_size(file, 40);
+	result = file->fseek(0, kiv_os::fsBeginning, 0);
+	assert(result == kiv_os::erSuccess);
+
+	result = file->fseek(40, kiv_os::fsBeginning, 1);
 	assert(result == kiv_os::erSuccess);
 	assert(file->get_dentry()->d_size == 40);
+
+	result = file->fseek(0, kiv_os::fsBeginning, 0);
+	assert(result == kiv_os::erSuccess);
 
 	int buff_size = 200;
 	char buffer[200];

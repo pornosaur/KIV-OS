@@ -109,18 +109,6 @@ uint16_t Vfs::remove_file(const std::string &absolute_path)
 	return translate_return_codes(ret_code2);
 }
 
-uint16_t Vfs::set_file_size(FileHandler * file, size_t size)
-{
-	if (file == NULL || file->get_dentry() == NULL || file->get_dentry()->d_fs == NULL) {
-		return kiv_os::erInvalid_Argument;
-	}
-
-	FS * m_fs = file->get_dentry()->d_fs;
-
-	int ret_code = m_fs->fs_set_file_size(file, size);
-	return translate_return_codes(ret_code);
-}
-
 uint16_t Vfs::register_fs(const std::string &name, FS * fs)
 {
 	if (fs == NULL) {
