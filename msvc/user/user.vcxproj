@@ -28,6 +28,7 @@
     <ClCompile Include="..\..\src\user\rtl.cpp" />
     <ClCompile Include="..\..\src\user\shell.cpp" />
     <ClCompile Include="..\..\src\user\string.cpp" />
+    <ClCompile Include="..\..\src\user\type.cpp" />
     <ClCompile Include="..\..\src\user\wc.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -41,6 +42,7 @@
     <ClInclude Include="..\..\src\user\rtl.h" />
     <ClInclude Include="..\..\src\user\shell.h" />
     <ClInclude Include="..\..\src\user\string.h" />
+    <ClInclude Include="..\..\src\user\type.h" />
     <ClInclude Include="..\..\src\user\wc.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
