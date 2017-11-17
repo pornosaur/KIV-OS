@@ -6,6 +6,7 @@
 #include <list>
 #include <regex>
 #include <vector>
+
 #define SPACE		'\x20'	
 #define PIPE		'\x7C'	/* | */
 #define LF			'\x0A'	
@@ -13,9 +14,6 @@
 #define STROKE		'\x2F'  /* / */
 #define DOT			'\x2E'	/* . */
 #define COLON		'\x3A'	/* : */
-
-#define CMD_ARG			0
-#define CMD_INPUT		1
 
 #define WRITE_HANDLE		0
 #define READ_HANDLE			1

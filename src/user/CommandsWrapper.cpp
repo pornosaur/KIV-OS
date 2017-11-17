@@ -102,9 +102,11 @@ bool kiv_os_cmd::CommandsWrapper::Parse_Command(struct cmd_item_t& cmd_item)
 	if (std::regex_search(cmd_item.args_line, m_cmd, r_command)) {
 		cmd_item.command = std::string(m_cmd[1].str());
 		cmd_item.args_line = m_cmd.suffix().str();
-
-		cmd_item.args_line.pop_back();
 		
+		if (!cmd_item.args_line.empty()) {
+			cmd_item.args_line.pop_back();
+		}
+
 		if (!cmd_item.args_line.empty() && cmd_item.args_line.back() != '\n') {
 			cmd_item.args_line.push_back('\n');
 		}
