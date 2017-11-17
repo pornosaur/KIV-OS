@@ -25,10 +25,10 @@ size_t __stdcall rgen(const kiv_os::TRegisters &regs) {
 
 void wait_for_eof(const void *data) {
 	size_t read;
-	char *input = (char *)calloc(1024, sizeof(char)); //TODO MAX_SIZE const
+	char *input = (char *)calloc(MAX_SIZE_BUFFER_IN, sizeof(char));
 
 	do {
-		kiv_os_rtl::Read_File(kiv_os::stdInput, input, 1024, read); //TODO MAX_SIZE const
+		kiv_os_rtl::Read_File(kiv_os::stdInput, input, MAX_SIZE_BUFFER_IN, read);
 	} while (read != 0);
 
 	free(input);
