@@ -10,7 +10,6 @@ size_t __stdcall type(const kiv_os::TRegisters &regs)
 	kiv_os::THandle stdout_t = tsi->stdout_t;
 
 	kiv_os::THandle handle = kiv_os_rtl::Create_File(params, kiv_os::fmOpen_Always);
-	handle = tsi->stdin_t;
 	// TODO check error
 	free(params);
 	params = NULL;		//TODO clear this pointer?
