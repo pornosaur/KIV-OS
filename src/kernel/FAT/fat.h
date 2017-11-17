@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <assert.h>
 
 #include "fat_structure.h"
 

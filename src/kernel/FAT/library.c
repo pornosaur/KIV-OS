@@ -87,6 +87,10 @@ int *get_file_clusters(struct dir_file *file, uint32_t *clusters_size, uint16_t 
     size_t i = 0;
     uint32_t *clusters;
 
+	if (file->file_size == 0) {
+		return NULL;
+	}
+
 
     if(file->file_type == OBJECT_DIRECTORY){
         *clusters_size = dir_clusters;
@@ -389,6 +393,8 @@ int write_file_to_fat(char *memory, size_t memory_size, char *file, unsigned int
 
     return 0;
 }
+
+
 size_t write_bytes_to_fat(char *memory, size_t memory_size, char *bytes, unsigned long bytes_size, unsigned long offset, const uint32_t *clusters, uint32_t clusters_size, unsigned int start_of_data, uint16_t cluster_size){
     uint16_t first_cluster = 0;
     unsigned int cluster_offset = 0;
@@ -719,7 +725,8 @@ size_t read_file(char *memory, size_t memory_size, char *buffer, unsigned int bu
 	unsigned long first_cluster = 0;
 	unsigned int cluster_offset = 0;
 
-	if (memory == NULL || memory_size < start_of_root_dir + (file_clusters_size * cluster_size)) {
+		
+	if (memory == NULL || memory_size < start_of_root_dir + (file_clusters_size * cluster_size) || file_size == 0) {
 		return writed_size;
 	}
 

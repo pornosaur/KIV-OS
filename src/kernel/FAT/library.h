@@ -2,6 +2,7 @@
 #define FAT_LIBRARY_H
 
 #include <stdlib.h>
+#include <assert.h>
 #include "fat_structure.h"
 
 struct boot_record *get_boot_record(char *memory, size_t memory_size);

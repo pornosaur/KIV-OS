@@ -350,6 +350,7 @@ int FatFS::fs_write_to_file(FileHandler *file, size_t *writed_bytes, char *buffe
 	int result =  fat_write_file(FatFS::f_data, d_file, file->get_dentry()->d_dentry_position, buffer, (unsigned int) buffer_size, writed_bytes, (unsigned long)file->ftell());
 
 	if (*writed_bytes != 0) {
+		file->get_dentry()->d_position = d_file->first_cluster;
 		file->get_dentry()->d_size = d_file->file_size;
 		file->get_dentry()->d_blocks = (unsigned long) ceil((double)d_file -> file_size / FatFS::f_data->boot_record->cluster_size);
 	}
@@ -415,6 +416,10 @@ int FatFS::fs_remove_file(FileHandler *file)
 
 int FatFS::fs_set_file_size(FileHandler * file, size_t file_size)
 {
+	if (file->get_dentry()->d_size == file_size) {
+		return ERR_SUCCESS;
+	}
+
 	if (file == NULL || 
 		file->get_dentry() == NULL || 
 		file->get_dentry()->d_file_type != FS::FS_OBJECT_FILE ||

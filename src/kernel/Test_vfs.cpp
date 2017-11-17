@@ -157,8 +157,8 @@ void Test_vfs::create_new_file()
 	assert(file->get_dentry()->d_count == 1);
 	assert(file->get_dentry()->d_name == "new.txt");
 	assert(file->get_dentry()->d_mounted != 1);
-	assert(file->get_dentry()->d_size == 1);
-	assert(file->get_dentry()->d_blocks == 1);
+	assert(file->get_dentry()->d_size == 0);
+	assert(file->get_dentry()->d_blocks == 0);
 
 	std::cout << "closing new.txt" << std::endl;
 	if (file->close_handler()) {
@@ -175,8 +175,8 @@ void Test_vfs::create_new_file()
 	assert(file->get_dentry() != NULL);
 	assert(file->get_dentry()->d_name == "new.txt");
 	assert(file->get_dentry()->d_mounted != 1);
-	assert(file->get_dentry()->d_size == 1);
-	assert(file->get_dentry()->d_blocks == 1);
+	assert(file->get_dentry()->d_size == 0);
+	assert(file->get_dentry()->d_blocks == 0);
 	if (file->close_handler()) {
 		delete file;
 		file = NULL;
@@ -217,8 +217,8 @@ void Test_vfs::create_new_file_not_in_root()
 	assert(file->get_dentry()->d_count == 1);
 	assert(file->get_dentry()->d_name == "new.txt");
 	assert(file->get_dentry()->d_mounted != 1);
-	assert(file->get_dentry()->d_size == 1);
-	assert(file->get_dentry()->d_blocks == 1);
+	assert(file->get_dentry()->d_size == 0);
+	assert(file->get_dentry()->d_blocks == 0);
 
 	std::cout << "closing new.txt" << std::endl;
 	if (file->close_handler()) {
@@ -234,8 +234,8 @@ void Test_vfs::create_new_file_not_in_root()
 	assert(file->get_dentry() != NULL);
 	assert(file->get_dentry()->d_name == "new.txt");
 	assert(file->get_dentry()->d_mounted != 1);
-	assert(file->get_dentry()->d_size == 1);
-	assert(file->get_dentry()->d_blocks == 1);
+	assert(file->get_dentry()->d_size == 0);
+	assert(file->get_dentry()->d_blocks == 0);
 	if (file->close_handler()) {
 		delete file;
 		file = NULL;
@@ -291,7 +291,7 @@ void Test_vfs::create_existing_file()
 	std::cout << "write data to file new.txt" << std::endl;
 	size_t bytes = 0;
 	result = file->write(buffer, buff_size, bytes);
-	assert(file->get_dentry()->d_size > 1);
+	assert(file->get_dentry()->d_size == 34);
 	assert(file->get_dentry()->d_blocks == 1);
 	assert(result == kiv_os::erSuccess);
 	assert(bytes == buff_size);
@@ -308,8 +308,8 @@ void Test_vfs::create_existing_file()
 	assert(file != NULL);
 	assert(result == kiv_os::erSuccess);
 	assert(file->get_dentry() != NULL);
-	assert(file->get_dentry()->d_size == 1);
-	assert(file->get_dentry()->d_blocks == 1);
+	assert(file->get_dentry()->d_size == 0);
+	assert(file->get_dentry()->d_blocks == 0);
 	if (file->close_handler()) {
 		delete file;
 		file = NULL;
@@ -336,8 +336,8 @@ void Test_vfs::create_file_with_max_name()
 	assert(file->get_dentry()->d_count == 1);
 	assert(file->get_dentry()->d_name == "filename.txt");
 	assert(file->get_dentry()->d_mounted != 1);
-	assert(file->get_dentry()->d_size == 1);
-	assert(file->get_dentry()->d_blocks == 1);
+	assert(file->get_dentry()->d_size == 0);
+	assert(file->get_dentry()->d_blocks == 0);
 
 	std::cout << "closing filename.txt" << std::endl;
 	if (file->close_handler()) {
@@ -353,8 +353,8 @@ void Test_vfs::create_file_with_max_name()
 	assert(file->get_dentry() != NULL);
 	assert(file->get_dentry()->d_name == "filename.txt");
 	assert(file->get_dentry()->d_mounted != 1);
-	assert(file->get_dentry()->d_size == 1);
-	assert(file->get_dentry()->d_blocks == 1);
+	assert(file->get_dentry()->d_size == 0);
+	assert(file->get_dentry()->d_blocks == 0);
 	if (file->close_handler()) {
 		delete file;
 		file = NULL;
@@ -853,13 +853,14 @@ void Test_vfs::write_read_file()
 
 	size_t bytes = 0;
 	result = file->read(buffer, buff_size, bytes);
-	assert(bytes == 1);
+	assert(bytes == 0);
 	assert(result == kiv_os::erSuccess);
 	file->fseek(0, kiv_os::fsBeginning, kiv_os::fsSet_Position);
 
 	char text[] = "small text";
 	result = file->write(text, 10, bytes);
 	assert(bytes == 10);
+	assert(file->get_dentry()->d_size == 10);
 	assert(result == kiv_os::erSuccess);
 
 	result = file->read(buffer, buff_size, bytes);
@@ -898,6 +899,7 @@ void Test_vfs::read_file_from_exact_position()
 	result = file->write(text, 36, bytes);
 	assert(result == kiv_os::erSuccess);
 	assert(bytes == 36);
+	assert(file->get_dentry()->d_size == 36);
 
 	
 	file->fseek(10, kiv_os::fsBeginning, 0);
@@ -936,6 +938,8 @@ void Test_vfs::write_read_file_bigger_than_one_cluster()
 	result = file->write(text, 200, bytes);
 	assert(bytes == 200);
 	assert(result == kiv_os::erSuccess);
+	assert(file->get_dentry()->d_size == 200);
+	assert(file->get_dentry()->d_blocks == 2);
 
 	result = file->read(buffer, buff_size, bytes);
 	assert(bytes == 200);
@@ -972,6 +976,8 @@ void Test_vfs::write_read_exactly_one_cluster()
 	result = file->write(text, 128, bytes);
 	assert(bytes == 128);
 	assert(result == kiv_os::erSuccess);
+	assert(file->get_dentry()->d_size == 128);
+	assert(file->get_dentry()->d_blocks == 1);
 
 	result = file->read(buffer, buff_size, bytes);
 	assert(bytes == 128);
@@ -1008,6 +1014,8 @@ void Test_vfs::read_small_piece_of_file()
 	result = file->write(text, 200, bytes);
 	assert(bytes == 200);
 	assert(result == kiv_os::erSuccess);
+	assert(file->get_dentry()->d_size == 200);
+	assert(file->get_dentry()->d_blocks == 2);
 
 	file->fseek(120, kiv_os::fsBeginning, 0);
 	result = file->read(buffer, buff_size, bytes);
@@ -1060,6 +1068,11 @@ void Test_vfs::read_all_file_by_pieces()
 		assert(strncmp(buffer, text + i, shuld_read) == 0);
 		assert(file->ftell() == i + shuld_read);
 	}
+	
+	result = file->read(buffer, buff_size, bytes);
+	assert(bytes == 0);
+	assert(result == kiv_os::erSuccess);
+
 
 	if (file->close_handler()) {
 		delete file;
@@ -1159,7 +1172,7 @@ void Test_vfs::write_zero_bytes_to_file()
 	assert(result == kiv_os::erSuccess);
 
 	result = file->read(buffer, buff_size, bytes);
-	assert(bytes == 1);
+	assert(bytes == 0);
 	assert(result == kiv_os::erSuccess);
 
 	if (file->close_handler()) {
@@ -1768,11 +1781,11 @@ void Test_vfs::set_size_for_empty_file()
 	uint16_t result = vfs->create_file(&file, "C:/text.txt");
 	assert(file != NULL);
 	assert(result == kiv_os::erSuccess);
-	assert(file->get_dentry()->d_size == 1);
+	assert(file->get_dentry()->d_size == 0);
 
 	result = file->fseek(0, kiv_os::fsBeginning, 1);
 	assert(result == kiv_os::erSuccess);
-	assert(file->get_dentry()->d_size == 1);
+	assert(file->get_dentry()->d_size == 0);
 
 	if (file->close_handler()) {
 		delete file;
@@ -1821,8 +1834,8 @@ void Test_vfs::set_size_in_one_cluster()
 
 	result = file->fseek(0, kiv_os::fsBeginning, 1);
 	assert(result == kiv_os::erSuccess);
-	assert(file->get_dentry()->d_size == 1);
-	assert(file->get_dentry()->d_blocks == 1);
+	assert(file->get_dentry()->d_size == 0);
+	assert(file->get_dentry()->d_blocks == 0);
 
 	file->fseek(1, kiv_os::fsBeginning, 0);
 	result = file->read(buffer, buff_size, bytes);
