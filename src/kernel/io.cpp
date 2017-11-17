@@ -68,7 +68,8 @@ void HandleIO(kiv_os::TRegisters &regs) {
 
 void create_file(kiv_os::TRegisters &regs) {
 	
-	char *path = reinterpret_cast<char*>(regs.rdx.r);
+	std::string path(reinterpret_cast<char*>(regs.rdx.r));
+	path.erase(path.find_last_not_of(" \n\r\t") + 1);
 	uint8_t open_always = (uint8_t)regs.rcx.r;
 	uint8_t file_atributes = (uint8_t)regs.rdi.r;
 
@@ -77,16 +78,16 @@ void create_file(kiv_os::TRegisters &regs) {
 	
 	if (file_atributes & kiv_os::faDirectory) { 
 		// create/open directory
-		ret_code = vfs->create_dir(&handler, std::string(path));
+		ret_code = vfs->create_dir(&handler, path);
 	}
 	else {
 		if (open_always == kiv_os::fmOpen_Always) {
 			// open file
-			ret_code = vfs->open_object(&handler, std::string(path), FS::FS_OBJECT_FILE);
+			ret_code = vfs->open_object(&handler, path, FS::FS_OBJECT_FILE);
 		}
 		else {
 			// crate file
-			ret_code = vfs->create_file(&handler, std::string(path));
+			ret_code = vfs->create_file(&handler, path);
 		}
 	}
 
@@ -168,14 +169,15 @@ void read_file(kiv_os::TRegisters &regs) {
 
 void delete_file(kiv_os::TRegisters &regs)
 {
-	char *path = reinterpret_cast<char*>(regs.rdx.r);
+	std::string path(reinterpret_cast<char*>(regs.rdx.r));
+	path.erase(path.find_last_not_of(" \n\r\t") + 1);
 
 	// TODO(nice to have) remove file or dentry by one call
 
-	uint16_t ret_code = vfs->remove_file(std::string(path)); // remove file
+	uint16_t ret_code = vfs->remove_file(path); // remove file
 
 	if (ret_code == kiv_os::erFile_Not_Found) {
-		ret_code = vfs->remove_emtpy_dir(std::string(path)); // remove directory
+		ret_code = vfs->remove_emtpy_dir(path); // remove directory
 	}
 
 	if (ret_code != kiv_os::erSuccess) {
