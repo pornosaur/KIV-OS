@@ -24,7 +24,7 @@ size_t __stdcall wc(const kiv_os::TRegisters &regs) {
 
 	bool res = true;
 	do {
-		res = kiv_os_rtl::Read_File(handle, input, 1024, read);
+		res = kiv_os_rtl::Read_File(kiv_os::stdInput, input, 1024, read);
 		std::string str_input(input, read);
 
 		calculate(str_input, lines, words);
