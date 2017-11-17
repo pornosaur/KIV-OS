@@ -2,6 +2,9 @@
 
 #include "..\api\api.h"
 #include <vector>
+
+#define MAX_SIZE_BUFFER_IN	1024
+
 namespace kiv_os_rtl {
 
 	size_t Get_Last_Error();

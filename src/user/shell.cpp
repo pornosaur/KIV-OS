@@ -21,7 +21,7 @@ size_t __stdcall shell(const kiv_os::TRegisters &regs) {
 	kiv_os_cmd::CommandsWrapper cmd_w;
 
 	while (run_shell) {
-		kiv_os_rtl::Read_File(kiv_os::stdInput, input, MAX_SIZE_BUFFER_IN, read);
+		bool result = kiv_os_rtl::Read_File(kiv_os::stdInput, input, MAX_SIZE_BUFFER_IN, read);
 		
 		/* Input is not empty; 2 because of \r\n */
 		/* TODO: on linux could be less then 2? */

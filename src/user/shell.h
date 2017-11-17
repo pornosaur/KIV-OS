@@ -7,7 +7,6 @@
 #define ERROR_RESULT		-1
 #define CORRECT_RESULT		 1
 
-#define MAX_SIZE_BUFFER_IN	1024
 #define REGEX_DEF_GROUP		3
 
 
