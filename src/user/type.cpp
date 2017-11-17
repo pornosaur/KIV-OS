@@ -1,4 +1,5 @@
 #include "type.h"
+#include <cassert>
 
 size_t __stdcall type(const kiv_os::TRegisters &regs)
 {
@@ -15,22 +16,26 @@ size_t __stdcall type(const kiv_os::TRegisters &regs)
 
 	while (!str.empty() && std::regex_search(str, match, reg_type)) {
 		std::string tmp = match[0].str();
+		str = match.suffix();
 		
 		if (!tmp.empty()) {
 			tmp.erase(tmp.find_last_not_of(" \n\r\t\"'") + 1);
 			tmp.erase(0, tmp.find_first_not_of(" \n\r\t\"'"));
-			
-			console = is_console(tmp);
 
+			if (is_string_name_lower(tmp, "nul")) {
+				counter++;
+				continue;
+			}
+
+			console = is_string_name_lower(tmp, "con");
 			handle = console ? stdin_t : kiv_os_rtl::Create_File(tmp.c_str(), kiv_os::fmOpen_Always);
 			// TODO check error
 
 			write_file_name(counter, stdout_t, tmp);
-
 			read_and_write(handle, stdout_t);
-			if(!console) kiv_os_rtl::Close_File(handle);
+
+			if (!console) kiv_os_rtl::Close_File(handle);
 		}
-		str = match.suffix();
 		counter++;
 	}
 
@@ -62,6 +67,9 @@ void read_and_write(kiv_os::THandle &in, kiv_os::THandle &out) {
 	if (!res || writen == 0) return; // TODO error
 }
 
+/**
+ * if counter != 0 write name to stdout_t
+ */
 void write_file_name(int &counter, kiv_os::THandle &stdout_t, std::string &name)
 {
 	if (counter) {
@@ -77,9 +85,11 @@ void write_file_name(int &counter, kiv_os::THandle &stdout_t, std::string &name)
 	}
 }
 
-bool is_console(std::string &name)
+/**
+ * return true if name.lowerCase is equals to string 
+ */
+bool is_string_name_lower(std::string name, std::string string)
 {
-	std::string con = name;
-	kiv_os_str::string_to_lower(con);
-	return !con.compare("con");
+	kiv_os_str::string_to_lower(name);
+	return !name.compare(string);
 }
