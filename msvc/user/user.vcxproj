@@ -22,6 +22,7 @@
     <ClCompile Include="..\..\src\user\commands.cpp" />
     <ClCompile Include="..\..\src\user\CommandsWrapper.cpp" />
     <ClCompile Include="..\..\src\user\dllmain.cpp" />
+    <ClCompile Include="..\..\src\user\echo.cpp" />
     <ClCompile Include="..\..\src\user\freq.cpp" />
     <ClCompile Include="..\..\src\user\pipe_test.cpp" />
     <ClCompile Include="..\..\src\user\rgen.cpp" />
@@ -36,6 +37,7 @@
     <ClInclude Include="..\..\src\api\api_extension.h" />
     <ClInclude Include="..\..\src\user\commands.h" />
     <ClInclude Include="..\..\src\user\CommandsWrapper.h" />
+    <ClInclude Include="..\..\src\user\echo.h" />
     <ClInclude Include="..\..\src\user\freq.h" />
     <ClInclude Include="..\..\src\user\pipe_test.h" />
     <ClInclude Include="..\..\src\user\rgen.h" />
