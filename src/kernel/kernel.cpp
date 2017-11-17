@@ -45,6 +45,15 @@ void Initialize_Kernel() {
 	// register FAT in VFS
 	vfs = new Vfs();
 	vfs->register_fs("C:", fs);
+
+	// TODO REMOVE ONLY TEST FILE ==================================================================================
+	FileHandler *file = NULL;
+	vfs->create_file(&file, "C:/joke.txt");
+	size_t writen = 0;
+	file->write("Teacher: \"Kids, what does the chicken give you ? \"\n Student : \"Meat!\"\n Teacher : \"Very good! Now what does the pig give you?\"\n Student : \"Bacon!\"\n Teacher : \"Great! And what does the fat cow give you?\"\n Student : \"Homework!\"", 238, writen);
+	delete file;
+	file = NULL;
+	// =============================================================================================================
 }
 
 void Shutdown_Kernel() {
