@@ -21,7 +21,7 @@ uint16_t Vfs::create_dir(FileHandler ** directory, const std::string &absolute_p
 
 	FS *file_system = Vfs::find_fs_by_name(disk);
 
-	if (path == "") {
+	if (!file_system || path == "") {
 		return kiv_os::erFile_Not_Found;
 	}
 
@@ -62,6 +62,10 @@ uint16_t Vfs::open_object(FileHandler ** object, const std::string &absolute_pat
 
 	FS *file_system = Vfs::find_fs_by_name(disk);
 
+	if (!file_system) {
+		return kiv_os::erFile_Not_Found;
+	}
+
 	int ret_code = file_system->fs_open_object(object, path, type);
 
 	return FS::translate_return_codes(ret_code);
@@ -77,7 +81,7 @@ uint16_t Vfs::create_file(FileHandler ** file, const std::string &absolute_path)
 	
 	FS *file_system = Vfs::find_fs_by_name(disk);
 
-	if (path == "") {
+	if (!file_system || path == "") {
 		return kiv_os::erFile_Not_Found;
 	}
 
