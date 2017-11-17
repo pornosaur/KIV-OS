@@ -7,13 +7,15 @@ size_t __stdcall rgen(const kiv_os::TRegisters &regs) {
 	std::vector<kiv_os::THandle> proc_handles;
 	float random;
 	std::string random_str;
+
 	generate = true;
 
+	//TODO check arguments?
 	kiv_os_rtl::Create_Thread((kiv_os::TThread_Proc)wait_for_eof, nullptr, proc_handle);
 	while (generate) {
 		random = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-		random_str = std::to_string(random);
-		kiv_os_rtl::Write_File(kiv_os::stdOutput, kiv_os_str::copy_string(random_str), random_str.length(), written);
+		random_str = std::to_string(random) + "\n";
+		kiv_os_rtl::Write_File(kiv_os::stdOutput, random_str.c_str(), random_str.size(), written);
 	}
 
 	proc_handles.push_back(proc_handle);
@@ -28,7 +30,6 @@ void wait_for_eof(const void *data) {
 	do {
 		kiv_os_rtl::Read_File(kiv_os::stdInput, input, 1024, read); //TODO MAX_SIZE const
 	} while (read != 0);
-	kiv_os_rtl::Read_File(kiv_os::stdInput, input, 1024, read); //TODO MAX_SIZE const
 
 	free(input);
 	generate = false;
