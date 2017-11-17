@@ -262,8 +262,14 @@ std::vector<kiv_os::THandle> kiv_os_cmd::CommandsWrapper::Run_Commands()
 		if (result) {
 			proc_handles.push_back(proc_handle); //pridani handlu do pole s handly
 		}
-		cmd_counter++;
 
+		cmd_counter++;
+		
+	}
+	/*Remove pipe handles*/
+	for (std::vector<kiv_os::THandle> pipe_handle : creation_pipes) {
+		kiv_os_rtl::Close_File(pipe_handle[WRITE_HANDLE]);
+		kiv_os_rtl::Close_File(pipe_handle[READ_HANDLE]);
 	}
 	return proc_handles;
 }
