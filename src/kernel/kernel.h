@@ -5,6 +5,7 @@
 #include "ProcessManager.h"
 
 #include "io.h"
+
 #include <Windows.h>
 #include "Handles.h"
 #include "Vfs.h"
@@ -13,7 +14,9 @@
 
 extern HMODULE User_Programs;
 extern std::shared_ptr<Handles> handles;
+extern ProcessManager *processManager;
 extern Vfs *vfs;
+
 void Set_Error(const bool failed, kiv_os::TRegisters &regs);
 
 void Lock_Kernel();

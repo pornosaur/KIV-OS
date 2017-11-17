@@ -224,7 +224,7 @@ void close_handle(kiv_os::TRegisters &regs) //TODO close pro konzoli?
 	if (handle->close_handler()) {
 		handles->Remove_Handle(regs.rdx.x);
 		assert(handle.get());
-		handle.reset();	/* Free a handler */
+		//handle.reset();	/* Free a handler */
 	}
 	else {
 		// Handle is used by other process
