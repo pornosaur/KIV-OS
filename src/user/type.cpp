@@ -11,25 +11,27 @@ size_t __stdcall type(const kiv_os::TRegisters &regs)
 	std::smatch match;
 	std::string str(params);
 	kiv_os::THandle handle;
+	int counter = 0;
 
-	while (!str.empty() && std::regex_search(str, match, reg_type, std::regex_constants::match_not_null)) {
+	while (!str.empty() && std::regex_search(str, match, reg_type)) {
 		std::string tmp = match[0].str();
 		
 		if (!tmp.empty()) {
 			tmp.erase(tmp.find_last_not_of(" \n\r\t\"'") + 1);
 			tmp.erase(0, tmp.find_first_not_of(" \n\r\t\"'"));
 			
-			std::string con = tmp;
-			kiv_os_str::string_to_lower(con);
-			console = !con.compare("con");
+			console = is_console(tmp);
 
 			handle = console ? stdin_t : kiv_os_rtl::Create_File(tmp.c_str(), kiv_os::fmOpen_Always);
 			// TODO check error
 
+			write_file_name(counter, stdout_t, tmp);
+
 			read_and_write(handle, stdout_t);
-			if(!console) kiv_os_rtl::Close_File(handle); // TODO only if handle is file
+			if(!console) kiv_os_rtl::Close_File(handle);
 		}
 		str = match.suffix();
+		counter++;
 	}
 
 	free(params);
@@ -40,12 +42,12 @@ size_t __stdcall type(const kiv_os::TRegisters &regs)
 
 void read_and_write(kiv_os::THandle &in, kiv_os::THandle &out) {
 
-	char *input = (char *)malloc(1024 * sizeof(char));
+	char *input = (char *)malloc(1024 * sizeof(char)); // TODO constant 1024
 	size_t read = 0, writen = 0;
 	bool res = true;
 
 	do {
-		res = kiv_os_rtl::Read_File(in, input, 1024, read);
+		res = kiv_os_rtl::Read_File(in, input, 1024, read); // TODO constant 1024
 		if (!res || read == 0) break;
 
 		res = kiv_os_rtl::Write_File(out, input, read, writen);
@@ -58,5 +60,26 @@ void read_and_write(kiv_os::THandle &in, kiv_os::THandle &out) {
 
 	res = kiv_os_rtl::Write_File(out, "\n", 1, writen);
 	if (!res || writen == 0) return; // TODO error
+}
 
+void write_file_name(int &counter, kiv_os::THandle &stdout_t, std::string &name)
+{
+	if (counter) {
+		size_t writen = 0;
+
+		bool res = kiv_os_rtl::Write_File(
+			stdout_t, 
+			std::string("\n").append(name.append("\n\n\n")).c_str(),
+			name.length() + 4,
+			writen);
+
+		if (!res || writen == 0) return; // TODO error
+	}
+}
+
+bool is_console(std::string &name)
+{
+	std::string con = name;
+	kiv_os_str::string_to_lower(con);
+	return !con.compare("con");
 }
