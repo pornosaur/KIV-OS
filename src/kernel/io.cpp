@@ -69,7 +69,6 @@ void HandleIO(kiv_os::TRegisters &regs) {
 void create_file(kiv_os::TRegisters &regs) {
 	
 	std::string path(reinterpret_cast<char*>(regs.rdx.r));
-	path.erase(path.find_last_not_of(" \n\r\t") + 1);
 	uint8_t open_always = (uint8_t)regs.rcx.r;
 	uint8_t file_atributes = (uint8_t)regs.rdi.r;
 
@@ -170,7 +169,6 @@ void read_file(kiv_os::TRegisters &regs) {
 void delete_file(kiv_os::TRegisters &regs)
 {
 	std::string path(reinterpret_cast<char*>(regs.rdx.r));
-	path.erase(path.find_last_not_of(" \n\r\t") + 1);
 
 	// TODO(nice to have) remove file or dentry by one call
 
