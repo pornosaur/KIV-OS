@@ -108,7 +108,7 @@ bool kiv_os_cmd::CommandsWrapper::Parse_Command(struct cmd_item_t& cmd_item)
 		}
 
 		if (!cmd_item.args_line.empty() && cmd_item.args_line.back() != '\n') {
-			cmd_item.args_line.push_back('\n');
+			cmd_item.args_line.append("\r\n");
 		}
 	}
 	else {
