@@ -81,6 +81,7 @@ void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_In
 	}
 	else { //first process
 		pcb->ppid = 0; //TODO realy 0?
+		pcb->workind_dir = "C:";
 		pcb->open_files.push_back(nullptr);
 		std::shared_ptr<Console> conIn = std::make_shared<Console>(kiv_os::stdInput);
 		pcb->open_files.push_back(conIn);
@@ -214,4 +215,14 @@ bool ProcessManager::close_handle(const kiv_os::THandle hnd) {
 		return false;
 	}
 	
+}
+
+void ProcessManager::set_proc_work_dir(std::string working_dir) {
+	std::shared_ptr<PCB> pcb = get_proc_context();
+	pcb->workind_dir = working_dir;
+}
+
+std::string ProcessManager::get_proc_work_dir() {
+	std::shared_ptr<PCB> pcb = get_proc_context();
+	return pcb->workind_dir;
 }

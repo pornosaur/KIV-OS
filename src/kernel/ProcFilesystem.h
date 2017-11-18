@@ -11,6 +11,7 @@ struct PCB {
 	kiv_os::THandle pid;
 	kiv_os::THandle ppid;
 	char *proc_name;
+	std::string workind_dir;
 	std::vector<std::shared_ptr<Handler>> open_files;
 	std::thread proc_thread;
 };

@@ -26,6 +26,8 @@ class ProcessManager {
 		kiv_os::THandle add_open_file(std::shared_ptr<Handler> handle);
 		bool close_handle(const kiv_os::THandle handle);
 		std::shared_ptr<PCB> get_proc_context();
+		std::string ProcessManager::get_proc_work_dir();
+		void ProcessManager::set_proc_work_dir(std::string working_dir);
 	private:
 		ProcFilesystem *proc_filesystem;
 		

@@ -48,6 +48,13 @@ bool Handles::Remove_Handle(const kiv_os::THandle hnd) {
 	return processManager->close_handle(hnd);
 }
 
+std::string Handles::get_proc_work_dir() {
+	return processManager->get_proc_work_dir();
+}
+void Handles::set_proc_work_dir(std::string working_dir) {
+	return processManager->set_proc_work_dir(working_dir);
+}
+
 Handles::~Handles() {
 
 }
