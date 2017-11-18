@@ -27,12 +27,18 @@ bool Do_SysCall(kiv_os::TRegisters &regs) {
 	return !regs.flags.carry;
 }
 
-kiv_os::THandle kiv_os_rtl::Create_File(const char* file_name, size_t flags) {
+kiv_os::THandle kiv_os_rtl::Create_File(const char* file_name, size_t flags, uint8_t atributes) {
 	kiv_os::TRegisters regs = Prepare_SysCall_Context(kiv_os::scIO, kiv_os::scCreate_File);
 	regs.rdx.r = reinterpret_cast<decltype(regs.rdx.r)>(file_name);
 	regs.rcx.r = flags;
-	Do_SysCall(regs);
-	return static_cast<kiv_os::THandle>(regs.rax.x);
+	regs.rdi.r = atributes;
+	const bool result = Do_SysCall(regs);
+
+	if (result) {
+		return static_cast<kiv_os::THandle>(regs.rax.x);
+	}
+		
+	return 0;
 }
 
 

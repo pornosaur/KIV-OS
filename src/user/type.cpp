@@ -26,8 +26,10 @@ size_t __stdcall type(const kiv_os::TRegisters &regs)
 			}
 
 			console = is_string_name_lower(tmp, "con");
-			handle = console ? kiv_os::stdInput : kiv_os_rtl::Create_File(tmp.c_str(), kiv_os::fmOpen_Always);
-			// TODO check error
+			handle = console ? kiv_os::stdInput : kiv_os_rtl::Create_File(tmp.c_str(), kiv_os::fmOpen_Always, 0);
+			if (!handle) {
+				return 0; // TODO ERROR
+			}
 
 			write_file_name(counter, kiv_os::stdOutput, tmp);
 			read_and_write(handle, kiv_os::stdOutput);
@@ -43,6 +45,9 @@ size_t __stdcall type(const kiv_os::TRegisters &regs)
 	return 0; // TODO what return
 }
 
+/**
+ * write data all data from in to out
+ */
 void read_and_write(kiv_os::THandle &in, kiv_os::THandle out) {
 
 	char *input = (char *)malloc(1024 * sizeof(char)); // TODO constant 1024
