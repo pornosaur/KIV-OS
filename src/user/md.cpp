@@ -45,7 +45,7 @@ void create_directories(std::string &path)
 			handle = kiv_os_rtl::Create_File(tmp_path.c_str(), kiv_os::fmOpen_Always, kiv_os::faDirectory);
 			if (handle) {
 				kiv_os_rtl::Close_File(handle);
-				tmp_path.append("/");
+				tmp_path.append(delimeter);
 				continue;
 			}
 
@@ -56,7 +56,7 @@ void create_directories(std::string &path)
 			}
 
 			kiv_os_rtl::Close_File(handle);
-			tmp_path.append("/");
+			tmp_path.append(delimeter);
 			created = true;
 		}
 	}

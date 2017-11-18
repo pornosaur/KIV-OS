@@ -76,7 +76,7 @@ void create_file(kiv_os::TRegisters &regs) {
 	uint16_t ret_code = 0;
 
 	if (path.find(":") == std::string::npos) {
-		path = handles->get_proc_work_dir() + "/" + path;
+		path = handles->get_proc_work_dir() + delimeter + path;
 	}
 	
 	if (file_atributes & kiv_os::faDirectory) { 
@@ -181,7 +181,7 @@ void delete_file(kiv_os::TRegisters &regs)
 	std::string path(reinterpret_cast<char*>(regs.rdx.r));
 
 	if (path.find(":") == std::string::npos) {
-		path = handles->get_proc_work_dir() + "/" + path;
+		path = handles->get_proc_work_dir() + delimeter + path;
 	}
 	// TODO(nice to have) remove file or dentry by one call
 
@@ -281,7 +281,7 @@ void set_current_directory(kiv_os::TRegisters &regs) {
 	}
 
 	if (new_path.find(":") == std::string::npos) {
-		new_path = handles->get_proc_work_dir() + "/" + new_path;
+		new_path = handles->get_proc_work_dir() + delimeter + new_path;
 	}
 
 	FileHandler * handler = NULL;

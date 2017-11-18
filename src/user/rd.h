@@ -4,11 +4,11 @@
 
 #include <regex>
 
-#define erase_chars " \n\r\t\"'/"
+#define erase_chars " \n\r\t\"'\\"
+#define delimeter "\\"
 
 static std::regex reg_rd("\"([\\S\\s][^\"]+)\"|\'([\\S\\s][^\']+)\'|(\\S+)");
 static std::regex reg_rd_params("(/s|/S)|(/q|/Q)|\"([\\S\\s][^\"]+)\"|\'([\\S\\s][^\']+)\'|(\\S+)");
-//static std::regex reg_md_recur("[^\\/]+");
 
 extern "C" size_t __stdcall rd(const kiv_os::TRegisters &regs);
 

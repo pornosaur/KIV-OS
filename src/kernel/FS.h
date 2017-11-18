@@ -5,6 +5,9 @@
 #include "VfsStructures.h"
 #include "../api/api.h"
 
+#define delimeter "\\"
+#define delimeter_size 1;
+
 class FileHandler;
 
 class FS

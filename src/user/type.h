@@ -4,7 +4,8 @@
 
 #include <regex>
 
-#define erase_chars " \n\r\t\"'/"
+#define erase_chars " \n\r\t\"'//"
+#define delimeter "\\"
 #define buffer_size 1024
 
 static std::regex reg_type("\"([\\S\\s][^\"]+)\"|\'([\\S\\s][^\']+)\'|(\\S+)");

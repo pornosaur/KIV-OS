@@ -305,7 +305,6 @@ struct dentry *FatFS::find_object_in_directory(struct dentry *m_dentry, const st
 
 dentry * FatFS::find_path(const std::string &absolute_path, size_t * start, size_t * end)
 {
-	std::string delimeter = "/";
 	struct dentry *m_dentry = NULL;
 	struct dentry *f_dentry = NULL;
 
@@ -328,7 +327,7 @@ dentry * FatFS::find_path(const std::string &absolute_path, size_t * start, size
 
 		m_dentry = f_dentry;
 
-		*start = *end + delimeter.length();
+		*start = *end + delimeter_size;
 		*end = absolute_path.find(delimeter, *start);
 	}
 

@@ -14,7 +14,7 @@ Vfs::~Vfs()
 uint16_t Vfs::create_dir(FileHandler ** directory, const std::string &absolute_path)
 {
 	size_t start = 0;
-	size_t end = absolute_path.find("/");
+	size_t end = absolute_path.find(delimeter);
 
 	const std::string disk = absolute_path.substr(start, end);
 	const std::string path = (end == std::string::npos) ? "" : absolute_path.substr(end + 1, std::string::npos);
@@ -55,7 +55,7 @@ uint16_t Vfs::remove_emtpy_dir(const std::string &absolute_path)
 uint16_t Vfs::open_object(FileHandler ** object, const std::string &absolute_path, unsigned int type)
 {
 	size_t start = 0;
-	size_t end = absolute_path.find("/");
+	size_t end = absolute_path.find(delimeter);
 
 	const std::string disk = absolute_path.substr(start, end);
 	const std::string path = (end == std::string::npos) ? "" : absolute_path.substr(end + 1, std::string::npos);
@@ -74,7 +74,7 @@ uint16_t Vfs::open_object(FileHandler ** object, const std::string &absolute_pat
 uint16_t Vfs::create_file(FileHandler ** file, const std::string &absolute_path)
 {
 	size_t start = 0;
-	size_t end = absolute_path.find("/");
+	size_t end = absolute_path.find(delimeter);
 
 	const std::string disk = absolute_path.substr(start, end);
 	const std::string path = (end == std::string::npos)? "" :absolute_path.substr(end+1, std::string::npos);

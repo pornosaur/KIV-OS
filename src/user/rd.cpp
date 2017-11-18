@@ -81,7 +81,7 @@ void remove_subfiles(std::string path, const kiv_os::TRegisters &regs)
 	kiv_os::TDir_Entry *entry;
 	size_t read = 0;
 	bool res;
-	path.append("/");
+	path.append(delimeter);
 
 	do {
 		res = kiv_os_rtl::Read_File(handle, input, input_size, read);
