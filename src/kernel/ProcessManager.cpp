@@ -67,9 +67,17 @@ void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_In
 		pcb->ppid = pcb_context->pid;
 
 		pcb->open_files.push_back(nullptr);
+		std::shared_ptr<Handler> stdin_handle = pcb_context->open_files[tsi->stdin_t];
+		std::shared_ptr<Handler> stdout_handle = pcb_context->open_files[tsi->stdout_t];
+		std::shared_ptr<Handler> stderr_handle = pcb_context->open_files[tsi->stderr_t];
+
 		pcb->open_files.push_back(pcb_context->open_files[tsi->stdin_t]);
 		pcb->open_files.push_back(pcb_context->open_files[tsi->stdout_t]);
 		pcb->open_files.push_back(pcb_context->open_files[tsi->stderr_t]);
+
+		stdin_handle->inc_count();
+		stdout_handle->inc_count();
+		stderr_handle->inc_count();
 	}
 	else { //first process
 		pcb->ppid = 0; //TODO realy 0?
@@ -80,7 +88,8 @@ void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_In
 		pcb->open_files.push_back(std::make_shared<Console>(kiv_os::stdError));
 	}
 	proc_filesystem->lock_pfs();
-	std::thread proc_thread = std::thread(program, regs);
+
+	std::thread proc_thread = std::thread (&ProcessManager::run_process, this, program, regs);
 	pcb->proc_thread = std::move(proc_thread);
 	proc_filesystem->unlock_pfs();
 	if (pcb->pid == 0) {
@@ -104,7 +113,6 @@ void ProcessManager::create_thread(kiv_os::TThread_Proc thread_proc, void *data,
 	kiv_os::THandle proc_handle = proc_filesystem->add_process(pcb);
 
 	
-	
 	if (pcb_context == nullptr) {
 		//TODO error
 		proc_filesystem->remove_process(proc_handle);
@@ -113,10 +121,17 @@ void ProcessManager::create_thread(kiv_os::TThread_Proc thread_proc, void *data,
 	
 	pcb->ppid = pcb_context->pid;
 	pcb->open_files = pcb_context->open_files;
+	
 	proc_filesystem->lock_pfs();
-	std::thread proc_thread = std::thread(thread_proc, data);
+	/*for (std::shared_ptr<Handler> open_file : pcb->open_files) {
+		if (open_file != nullptr) {
+			open_file->inc_count();
+		}
+	}*/
+	std::thread proc_thread = std::thread(&ProcessManager::run_thread, this, thread_proc, data, regs);
 	pcb->proc_thread = move(proc_thread);
 	proc_filesystem->unlock_pfs();
+
 	std::cout << "LOG: Thread for process " << pcb_context->proc_name << " created w/ pid " << pcb_context->pid << std::endl;
 	std::cout << "---ACTUAL PCB TABLE---" << std::endl;
 	std::cout << proc_filesystem->pcb_table_to_str();
@@ -147,7 +162,7 @@ std::shared_ptr<PCB> ProcessManager::get_proc_context() {
 }
 
 kiv_os::THandle ProcessManager::add_open_file(std::shared_ptr<Handler> handle) {
-	std::shared_ptr<PCB> pcb = processManager->get_proc_context();
+	std::shared_ptr<PCB> pcb = get_proc_context();
 	std::vector<std::shared_ptr<Handler>>::iterator it = std::find_if(pcb->open_files.begin() + 1, pcb->open_files.end(),
 		[&](std::shared_ptr<Handler> element) { return element == nullptr; });
 	 
@@ -159,4 +174,44 @@ kiv_os::THandle ProcessManager::add_open_file(std::shared_ptr<Handler> handle) {
 		pcb->open_files[std::distance(pcb->open_files.begin(), it)] = handle;
 		return static_cast<kiv_os::THandle>(std::distance(pcb->open_files.begin(), it));
 	}
+}
+
+void ProcessManager::run_process(kiv_os::TEntry_Point program,  kiv_os::TRegisters &regs) {
+	
+	program(regs);
+	std::shared_ptr<PCB> pcb = get_proc_context();
+	for (int i = 0; i < pcb->open_files.size() ; i++) {
+
+		if (pcb->open_files[i] != nullptr) {
+			pcb->open_files[i]->dec_count();
+			pcb->open_files[i].reset();
+		}
+	}
+}
+
+void ProcessManager::run_thread(kiv_os::TThread_Proc thread_proc, void *data, kiv_os::TRegisters &regs) {
+
+	thread_proc(data);
+	std::shared_ptr<PCB> pcb = get_proc_context();
+	for (int i = 0; i < pcb->open_files.size(); i++) {
+
+		if (pcb->open_files[i] != nullptr) {
+			pcb->open_files[i]->dec_count();
+			pcb->open_files[i].reset();
+		}
+	}
+}
+
+bool ProcessManager::close_handle(const kiv_os::THandle hnd) {
+	std::shared_ptr<PCB> pcb = get_proc_context();
+	if (hnd < pcb->open_files.size() && pcb->open_files[hnd] != nullptr) {
+		pcb->open_files[hnd].reset();
+		pcb->open_files[hnd] = nullptr;
+		return true;
+	}
+	else {
+		assert(false);
+		return false;
+	}
+	
 }

@@ -45,9 +45,7 @@ std::shared_ptr<Handler> Handles::get_handle_object(const kiv_os::THandle hnd) {
 
 bool Handles::Remove_Handle(const kiv_os::THandle hnd) {
 	std::lock_guard<std::mutex> guard(Handles_Guard);
-	processManager->get_proc_context()->open_files[hnd].reset();
-	processManager->get_proc_context()->open_files[hnd] = nullptr;
-	return true;
+	return processManager->close_handle(hnd);
 }
 
 Handles::~Handles() {
