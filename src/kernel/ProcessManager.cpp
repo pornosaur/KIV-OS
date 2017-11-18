@@ -67,6 +67,7 @@ void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_In
 		pcb->ppid = pcb_context->pid;
 
 		pcb->open_files.push_back(nullptr);
+		pcb->workind_dir = pcb_context->workind_dir;
 		std::shared_ptr<Handler> stdin_handle = pcb_context->open_files[tsi->stdin_t];
 		std::shared_ptr<Handler> stdout_handle = pcb_context->open_files[tsi->stdout_t];
 		std::shared_ptr<Handler> stderr_handle = pcb_context->open_files[tsi->stderr_t];
