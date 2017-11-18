@@ -163,7 +163,7 @@ std::shared_ptr<PCB> ProcessManager::get_proc_context() {
 	return proc_filesystem->get_pcb_by_thread_id(thread_id);
 }
 
-kiv_os::THandle ProcessManager::add_open_file(std::shared_ptr<Handler> handle) {
+kiv_os::THandle ProcessManager::add_handle(std::shared_ptr<Handler> handle) {
 	std::shared_ptr<PCB> pcb = get_proc_context();
 	std::vector<std::shared_ptr<Handler>>::iterator it = std::find_if(pcb->open_files.begin() + 1, pcb->open_files.end(),
 		[&](std::shared_ptr<Handler> element) { return element == nullptr; });
@@ -207,6 +207,7 @@ void ProcessManager::run_thread(kiv_os::TThread_Proc thread_proc, void *data, ki
 bool ProcessManager::close_handle(const kiv_os::THandle hnd) {
 	std::shared_ptr<PCB> pcb = get_proc_context();
 	if (hnd < pcb->open_files.size() && pcb->open_files[hnd] != nullptr) {
+		pcb->open_files[hnd]->dec_count();
 		pcb->open_files[hnd].reset();
 		pcb->open_files[hnd] = nullptr;
 		return true;
@@ -226,4 +227,12 @@ void ProcessManager::set_proc_work_dir(std::string working_dir) {
 std::string ProcessManager::get_proc_work_dir() {
 	std::shared_ptr<PCB> pcb = get_proc_context();
 	return pcb->workind_dir;
+}
+
+std::shared_ptr<Handler> ProcessManager::get_handle_object(const kiv_os::THandle hnd) {
+	std::shared_ptr<PCB> pcb = get_proc_context();
+	if (hnd < pcb->open_files.size() && pcb->open_files[hnd] != nullptr) {
+		return pcb->open_files[hnd];
+	}
+	return nullptr;
 }

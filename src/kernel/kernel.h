@@ -3,17 +3,15 @@
 #include "..\api\api.h"
 #include "BinSemaphore.h"
 #include "ProcessManager.h"
-
 #include "io.h"
-
-#include <Windows.h>
-#include "Handles.h"
 #include "Vfs.h"
 #include "FatFS.h"
 
+#include <Windows.h>
+
+
 
 extern HMODULE User_Programs;
-extern std::shared_ptr<Handles> handles;
 extern ProcessManager *processManager;
 extern Vfs *vfs;
 

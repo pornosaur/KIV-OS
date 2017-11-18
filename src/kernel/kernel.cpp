@@ -3,7 +3,6 @@
 #include "kernel.h"
 
 ProcessManager *processManager;
-std::shared_ptr<Handles> handles;
 BinSemaphore interrupt_sem;
 HMODULE User_Programs;
 Vfs *vfs;
@@ -30,9 +29,7 @@ void Unlock_Kernel()
 
 void Initialize_Kernel() {
 	User_Programs = LoadLibrary(L"user.dll");
-	handles = std::make_shared<Handles>();
 	processManager = new ProcessManager();
-	handles->init_console_handles();
 	
 	// virtual memory initialization
 	size_t memory_size = 4096;

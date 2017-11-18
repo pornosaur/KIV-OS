@@ -1,6 +1,5 @@
 #include "io.h"
 #include "kernel.h"
-#include "Handles.h"
 #include "Handler.h"
 #include "PipeHandler.h"
 #include "Pipe.h"
@@ -76,7 +75,7 @@ void create_file(kiv_os::TRegisters &regs) {
 	uint16_t ret_code = 0;
 
 	if (path.find(":") == std::string::npos) {
-		path = handles->get_proc_work_dir() + delimeter + path;
+		path = processManager->get_proc_work_dir() + delimeter + path;
 	}
 	
 	if (file_atributes & kiv_os::faDirectory) { 
@@ -106,7 +105,7 @@ void create_file(kiv_os::TRegisters &regs) {
 	}
 
 	std::shared_ptr<Handler> shared_handler(handler);
-	kiv_os::THandle t_handle = handles->add_handle(shared_handler);
+	kiv_os::THandle t_handle = processManager->add_handle(shared_handler);
 
 	regs.rax.x = t_handle;
 
@@ -125,7 +124,7 @@ void create_file(kiv_os::TRegisters &regs) {
 void write_file(kiv_os::TRegisters &regs) {
 	size_t written;
 
-	std::shared_ptr<Handler> handle = handles->get_handle_object(regs.rdx.x);
+	std::shared_ptr<Handler> handle = processManager->get_handle_object(regs.rdx.x);
 	if (!handle) {
 		set_error(regs, kiv_os::erInvalid_Handle);
 		return;
@@ -153,7 +152,7 @@ void write_file(kiv_os::TRegisters &regs) {
 void read_file(kiv_os::TRegisters &regs) {
 	size_t read;
 	//Unlock_Kernel();	//TODO: Can I allow to interruption while reading a file?
-	std::shared_ptr<Handler> handle = handles->get_handle_object(regs.rdx.x);
+	std::shared_ptr<Handler> handle = processManager->get_handle_object(regs.rdx.x);
 	if (!handle) {
 		set_error(regs, kiv_os::erInvalid_Handle);
 		return;
@@ -181,7 +180,7 @@ void delete_file(kiv_os::TRegisters &regs)
 	std::string path(reinterpret_cast<char*>(regs.rdx.r));
 
 	if (path.find(":") == std::string::npos) {
-		path = handles->get_proc_work_dir() + delimeter + path;
+		path = processManager->get_proc_work_dir() + delimeter + path;
 	}
 	// TODO(nice to have) remove file or dentry by one call
 
@@ -199,7 +198,7 @@ void delete_file(kiv_os::TRegisters &regs)
 
 void set_file_position(kiv_os::TRegisters &regs)
 {
-	std::shared_ptr<Handler> handler = handles->get_handle_object(regs.rdx.x);
+	std::shared_ptr<Handler> handler = processManager->get_handle_object(regs.rdx.x);
 	if (!handler) {
 		set_error(regs, kiv_os::erInvalid_Handle);
 		return;
@@ -217,7 +216,7 @@ void set_file_position(kiv_os::TRegisters &regs)
 
 void get_file_position(kiv_os::TRegisters &regs)
 {
-	std::shared_ptr<Handler> handler = handles->get_handle_object(regs.rdx.x);
+	std::shared_ptr<Handler> handler = processManager->get_handle_object(regs.rdx.x);
 	if (!handler) {
 		set_error(regs, kiv_os::erInvalid_Handle);
 		return;
@@ -228,14 +227,14 @@ void get_file_position(kiv_os::TRegisters &regs)
 
 void close_handle(kiv_os::TRegisters &regs) //TODO close pro konzoli? 
 { 
-	std::shared_ptr<Handler> handle = handles->get_handle_object(regs.rdx.x);
+	std::shared_ptr<Handler> handle = processManager->get_handle_object(regs.rdx.x);
 	if (!handle) {
 		set_error(regs, kiv_os::erInvalid_Handle);
 		return;
 	}
 
 	if (handle->close_handler()) {
-		handles->Remove_Handle(regs.rdx.x);
+		processManager->close_handle(regs.rdx.x);
 		assert(handle.get());
 		//handle.reset();	/* Free a handler */
 	}
@@ -259,7 +258,7 @@ void get_current_directory(kiv_os::TRegisters &regs) {
 		return;
 	}
 
-	std::string path = handles->get_proc_work_dir();
+	std::string path = processManager->get_proc_work_dir();
 
 	size_t len = path.size();
 	if (len + 1u > buff_size) {
@@ -281,14 +280,14 @@ void set_current_directory(kiv_os::TRegisters &regs) {
 	}
 
 	if (new_path.find(":") == std::string::npos) {
-		new_path = handles->get_proc_work_dir() + delimeter + new_path;
+		new_path = processManager->get_proc_work_dir() + delimeter + new_path;
 	}
 
 	FileHandler * handler = NULL;
 	uint16_t result = vfs->open_object(&handler, new_path, FS::FS_OBJECT_DIRECTORY);
 
 	if (result == kiv_os::erSuccess && handler != NULL) {
-		handles->set_proc_work_dir(new_path);
+		processManager->set_proc_work_dir(new_path);
 
 		if (handler->close_handler()) {
 			delete handler;
@@ -311,8 +310,8 @@ void create_pipe(kiv_os::TRegisters &regs)
 	std::shared_ptr<PipeHandler> handle_write = std::make_shared<PipeHandler>(pipe, PipeHandler::fmOpen_Write);
 	std::shared_ptr<PipeHandler> handle_read = std::make_shared<PipeHandler>(pipe, PipeHandler::fmOpen_Read);
 	
-	*pipe_handles = handles->add_handle(handle_write);
-	*(pipe_handles + 1) = handles->add_handle(handle_read);
+	*pipe_handles = processManager->add_handle(handle_write);
+	*(pipe_handles + 1) = processManager->add_handle(handle_read);
 }
 
 

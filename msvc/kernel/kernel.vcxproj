@@ -30,7 +30,6 @@
     <ClCompile Include="..\..\src\kernel\Test_vfs.cpp" />
     <ClCompile Include="..\..\src\kernel\Vfs.cpp" />
     <ClCompile Include="..\..\src\kernel\FatFS.cpp" />
-    <ClCompile Include="..\..\src\kernel\Handles.cpp" />
     <ClCompile Include="..\..\src\kernel\io.cpp" />
     <ClCompile Include="..\..\src\kernel\kernel.cpp" />
     <ClCompile Include="..\..\src\kernel\BinSemaphore.cpp" />
@@ -52,7 +51,6 @@
     <ClInclude Include="..\..\src\api\api.h" />
     <ClInclude Include="..\..\src\api\api_extension.h" />
     <ClInclude Include="..\..\src\kernel\Console.h" />
-    <ClInclude Include="..\..\src\kernel\Handles.h" />
     <ClInclude Include="..\..\src\kernel\io.h" />
     <ClInclude Include="..\..\src\kernel\kernel.h" />
     <ClInclude Include="..\..\src\kernel\BinSemaphore.h" />

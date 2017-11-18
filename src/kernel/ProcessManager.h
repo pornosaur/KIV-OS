@@ -5,6 +5,7 @@
 #include "ProcFilesystem.h"
 
 #include "Handler.h"
+#include "console.h"
 
 #include <Windows.h>
 #include <vector>
@@ -23,11 +24,12 @@ class ProcessManager {
 		void wait_for(kiv_os::THandle *proc_handles, size_t proc_count);
 		void run_process(kiv_os::TEntry_Point program, kiv_os::TRegisters &regs);
 		void ProcessManager::run_thread(kiv_os::TThread_Proc thread_proc, void *data, kiv_os::TRegisters &regs);
-		kiv_os::THandle add_open_file(std::shared_ptr<Handler> handle);
+		kiv_os::THandle add_handle(std::shared_ptr<Handler> handle);
 		bool close_handle(const kiv_os::THandle handle);
 		std::shared_ptr<PCB> get_proc_context();
 		std::string ProcessManager::get_proc_work_dir();
 		void ProcessManager::set_proc_work_dir(std::string working_dir);
+		std::shared_ptr<Handler> ProcessManager::get_handle_object(const kiv_os::THandle hnd);
 	private:
 		ProcFilesystem *proc_filesystem;
 		
