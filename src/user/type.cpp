@@ -4,8 +4,6 @@
 size_t __stdcall type(const kiv_os::TRegisters &regs)
 {
 	kiv_os::TProcess_Startup_Info *tsi = reinterpret_cast<kiv_os::TProcess_Startup_Info*> (regs.rdi.r);
-	kiv_os::THandle stdin_t = tsi->stdin_t;
-	kiv_os::THandle stdout_t = tsi->stdout_t;
 	char* params = tsi->arg;
 	
 	bool console = false;
@@ -28,11 +26,11 @@ size_t __stdcall type(const kiv_os::TRegisters &regs)
 			}
 
 			console = is_string_name_lower(tmp, "con");
-			handle = console ? stdin_t : kiv_os_rtl::Create_File(tmp.c_str(), kiv_os::fmOpen_Always);
+			handle = console ? kiv_os::stdInput : kiv_os_rtl::Create_File(tmp.c_str(), kiv_os::fmOpen_Always);
 			// TODO check error
 
-			write_file_name(counter, stdout_t, tmp);
-			read_and_write(handle, stdout_t);
+			write_file_name(counter, kiv_os::stdOutput, tmp);
+			read_and_write(handle, kiv_os::stdOutput);
 
 			if (!console) kiv_os_rtl::Close_File(handle);
 		}
@@ -45,7 +43,7 @@ size_t __stdcall type(const kiv_os::TRegisters &regs)
 	return 0; // TODO what return
 }
 
-void read_and_write(kiv_os::THandle &in, kiv_os::THandle &out) {
+void read_and_write(kiv_os::THandle &in, kiv_os::THandle out) {
 
 	char *input = (char *)malloc(1024 * sizeof(char)); // TODO constant 1024
 	size_t read = 0, writen = 0;
@@ -70,7 +68,7 @@ void read_and_write(kiv_os::THandle &in, kiv_os::THandle &out) {
 /**
  * if counter != 0 write name to stdout_t
  */
-void write_file_name(int &counter, kiv_os::THandle &stdout_t, std::string &name)
+void write_file_name(int &counter, kiv_os::THandle stdout_t, std::string &name)
 {
 	if (counter) {
 		size_t writen = 0;
