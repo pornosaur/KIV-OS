@@ -251,8 +251,8 @@ std::vector<kiv_os::THandle> kiv_os_cmd::CommandsWrapper::Run_Commands()
 				tsi.stdin_t = creation_pipes.back()[READ_HANDLE];
 			}
 			else { // pipe
-				tsi.stdin_t = creation_pipes[cmd_counter-1][WRITE_HANDLE];
-				tsi.stdout_t = creation_pipes[cmd_counter][READ_HANDLE];
+				tsi.stdin_t = creation_pipes[cmd_counter-1][READ_HANDLE];
+				tsi.stdout_t = creation_pipes[cmd_counter][WRITE_HANDLE];
 			}
 		}
 		
