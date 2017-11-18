@@ -8,6 +8,8 @@
 #include <ctype.h>
 
 
+/* Variable for loop in the shell */
+int run_system = 1;
 
 size_t __stdcall shell(const kiv_os::TRegisters &regs) {
 	size_t written, read;
@@ -20,18 +22,17 @@ size_t __stdcall shell(const kiv_os::TRegisters &regs) {
 	char *input = (char *)calloc(MAX_SIZE_BUFFER_IN, sizeof(char));
 	kiv_os_cmd::CommandsWrapper cmd_w;
 
-	while (run_shell) {
+	while (run_system && run_shell ) {
 		bool result = kiv_os_rtl::Read_File(kiv_os::stdInput, input, MAX_SIZE_BUFFER_IN, read);
 		
 		/* Input is not empty; 2 because of \r\n */
 		/* TODO: on linux could be less then 2? */
+		
 		if (read > 2) {
 			if (!cmd_w.Run_Parse(std::string(input))) {
 				cmd_w.Print_Error();
 				continue;
-			}
-
-			
+			}			
 			
 			kiv_os::THandle proc_handle;
 
@@ -52,8 +53,7 @@ size_t __stdcall shell(const kiv_os::TRegisters &regs) {
 	return 0;
 }
 
-void __stdcall shell_stop()
+void __stdcall system_stop()
 {
-	//run_shell = 0;
-	//TODO: implement also shell stop in the Kernel
+	run_system = 0;
 }

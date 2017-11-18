@@ -10,11 +10,9 @@
 #define REGEX_DEF_GROUP		3
 
 
-/* Variable for loop in the shell */
-//int run_shell = 1;
 
 extern "C" size_t __stdcall shell(const kiv_os::TRegisters &regs);
 
 /* Function prepared for stop shell */
-extern "C" void __stdcall shell_stop();
+extern "C" void __stdcall system_stop();
 
