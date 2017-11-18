@@ -3,10 +3,6 @@
 
 #include <cstring>
 
-size_t __stdcall md(const kiv_os::TRegisters &regs) {
-	return 0;
-}
-
 size_t __stdcall rd(const kiv_os::TRegisters &regs) {
 	return 0;
 }
