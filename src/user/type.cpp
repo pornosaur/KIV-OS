@@ -17,8 +17,8 @@ size_t __stdcall type(const kiv_os::TRegisters &regs)
 		str = match.suffix();
 		
 		if (!tmp.empty()) {
-			tmp.erase(tmp.find_last_not_of(" \n\r\t\"'") + 1);
-			tmp.erase(0, tmp.find_first_not_of(" \n\r\t\"'"));
+			tmp.erase(tmp.find_last_not_of(erase_chars) + 1);
+			tmp.erase(0, tmp.find_first_not_of(erase_chars));
 
 			if (is_string_name_lower(tmp, "nul")) {
 				counter++;

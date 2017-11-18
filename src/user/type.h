@@ -4,6 +4,8 @@
 
 #include <regex>
 
+#define erase_chars " \n\r\t\"'/"
+
 static std::regex reg_type("\"([\\S\\s][^\"]+)\"|\'([\\S\\s][^\']+)\'|(\\S+)");
 
 extern "C" size_t __stdcall type(const kiv_os::TRegisters &regs);
