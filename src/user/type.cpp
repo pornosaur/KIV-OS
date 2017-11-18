@@ -34,7 +34,7 @@ size_t __stdcall type(const kiv_os::TRegisters &regs)
 			write_file_name(counter, kiv_os::stdOutput, tmp);
 			read_and_write(handle, kiv_os::stdOutput);
 
-			if (!console) kiv_os_rtl::Close_File(handle);
+			if (!console) kiv_os_rtl::Close_File(handle); // TODO check return code of Close_File?
 		}
 		counter++;
 	}
@@ -50,12 +50,12 @@ size_t __stdcall type(const kiv_os::TRegisters &regs)
  */
 void read_and_write(kiv_os::THandle &in, kiv_os::THandle out) {
 
-	char *input = (char *)malloc(1024 * sizeof(char)); // TODO constant 1024
+	char *input = (char *)malloc(buffer_size * sizeof(char));
 	size_t read = 0, writen = 0;
 	bool res = true;
 
 	do {
-		res = kiv_os_rtl::Read_File(in, input, 1024, read); // TODO constant 1024
+		res = kiv_os_rtl::Read_File(in, input, buffer_size, read);
 		if (!res || read == 0) break;
 
 		res = kiv_os_rtl::Write_File(out, input, read, writen);

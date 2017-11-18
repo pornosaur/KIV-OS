@@ -5,6 +5,7 @@
 #include <regex>
 
 #define erase_chars " \n\r\t\"'/"
+#define buffer_size 1024
 
 static std::regex reg_type("\"([\\S\\s][^\"]+)\"|\'([\\S\\s][^\']+)\'|(\\S+)");
 
