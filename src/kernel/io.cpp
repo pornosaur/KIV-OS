@@ -74,6 +74,10 @@ void create_file(kiv_os::TRegisters &regs) {
 
 	FileHandler * handler = NULL;
 	uint16_t ret_code = 0;
+
+	if (path.find(":") == std::string::npos) {
+		path = handles->get_proc_work_dir() + "/" + path;
+	}
 	
 	if (file_atributes & kiv_os::faDirectory) { 
 		if (open_always == kiv_os::fmOpen_Always) {
@@ -176,6 +180,9 @@ void delete_file(kiv_os::TRegisters &regs)
 {
 	std::string path(reinterpret_cast<char*>(regs.rdx.r));
 
+	if (path.find(":") == std::string::npos) {
+		path = handles->get_proc_work_dir() + "/" + path;
+	}
 	// TODO(nice to have) remove file or dentry by one call
 
 	uint16_t ret_code = vfs->remove_file(path); // remove file
@@ -198,7 +205,7 @@ void set_file_position(kiv_os::TRegisters &regs)
 		return;
 	}
 
-	long offset = (long)regs.rdi.r;
+	long offset = static_cast<long>(regs.rdi.r);
 	uint8_t origin = regs.rcx.l;
 
 	uint16_t ret_code = handler->fseek(offset, origin, regs.rcx.h);
@@ -244,11 +251,53 @@ void close_handle(kiv_os::TRegisters &regs) //TODO close pro konzoli?
 }
 
 void get_current_directory(kiv_os::TRegisters &regs) {
-	// TODO implement
+	char * buffer = reinterpret_cast<char*>(regs.rdx.r);
+	size_t buff_size = regs.rcx.r;
+
+	if (buffer == NULL || buff_size == 0) {
+		set_error(regs, kiv_os::erInvalid_Argument);
+		return;
+	}
+
+	std::string path = handles->get_proc_work_dir();
+
+	size_t len = path.size();
+	if (len + 1u > buff_size) {
+		set_error(regs, kiv_os::erInvalid_Argument);
+		return;
+	}
+
+	strcpy_s(buffer, len + 1u, path.c_str());
+
+	regs.rax.r = len;
 }
 
 void set_current_directory(kiv_os::TRegisters &regs) {
-	// TODO implement
+	std::string new_path(reinterpret_cast<char*>(regs.rdx.r));
+
+	if (new_path == "") {
+		set_error(regs, kiv_os::erInvalid_Argument);
+		return;
+	}
+
+	if (new_path.find(":") == std::string::npos) {
+		new_path = handles->get_proc_work_dir() + "/" + new_path;
+	}
+
+	FileHandler * handler = NULL;
+	uint16_t result = vfs->open_object(&handler, new_path, FS::FS_OBJECT_DIRECTORY);
+
+	if (result == kiv_os::erSuccess && handler != NULL) {
+		handles->set_proc_work_dir(new_path);
+
+		if (handler->close_handler()) {
+			delete handler;
+			handler = NULL;
+		}
+	}
+	else {
+		set_error(regs, result);
+	}
 }
 
 void create_pipe(kiv_os::TRegisters &regs)

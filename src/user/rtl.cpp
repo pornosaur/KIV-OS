@@ -76,6 +76,40 @@ bool kiv_os_rtl::Remove_File(const char* file_name) {
 	return Do_SysCall(regs);
 }
 
+bool kiv_os_rtl::Set_File_Position(const kiv_os::THandle file_handle, long &position, uint8_t &origin, uint16_t &set_size) {
+	kiv_os::TRegisters regs = Prepare_SysCall_Context(kiv_os::scIO, kiv_os::scSet_File_Position);
+	regs.rdx.x = static_cast<decltype(regs.rdx.x)>(file_handle);
+	regs.rdi.r = static_cast<decltype(regs.rdi.r)>(position);
+	regs.rcx.l = origin;
+	regs.rcx.h = static_cast<decltype(regs.rcx.h)>(set_size);
+	return Do_SysCall(regs);
+}
+
+bool kiv_os_rtl::Get_File_Position(const kiv_os::THandle file_handle, size_t &position) {
+	kiv_os::TRegisters regs = Prepare_SysCall_Context(kiv_os::scIO, kiv_os::scGet_File_Position);
+	regs.rdx.x = static_cast<decltype(regs.rdx.x)>(file_handle);
+
+	const bool result = Do_SysCall(regs);
+	position = regs.rax.r;
+	return result;
+}
+
+bool kiv_os_rtl::Set_Current_Directory(const char *path) {
+	kiv_os::TRegisters regs = Prepare_SysCall_Context(kiv_os::scIO, kiv_os::scSet_Current_Directory);
+	regs.rdx.r = reinterpret_cast<decltype(regs.rdx.r)>(path);
+	return Do_SysCall(regs);
+}
+
+bool kiv_os_rtl::Get_Current_Direcotry(const void *buffer, const size_t buffer_size, size_t &read) {
+	kiv_os::TRegisters regs = Prepare_SysCall_Context(kiv_os::scIO, kiv_os::scGet_Current_Directory);
+	regs.rdx.r = reinterpret_cast<decltype(regs.rdx.r)>(buffer);
+	regs.rcx.r = buffer_size;
+
+	const bool result = Do_SysCall(regs);
+	read = regs.rax.r;
+	return result;
+}
+
 bool kiv_os_rtl::Create_Process(const char *program_name, kiv_os::TProcess_Startup_Info tsi, kiv_os::THandle &process_handle) {
 	kiv_os::TRegisters regs = Prepare_SysCall_Context(kiv_os::scProc, kiv_os::scClone);
 	regs.rcx.l = kiv_os::clCreate_Process;

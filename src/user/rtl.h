@@ -24,6 +24,10 @@ namespace kiv_os_rtl {
 	bool Remove_File(const char* file_name);
 	// smaze soubor z disku
 	// vraci true, kdyz vse OK
+	bool Set_File_Position(const kiv_os::THandle file_handle, long &position, uint8_t &origin, uint16_t &set_size);
+	bool Get_File_Position(const kiv_os::THandle file_handle, size_t &position);
+	bool Set_Current_Directory(const char *path);
+	bool Get_Current_Direcotry(const void *buffer, const size_t buffer_size, size_t &written);
 	bool Create_Process(const char *program_name, kiv_os::TProcess_Startup_Info tsi, kiv_os::THandle &process_handle);
 	bool Create_Thread(kiv_os::TThread_Proc ttp, void *data, kiv_os::THandle &process_handle);
 	//Vytvoreni procesu podle nazvu programu program_name s prislunymi paramatery a handlery ulozenych v tso.
