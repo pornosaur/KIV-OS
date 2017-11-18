@@ -3,7 +3,6 @@
 size_t __stdcall md(const kiv_os::TRegisters &regs)
 {
 	kiv_os::TProcess_Startup_Info *tsi = reinterpret_cast<kiv_os::TProcess_Startup_Info*> (regs.rdi.r);
-	kiv_os::THandle stdout_t = tsi->stdout_t;
 	char* params = tsi->arg;
 
 	std::smatch match;
