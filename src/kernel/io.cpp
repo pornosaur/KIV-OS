@@ -76,8 +76,14 @@ void create_file(kiv_os::TRegisters &regs) {
 	uint16_t ret_code = 0;
 	
 	if (file_atributes & kiv_os::faDirectory) { 
-		// create/open directory
-		ret_code = vfs->create_dir(&handler, path);
+		if (open_always == kiv_os::fmOpen_Always) {
+			// open dir
+			ret_code = vfs->open_object(&handler, path, FS::FS_OBJECT_DIRECTORY);
+		}
+		else {
+			// crate dir
+			ret_code = vfs->create_dir(&handler, path);
+		}
 	}
 	else {
 		if (open_always == kiv_os::fmOpen_Always) {
