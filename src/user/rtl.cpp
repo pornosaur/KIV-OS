@@ -7,7 +7,7 @@ extern "C" __declspec(dllimport) void __stdcall Sys_Call(kiv_os::TRegisters &con
 
 std::atomic<size_t> Last_Error;
 
-size_t Get_Last_Error() {
+size_t kiv_os_rtl::Get_Last_Error() {
 	return Last_Error;
 }
 
@@ -68,6 +68,12 @@ bool kiv_os_rtl::Read_File(const kiv_os::THandle file_handle, void *buffer, cons
 	const bool result = Do_SysCall(regs);
 	read = regs.rax.r;
 	return result;
+}
+
+bool kiv_os_rtl::Remove_File(const char* file_name) {
+	kiv_os::TRegisters regs = Prepare_SysCall_Context(kiv_os::scIO, kiv_os::scDelete_File);
+	regs.rdx.r = reinterpret_cast<decltype(regs.rdx.r)>(file_name);
+	return Do_SysCall(regs);
 }
 
 bool kiv_os_rtl::Create_Process(const char *program_name, kiv_os::TProcess_Startup_Info tsi, kiv_os::THandle &process_handle) {

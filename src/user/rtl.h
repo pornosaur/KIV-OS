@@ -21,6 +21,9 @@ namespace kiv_os_rtl {
 	bool Read_File(const kiv_os::THandle file_handle, void *buffer, const size_t buffer_size, size_t &read);
 	//cte ze souboru do buffer o velikosti buffer_size a vraci pocet precenych dat ve read
 	//vraci true, kdyz vse OK
+	bool Remove_File(const char* file_name);
+	// smaze soubor z disku
+	// vraci true, kdyz vse OK
 	bool Create_Process(const char *program_name, kiv_os::TProcess_Startup_Info tsi, kiv_os::THandle &process_handle);
 	bool Create_Thread(kiv_os::TThread_Proc ttp, void *data, kiv_os::THandle &process_handle);
 	//Vytvoreni procesu podle nazvu programu program_name s prislunymi paramatery a handlery ulozenych v tso.

@@ -3,12 +3,6 @@
 
 #include <cstring>
 
-size_t __stdcall rd(const kiv_os::TRegisters &regs) {
-	return 0;
-}
-
-
-
 
 size_t __stdcall sort(const kiv_os::TRegisters &regs) {
 	return 0;
