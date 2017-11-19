@@ -175,6 +175,11 @@ kiv_os::THandle ProcessManager::add_handle(std::shared_ptr<Handler> handle) {
 }
 
 void ProcessManager::run_process(kiv_os::TEntry_Point program,  kiv_os::TRegisters &regs) {
+	kiv_os::TProcess_Startup_Info *tsi = reinterpret_cast<kiv_os::TProcess_Startup_Info*> (regs.rdi.r);
+	char *args = NULL;
+	if (tsi != NULL) {
+		args = tsi->arg;
+	}
 	
 	program(regs);
 	std::shared_ptr<PCB> pcb = get_proc_context();
@@ -185,6 +190,9 @@ void ProcessManager::run_process(kiv_os::TEntry_Point program,  kiv_os::TRegiste
 			pcb->open_files[i].reset();
 		}
 	}
+
+	free(args);
+	args = NULL;
 }
 
 void ProcessManager::run_thread(kiv_os::TThread_Proc thread_proc, void *data, kiv_os::TRegisters &regs) {
