@@ -66,8 +66,7 @@ uint16_t Console::read(char* buffer, size_t length, size_t& read) {
 	}
 	else {
 		read = 0;		//TODO only for testing, change it but how? Console close after press ctrl+z in subshell and stay closed in init shell
-		mStdInOpen = true; //TODO only for testing, change it but how?
-		err = kiv_os::erSuccess;
+		err = kiv_os::erPermission_Denied;
 	}
 
 	return err;
