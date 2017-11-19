@@ -117,7 +117,7 @@ void md_print_msg(std::string msg)
 
 	msg.append("\n\n");
 
-	bool res = kiv_os_rtl::Write_File(kiv_os::stdOutput, msg.c_str(), msg.size(), writen);
+	bool res = kiv_os_rtl::Write_File(kiv_os::stdError, msg.c_str(), msg.size(), writen);
 	if (!res) {
 		return;
 	}
