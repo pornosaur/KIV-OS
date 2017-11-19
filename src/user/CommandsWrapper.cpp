@@ -204,7 +204,8 @@ std::vector<kiv_os::THandle> kiv_os_cmd::CommandsWrapper::Run_Commands()
 {
 	std::vector<kiv_os::THandle> proc_handles;
 	assert(!commands.empty());
-	//TODO: here odpalit processes
+	kiv_os::THandle redirect_input_h = kiv_os::erInvalid_Handle;
+	kiv_os::THandle redirect_output_h = kiv_os::erInvalid_Handle;
 	std::vector<std::vector<kiv_os::THandle>> creation_pipes;
 	size_t cmd_counter = 0;
 	for (size_t i = 1; i < commands.size(); i++) { //create pipes
@@ -219,60 +220,86 @@ std::vector<kiv_os::THandle> kiv_os_cmd::CommandsWrapper::Run_Commands()
 		tsi.stdout_t = kiv_os::stdOutput;
 		tsi.stderr_t = kiv_os::stdError;
 
-		if (&cmd == &commands.front()) { //first command
-			if (cmd.is_redirect && cmd.redirect.type == redirect_to_command) { //input redirect
-				//TODO redirect file to stdin
-			}
-			else {
+		//set stdin_t
+		if (cmd.is_redirect && cmd.redirect.type == redirect_to_command) { //input redirect
+			//TODO tsi.stdin_t = handle
+		}
+		else {
+			if (&cmd == &commands.front()) {
 				tsi.stdin_t = kiv_os::stdInput;
 			}
-
-			if (&commands.front() == &commands.back()) { //Only one cmd without pipes
-				tsi.stdout_t = kiv_os::stdOutput;
-				tsi.stderr_t = kiv_os::stdError; //set error too? 
-			}
 			else {
-				tsi.stdout_t = creation_pipes.front()[WRITE_HANDLE]; // output first pipe write
+				tsi.stdin_t = creation_pipes[cmd_counter-1][READ_HANDLE];
 			}
 			
 		}
+
+		//set stdout_t
+		if (cmd.is_redirect) {
+			if (cmd.redirect.type == redirect_to_file) {
+				redirect_output_h = kiv_os_rtl::Create_File(cmd.redirect.dest.c_str(), 0, 0);
+				if (redirect_output_h == 0) {
+					//TODO get_last_errr
+					break;
+				}
+				tsi.stdout_t = redirect_output_h;
+				tsi.stderr_t = redirect_output_h;
+			}
+			if (cmd.redirect.type == redirect_to_file_append) {
+				long position = 0;
+				redirect_output_h = kiv_os_rtl::Create_File(cmd.redirect.dest.c_str(), kiv_os::fmOpen_Always, 0);
+				if (redirect_output_h == 0) {
+					//TODO get_last_errr
+					break;
+				}
+				if (!kiv_os_rtl::Set_File_Position(redirect_output_h, position, kiv_os::fsEnd, kiv_os::fsSet_Position)) {
+					//TODO get_last_err
+					break;
+				}
+				tsi.stdout_t = redirect_output_h;
+				tsi.stderr_t = redirect_output_h;
+			}
+		}
 		else {
-			if (&cmd == &commands.back()) { //last command
-				if (cmd.is_redirect) {
-					if (cmd.redirect.type == redirect_to_file) {
-						//TODO
-					}
-					if (cmd.redirect.type == redirect_to_file_append) {
-						//TODO
-					}
-				}
-				else {
-					tsi.stdout_t = kiv_os::stdOutput;
-				}
-				tsi.stdin_t = creation_pipes.back()[READ_HANDLE];
+			if (&cmd == &commands.back()) {
+				tsi.stdout_t = kiv_os::stdOutput;
+				tsi.stderr_t = kiv_os::stdError;
 			}
-			else { // pipe
-				tsi.stdin_t = creation_pipes[cmd_counter-1][READ_HANDLE];
-				tsi.stdout_t = creation_pipes[cmd_counter][WRITE_HANDLE];
+			else
+			{
+				tsi.stdout_t = creation_pipes[cmd_counter][WRITE_HANDLE]; 
+				tsi.stderr_t = creation_pipes[cmd_counter][WRITE_HANDLE];
 			}
+			
 		}
 
 		if (cmd.command == "cd") {
 			cmd_cd(cmd.args_line);
 		}
 		else {
-			tsi.arg = kiv_os_str::copy_string(cmd.args_line); //argumenty //kde uvolnit???!!!
+			tsi.arg = kiv_os_str::copy_string(cmd.args_line); //argumenty
 			kiv_os::THandle proc_handle;
 			bool result = kiv_os_rtl::Create_Process(cmd.command.c_str(), tsi, proc_handle); //vytvoreni procesu
 			if (result) {
 				proc_handles.push_back(proc_handle); //pridani handlu do pole s handly
 			}
+			else {
+				//TODO get_err
+				break;
+			}
 		}
-		
+		if (redirect_input_h != kiv_os::erInvalid_Handle) {
+			kiv_os_rtl::Close_File(redirect_input_h);
+			redirect_input_h = kiv_os::erInvalid_Handle;
+		}
+		if (redirect_output_h != kiv_os::erInvalid_Handle) {
+			kiv_os_rtl::Close_File(redirect_output_h);
+			redirect_output_h = kiv_os::erInvalid_Handle;
+		}
 		cmd_counter++;
 		
 	}
-	/*Remove pipe handles*/
+	/*Close pipe handles*/
 	for (std::vector<kiv_os::THandle> pipe_handle : creation_pipes) {
 		kiv_os_rtl::Close_File(pipe_handle[WRITE_HANDLE]);
 		kiv_os_rtl::Close_File(pipe_handle[READ_HANDLE]);

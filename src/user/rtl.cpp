@@ -76,7 +76,7 @@ bool kiv_os_rtl::Remove_File(const char* file_name) {
 	return Do_SysCall(regs);
 }
 
-bool kiv_os_rtl::Set_File_Position(const kiv_os::THandle file_handle, long &position, uint8_t &origin, uint16_t &set_size) {
+bool kiv_os_rtl::Set_File_Position(const kiv_os::THandle file_handle, long &position, uint8_t origin, uint16_t set_size) {
 	kiv_os::TRegisters regs = Prepare_SysCall_Context(kiv_os::scIO, kiv_os::scSet_File_Position);
 	regs.rdx.x = static_cast<decltype(regs.rdx.x)>(file_handle);
 	regs.rdi.r = static_cast<decltype(regs.rdi.r)>(position);
