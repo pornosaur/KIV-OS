@@ -9,7 +9,6 @@ ProcessManager::ProcessManager(ProcFilesystem *proc_filesys) {
 	proc_filesystem = proc_filesys;
 }
 ProcessManager::~ProcessManager() {
-	delete(proc_filesystem);
 }
 void ProcessManager::handle_proc(kiv_os::TRegisters &regs) {
 	switch (regs.rax.l) {
