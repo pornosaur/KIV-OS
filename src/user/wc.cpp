@@ -39,9 +39,6 @@ size_t __stdcall wc(const kiv_os::TRegisters &regs) {
 	size_t written;
 	kiv_os_rtl::Write_File(kiv_os::stdOutput, output, out.size(), written);
 
-	free(str);
-	str = NULL;		//TODO clear this pointer?
-
 	return 0;
 }
 
