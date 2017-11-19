@@ -10,9 +10,6 @@ size_t __stdcall type(const kiv_os::TRegisters &regs)
 	std::smatch match;
 	std::string str(params);
 
-	free(params);
-	params = NULL;		//TODO clear this pointer?
-
 	kiv_os::THandle handle;
 	int counter = 0;
 
