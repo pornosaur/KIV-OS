@@ -261,9 +261,9 @@ std::vector<kiv_os::THandle> kiv_os_cmd::CommandsWrapper::Run_Commands()
 			cmd_cd(cmd.args_line);
 		}
 		else {
-			tsi.arg = kiv_os_str::copy_string(cmd.args_line); //argumenty
+			tsi.arg = kiv_os_str::copy_string(cmd.args_line); //argumenty //kde uvolnit???!!!
 			kiv_os::THandle proc_handle;
-			bool result = kiv_os_rtl::Create_Process(kiv_os_str::copy_string(cmd.command), tsi, proc_handle); //vytvoreni procesu
+			bool result = kiv_os_rtl::Create_Process(cmd.command.c_str(), tsi, proc_handle); //vytvoreni procesu
 			if (result) {
 				proc_handles.push_back(proc_handle); //pridani handlu do pole s handly
 			}
