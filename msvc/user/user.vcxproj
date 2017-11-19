@@ -20,7 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\user\cd.cpp" />
-    <ClCompile Include="..\..\src\user\commands.cpp" />
     <ClCompile Include="..\..\src\user\CommandsWrapper.cpp" />
     <ClCompile Include="..\..\src\user\dllmain.cpp" />
     <ClCompile Include="..\..\src\user\echo.cpp" />
@@ -33,6 +32,7 @@
     <ClCompile Include="..\..\src\user\rtl.cpp" />
     <ClCompile Include="..\..\src\user\shell.cpp" />
     <ClCompile Include="..\..\src\user\shutdown.cpp" />
+    <ClCompile Include="..\..\src\user\sort.cpp" />
     <ClCompile Include="..\..\src\user\string.cpp" />
     <ClCompile Include="..\..\src\user\type.cpp" />
     <ClCompile Include="..\..\src\user\wc.cpp" />
@@ -41,7 +41,6 @@
     <ClInclude Include="..\..\src\api\api.h" />
     <ClInclude Include="..\..\src\api\api_extension.h" />
     <ClInclude Include="..\..\src\user\cd.h" />
-    <ClInclude Include="..\..\src\user\commands.h" />
     <ClInclude Include="..\..\src\user\CommandsWrapper.h" />
     <ClInclude Include="..\..\src\user\echo.h" />
     <ClInclude Include="..\..\src\user\freq.h" />
@@ -53,6 +52,7 @@
     <ClInclude Include="..\..\src\user\rtl.h" />
     <ClInclude Include="..\..\src\user\shell.h" />
     <ClInclude Include="..\..\src\user\shutdown.h" />
+    <ClInclude Include="..\..\src\user\sort.h" />
     <ClInclude Include="..\..\src\user\string.h" />
     <ClInclude Include="..\..\src\user\type.h" />
     <ClInclude Include="..\..\src\user\wc.h" />
