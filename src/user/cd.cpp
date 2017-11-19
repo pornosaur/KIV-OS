@@ -152,8 +152,10 @@ void change_dir_with_disk(std::string &path, bool change_disk)
 	}
 
 	if(strncmp(buffer, path.c_str(), pos) && pos + 1 + delimeter_size < path.size() && !change_disk) {
+		free(buffer);
 		return;
 	}
+	free(buffer);
 
 	path_compiler(path);
 	res = kiv_os_rtl::Set_Current_Directory(path.c_str());
