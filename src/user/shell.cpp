@@ -27,7 +27,10 @@ size_t __stdcall shell(const kiv_os::TRegisters &regs) {
 		
 		/* Input is not empty; 2 because of \r\n */
 		/* TODO: on linux could be less then 2? */
-		
+		if (read == 2) { //Is all right? Enter catch
+			input = (char *)calloc(MAX_SIZE_BUFFER_IN, sizeof(char));
+			continue;
+		}
 		if (read > 2) {
 			if (!cmd_w.Run_Parse(std::string(input))) {
 				cmd_w.Print_Error();
