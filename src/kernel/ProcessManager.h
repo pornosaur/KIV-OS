@@ -15,7 +15,7 @@
 
 class ProcessManager {
 	public:
-		ProcessManager();
+		ProcessManager(ProcFilesystem *proc_filesys);
 		~ProcessManager();
 		
 		void handle_proc(kiv_os::TRegisters &regs);

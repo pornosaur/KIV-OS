@@ -3,6 +3,7 @@
 #include "..\api\api.h"
 #include "BinSemaphore.h"
 #include "ProcessManager.h"
+#include "ProcFilesystem.h"
 #include "io.h"
 #include "Vfs.h"
 #include "FatFS.h"

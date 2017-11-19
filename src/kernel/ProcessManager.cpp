@@ -5,8 +5,8 @@
 #include <string>      
 #include <iostream> 
 
-ProcessManager::ProcessManager() {
-	proc_filesystem = new ProcFilesystem();
+ProcessManager::ProcessManager(ProcFilesystem *proc_filesys) {
+	proc_filesystem = proc_filesys;
 }
 ProcessManager::~ProcessManager() {
 	delete(proc_filesystem);
@@ -99,8 +99,6 @@ void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_In
 	}
 	else {
 		std::cout << "LOG: Process "<< prog_name <<" in process " << pcb_context->proc_name << " created w/ pid " << pcb->pid << std::endl;
-		std::cout << "---ACTUAL PCB TABLE---" << std::endl;
-		std::cout << proc_filesystem->pcb_table_to_str();
 	}
 	
 	regs.rax.r = static_cast<decltype(regs.rdx.x)>(proc_handle);
@@ -136,8 +134,6 @@ void ProcessManager::create_thread(kiv_os::TThread_Proc thread_proc, void *data,
 	proc_filesystem->unlock_pfs();
 
 	std::cout << "LOG: Thread for process " << pcb_context->proc_name << " created w/ pid " << pcb_context->pid << std::endl;
-	std::cout << "---ACTUAL PCB TABLE---" << std::endl;
-	std::cout << proc_filesystem->pcb_table_to_str();
 	regs.rax.r = static_cast<decltype(regs.rdx.x)>(proc_handle);
 }
 void ProcessManager::wait_for(kiv_os::THandle *proc_handles, size_t proc_count) {

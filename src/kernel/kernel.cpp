@@ -5,6 +5,7 @@
 ProcessManager *processManager;
 BinSemaphore interrupt_sem;
 HMODULE User_Programs;
+ProcFilesystem *proc_filesystem;
 Vfs *vfs;
 char *fat_memory;
 
@@ -29,7 +30,7 @@ void Unlock_Kernel()
 
 void Initialize_Kernel() {
 	User_Programs = LoadLibrary(L"user.dll");
-	processManager = new ProcessManager();
+	
 	
 	// virtual memory initialization
 	size_t memory_size = 4096;
@@ -43,6 +44,11 @@ void Initialize_Kernel() {
 	vfs = new Vfs();
 	vfs->register_fs("C:", fs);
 
+	//registr ProcFileSystem
+	proc_filesystem = new ProcFilesystem();
+	
+	vfs->register_fs("0:", proc_filesystem);
+	processManager = new ProcessManager(proc_filesystem);
 	// TODO REMOVE ONLY TEST FILE ==================================================================================
 	FileHandler *file = NULL;
 	vfs->create_file(&file, "C:\\joke.txt");
@@ -57,6 +63,8 @@ void Shutdown_Kernel() {
 	FreeLibrary(User_Programs);
 
 	delete[] fat_memory;
+	delete[] processManager;
+	delete[] proc_filesystem;
 	delete vfs;
 }
 
