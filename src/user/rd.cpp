@@ -8,9 +8,6 @@ size_t __stdcall rd(const kiv_os::TRegisters &regs)
 	std::smatch match;
 	std::string str(params);
 
-	free(params);
-	params = NULL;		//TODO clear this pointer?
-
 	bool quiet = false;
 	bool recursively = false;
 
