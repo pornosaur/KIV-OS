@@ -13,7 +13,6 @@ size_t cmd_cd(const std::string &parameters)
 
 	if (str.empty()) {
 		cd_print();
-		//TODO clear remove str?
 		return 0; // TODO
 	}
 
@@ -44,7 +43,6 @@ size_t cmd_cd(const std::string &parameters)
 		str = match.suffix();
 	}
 
-	//TODO clear remove str?
 	return 0; // TODO what return
 }
 
@@ -263,7 +261,7 @@ void cd_print_error(std::string msg)
 
 	msg.append("\n\n");
 
-	bool res = kiv_os_rtl::Write_File(kiv_os::stdOutput, msg.c_str(), msg.size(), writen);
+	bool res = kiv_os_rtl::Write_File(kiv_os::stdError, msg.c_str(), msg.size(), writen);
 	if (!res) {
 		return;
 	}
