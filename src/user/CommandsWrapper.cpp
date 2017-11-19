@@ -1,7 +1,6 @@
 #include "CommandsWrapper.h"
 #include "string.h"
 #include "rtl.h"
-
 #include <regex>
 #include <memory>
 #include <cassert>
@@ -206,7 +205,7 @@ std::vector<kiv_os::THandle> kiv_os_cmd::CommandsWrapper::Run_Commands()
 	//TODO: here odpalit processes
 	std::vector<std::vector<kiv_os::THandle>> creation_pipes;
 	size_t cmd_counter = 0;
-	for (size_t i = 0; i < commands.size() - 1; i++) { //create pipes
+	for (size_t i = 1; i < commands.size(); i++) { //create pipes
 		std::vector<kiv_os::THandle> pipe_handles (2);
 		kiv_os_rtl::Create_Pipe(&pipe_handles[0]); //0 - write, 1 -read
 		creation_pipes.push_back(pipe_handles);
