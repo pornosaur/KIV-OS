@@ -187,6 +187,13 @@ void delete_file(kiv_os::TRegisters &regs)
 	uint16_t ret_code = vfs->remove_file(path); // remove file
 
 	if (ret_code == kiv_os::erFile_Not_Found) {
+
+		if (!processManager->get_proc_work_dir().find(path)) {
+			// trying to remove working dir
+			set_error(regs, kiv_os::erPermission_Denied);
+			return;
+		}
+
 		ret_code = vfs->remove_emtpy_dir(path); // remove directory
 	}
 
