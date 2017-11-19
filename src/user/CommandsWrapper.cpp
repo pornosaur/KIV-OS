@@ -1,6 +1,8 @@
 #include "CommandsWrapper.h"
 #include "string.h"
 #include "rtl.h"
+#include "cd.h"
+
 #include <regex>
 #include <memory>
 #include <cassert>
@@ -254,14 +256,19 @@ std::vector<kiv_os::THandle> kiv_os_cmd::CommandsWrapper::Run_Commands()
 				tsi.stdout_t = creation_pipes[cmd_counter][WRITE_HANDLE];
 			}
 		}
-		
-		tsi.arg = kiv_os_str::copy_string(cmd.args_line); //argumenty
-		kiv_os::THandle proc_handle;
-		bool result = kiv_os_rtl::Create_Process(kiv_os_str::copy_string(cmd.command), tsi, proc_handle); //vytvoreni procesu
-		if (result) {
-			proc_handles.push_back(proc_handle); //pridani handlu do pole s handly
-		}
 
+		if (cmd.command == "cd") {
+			cmd_cd(cmd.args_line);
+		}
+		else {
+			tsi.arg = kiv_os_str::copy_string(cmd.args_line); //argumenty
+			kiv_os::THandle proc_handle;
+			bool result = kiv_os_rtl::Create_Process(kiv_os_str::copy_string(cmd.command), tsi, proc_handle); //vytvoreni procesu
+			if (result) {
+				proc_handles.push_back(proc_handle); //pridani handlu do pole s handly
+			}
+		}
+		
 		cmd_counter++;
 		
 	}

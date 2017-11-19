@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\user\cd.cpp" />
     <ClCompile Include="..\..\src\user\commands.cpp" />
     <ClCompile Include="..\..\src\user\CommandsWrapper.cpp" />
     <ClCompile Include="..\..\src\user\dllmain.cpp" />
@@ -38,6 +39,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\src\api\api.h" />
     <ClInclude Include="..\..\src\api\api_extension.h" />
+    <ClInclude Include="..\..\src\user\cd.h" />
     <ClInclude Include="..\..\src\user\commands.h" />
     <ClInclude Include="..\..\src\user\CommandsWrapper.h" />
     <ClInclude Include="..\..\src\user\echo.h" />
