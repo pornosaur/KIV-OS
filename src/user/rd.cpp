@@ -92,7 +92,13 @@ bool remove_subfiles(std::string path, const kiv_os::TRegisters &regs)
 	}
 
 	size_t input_size = sizeof(kiv_os::TDir_Entry);
+	
 	char *input = (char *)malloc(input_size);
+	if (!input) {
+		rd_print_msg("Out of memory.");
+		return false;
+	}
+
 	kiv_os::TDir_Entry *entry;
 	size_t read = 0;
 	bool res;
@@ -151,6 +157,11 @@ void check_params(std::string &parameters, bool &recursively, bool &quiet)
 bool ask_for_deletion(std::string &path) {
 
 	char *input = (char *)malloc(buffer_size * sizeof(char));
+	if (!input) {
+		rd_print_msg("Out of memory.");
+		return false;
+	}
+
 	size_t writen = 0, read = 0;
 	bool res = true;
 
