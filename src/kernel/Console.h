@@ -18,8 +18,8 @@ private:
 	HANDLE mStdIn;
 	HANDLE mStdOut;
 	HANDLE mStdError;
-	bool mStdInOpen; 
-	bool mStdOutOpen;
-	bool mStdErrorOpen;
+	bool mStdInOpen = false; 
+	bool mStdOutOpen = false;
+	bool mStdErrorOpen = false;
 };
 

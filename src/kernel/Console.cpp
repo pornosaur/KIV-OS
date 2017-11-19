@@ -9,17 +9,17 @@ Console::Console(kiv_os::THandle handle)
 {
 	
 	if (handle == kiv_os::stdInput) {
-		_setmode(_fileno(stdin), _O_BINARY);
+		int res = _setmode(_fileno(stdin), _O_BINARY);
 		mStdIn = GetStdHandle(STD_INPUT_HANDLE);
 		mStdInOpen = true;
 	}
 	if (handle == kiv_os::stdOutput) {
-		_setmode(_fileno(stdout), _O_BINARY);
+		int res = _setmode(_fileno(stdout), _O_BINARY);
 		mStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
 		mStdOutOpen = true;
 	}
 	if (handle == kiv_os::stdError) {
-		_setmode(_fileno(stderr), _O_BINARY);
+		int res = _setmode(_fileno(stderr), _O_BINARY);
 		mStdError = GetStdHandle(STD_ERROR_HANDLE);
 		mStdErrorOpen = true;
 	}
