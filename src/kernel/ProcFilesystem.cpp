@@ -45,6 +45,7 @@ int ProcFilesystem::fs_open_object(FileHandler **object, const std::string &abso
 	if (absolute_path.compare("procfs") == 0) {
 		read_proc = true;
 		f_dentry = FS::init_dentry(nullptr, "", 0, 0, 1, 0, 0);
+		f_dentry->d_count++;
 		f_dentry->d_fs = this;
 		*object = new FileHandler(0, f_dentry, 0, 1);
 	}
