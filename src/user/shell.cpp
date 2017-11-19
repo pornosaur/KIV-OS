@@ -24,10 +24,11 @@ size_t __stdcall shell(const kiv_os::TRegisters &regs) {
 
 	while (run_system && run_shell ) {
 		bool result = kiv_os_rtl::Read_File(kiv_os::stdInput, input, MAX_SIZE_BUFFER_IN, read);
-		
 		/* Input is not empty; 2 because of \r\n */
 		/* TODO: on linux could be less then 2? */
 		if (read == 2) { //Is all right? Enter catch
+			free(input);
+			input = NULL;
 			input = (char *)calloc(MAX_SIZE_BUFFER_IN, sizeof(char));
 			continue;
 		}
@@ -46,7 +47,8 @@ size_t __stdcall shell(const kiv_os::TRegisters &regs) {
 		else {
 			run_shell = 0;
 		}
-
+		free(input);
+		input = NULL;
 		input = (char *)calloc(MAX_SIZE_BUFFER_IN, sizeof(char));
 	}
 
