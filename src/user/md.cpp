@@ -8,9 +8,6 @@ size_t __stdcall md(const kiv_os::TRegisters &regs)
 	std::smatch match;
 	std::string str(params);
 
-	free(params);
-	params = NULL;		//TODO clear this pointer?
-
 	while (!str.empty() && std::regex_search(str, match, reg_md_multi)) {
 		std::string tmp = match[0].str();
 		str = match.suffix();
