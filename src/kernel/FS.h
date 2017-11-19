@@ -5,6 +5,8 @@
 #include "VfsStructures.h"
 #include "../api/api.h"
 
+#include<mutex>
+
 #define delimeter "\\"
 #define delimeter_size 1;
 
@@ -16,6 +18,8 @@ public:
 
 	FS();
 	virtual ~FS();
+
+	std::mutex m_mutex;
 
 	// FILE TYPE CONSTANTS
 	static const int FS_OBJECT_DIRECTORY = 0;

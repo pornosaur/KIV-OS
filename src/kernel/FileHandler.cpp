@@ -4,9 +4,14 @@ FileHandler::~FileHandler()
 {
 	if (dentry != NULL)
 	{
+		FS *file_system = dentry->d_fs;
+		file_system->m_mutex.lock(); // lock FS
+		
 		dentry->d_count--;
-		dentry->d_fs->sb_remove_dentry(dentry); // nesmaze se kdyz na nej nekdo odkazuje
+		file_system->sb_remove_dentry(dentry); // nesmaze se kdyz na nej nekdo odkazuje
 		dentry = NULL;
+		
+		file_system->m_mutex.unlock(); // unlock FS
 	}
 }
 
@@ -19,11 +24,13 @@ uint16_t FileHandler::read(char * buffer, size_t length, size_t & read)
 	FS * m_fs = dentry->d_fs;
 	int ret_code = 0;
 	
+	m_fs->m_mutex.lock(); // lock FS
 	if (dentry->d_file_type == FS::FS_OBJECT_DIRECTORY) {
 		ret_code = m_fs->fs_read_dir(this, &read, buffer, length); // directory
 	} else {
 		ret_code = m_fs->fs_read_file(this, &read, buffer, length); // not directory
 	}
+	m_fs->m_mutex.unlock(); // unlock FS
 	
 	return FS::translate_return_codes(ret_code);
 	
@@ -36,7 +43,10 @@ uint16_t FileHandler::write(char * buffer, size_t length, size_t & written)
 	}
 	
 	FS * m_fs = dentry->d_fs;
+
+	m_fs->m_mutex.lock(); // lock FS
 	int ret_code = m_fs->fs_write_to_file(this, &written, buffer, length);
+	m_fs->m_mutex.unlock(); // unlock FS
 
 	return FS::translate_return_codes(ret_code);
 }
@@ -68,7 +78,10 @@ uint16_t FileHandler::fseek(long offset, uint8_t origin, uint8_t set_size)
 
 	if (set_size) {
 		FS * m_fs = dentry->d_fs;
+
+		m_fs->m_mutex.lock(); // lock FS
 		int ret_code = m_fs->fs_set_file_size(this, (size_t)new_position);
+		m_fs->m_mutex.unlock(); // unlock FS
 
 		return FS::translate_return_codes(ret_code);
 	}

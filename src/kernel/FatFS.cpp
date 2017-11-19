@@ -92,7 +92,7 @@ int FatFS::fs_create_dir(FileHandler **directory, const std::string &absolute_pa
 		return ERR_INVALID_PATH;
 	}
 
-	f_dentry = find_object_in_directory(m_dentry, absolute_path.substr(start, end), FS_OBJECT_DIRECTORY);
+	f_dentry = FatFS::find_object_in_directory(m_dentry, absolute_path.substr(start, end), FS_OBJECT_DIRECTORY);
 
 	if (f_dentry == NULL) {
 		unsigned long dir_position = 0;
@@ -194,7 +194,6 @@ int FatFS::fs_read_dir(FileHandler *file, size_t *read_bytes, char *buffer, size
 
 			file->fseek((long)(sizeof(struct dir_file) + positions[i] - file_position), kiv_os::fsBeginning, kiv_os::fsSet_Position);
 		}
-		
 	}
 
 	free(files);
@@ -218,7 +217,7 @@ int FatFS::fs_create_file(FileHandler **file, const std::string &absolute_path)
 		return ERR_INVALID_PATH;
 	}
 
-	f_dentry = find_object_in_directory(m_dentry, absolute_path.substr(start, end), FS_OBJECT_FILE);
+	f_dentry = FatFS::find_object_in_directory(m_dentry, absolute_path.substr(start, end), FS_OBJECT_FILE);
 
 	if (f_dentry != NULL) {
 		if (f_dentry->d_count > 0) {

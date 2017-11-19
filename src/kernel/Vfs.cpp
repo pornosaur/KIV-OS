@@ -25,7 +25,9 @@ uint16_t Vfs::create_dir(FileHandler ** directory, const std::string &absolute_p
 		return kiv_os::erFile_Not_Found;
 	}
 
+	file_system->m_mutex.lock(); // lock FS
 	int ret_code = file_system->fs_create_dir(directory, path);
+	file_system->m_mutex.unlock(); // unlock FS
 
 	return FS::translate_return_codes(ret_code);
 }
@@ -33,7 +35,7 @@ uint16_t Vfs::create_dir(FileHandler ** directory, const std::string &absolute_p
 uint16_t Vfs::remove_emtpy_dir(const std::string &absolute_path)
 {
 	FileHandler *file = NULL;
-	uint16_t ret_code1 = open_object(&file, absolute_path, FS::FS_OBJECT_DIRECTORY);
+	uint16_t ret_code1 = Vfs::open_object(&file, absolute_path, FS::FS_OBJECT_DIRECTORY);
 
 	if (ret_code1 != kiv_os::erSuccess) {
 		return ret_code1;
@@ -44,7 +46,10 @@ uint16_t Vfs::remove_emtpy_dir(const std::string &absolute_path)
 	}
 
 	FS * m_fs = file->get_dentry()->d_fs;
+
+	m_fs->m_mutex.lock(); // lock FS
 	int ret_code2 = m_fs->fs_remove_emtpy_dir(file);
+	m_fs->m_mutex.unlock(); // unlock FS
 
 	assert(file->get_count() == 1);
 	delete file;
@@ -65,8 +70,9 @@ uint16_t Vfs::open_object(FileHandler ** object, const std::string &absolute_pat
 	if (!file_system) {
 		return kiv_os::erFile_Not_Found;
 	}
-
+	file_system->m_mutex.lock(); // lock FS
 	int ret_code = file_system->fs_open_object(object, path, type);
+	file_system->m_mutex.unlock(); // unlock FS
 
 	return FS::translate_return_codes(ret_code);
 }
@@ -85,7 +91,9 @@ uint16_t Vfs::create_file(FileHandler ** file, const std::string &absolute_path)
 		return kiv_os::erFile_Not_Found;
 	}
 
+	file_system->m_mutex.lock(); // lock FS
 	int ret_code = file_system->fs_create_file(file, path);
+	file_system->m_mutex.unlock(); // unlock FS
 
 	return FS::translate_return_codes(ret_code);
 }
@@ -94,7 +102,7 @@ uint16_t Vfs::remove_file(const std::string &absolute_path)
 {
 
 	FileHandler *file = NULL;
-	uint16_t ret_code1 = open_object(&file, absolute_path, FS::FS_OBJECT_FILE);
+	uint16_t ret_code1 = Vfs::open_object(&file, absolute_path, FS::FS_OBJECT_FILE);
 
 	if (ret_code1 != kiv_os::erSuccess) {
 		return ret_code1;
@@ -106,7 +114,10 @@ uint16_t Vfs::remove_file(const std::string &absolute_path)
 
 	FS * m_fs = file->get_dentry()->d_fs;
 
+	m_fs->m_mutex.lock(); // lock FS
 	int ret_code2 = m_fs->fs_remove_file(file);
+	m_fs->m_mutex.unlock(); // unlock FS
+
 	assert(file->get_count() == 1);
 	delete file;
 
