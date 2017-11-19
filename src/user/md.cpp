@@ -8,6 +8,9 @@ size_t __stdcall md(const kiv_os::TRegisters &regs)
 	std::smatch match;
 	std::string str(params);
 
+	free(params);
+	params = NULL;		//TODO clear this pointer?
+
 	while (!str.empty() && std::regex_search(str, match, reg_md_multi)) {
 		std::string tmp = match[0].str();
 		str = match.suffix();
@@ -20,15 +23,13 @@ size_t __stdcall md(const kiv_os::TRegisters &regs)
 		}
 	}
 
-	free(params);
-	params = NULL;		//TODO clear this pointer?
-
 	return 0; // TODO what return
 }
 
 void create_directories(std::string &path)
 {
 	bool created = false;
+	bool res;
 	
 	kiv_os::THandle handle;
 	std::smatch match;
@@ -44,7 +45,11 @@ void create_directories(std::string &path)
 			// open dir if exists
 			handle = kiv_os_rtl::Create_File(tmp_path.c_str(), kiv_os::fmOpen_Always, kiv_os::faDirectory);
 			if (handle) {
-				kiv_os_rtl::Close_File(handle);
+				res = kiv_os_rtl::Close_File(handle);
+				if (!res) {
+					md_print_error();
+					return;
+				}
 				tmp_path.append(delimeter);
 				continue;
 			}
@@ -52,16 +57,71 @@ void create_directories(std::string &path)
 			// create dir
 			handle = kiv_os_rtl::Create_File(tmp_path.c_str(), 0, kiv_os::faDirectory);
 			if (!handle) {
-				return; // TODO error
+				md_print_error();
+				return;
 			}
 
-			kiv_os_rtl::Close_File(handle);
+			res = kiv_os_rtl::Close_File(handle);
+			if (!res) {
+				md_print_error();
+				return;
+			}
 			tmp_path.append(delimeter);
 			created = true;
 		}
 	}
 
 	if (!created) {
-		return; // TODO return error alredy exists
+		md_print_msg(tmp_path.append(": Directory or subdirectory already exists."));
+		return;
+	}
+}
+
+void md_print_error()
+{
+	switch (kiv_os_rtl::Get_Last_Error()) {
+	case kiv_os::erInvalid_Handle:
+		md_print_msg("Internal error. (Invalid Handle)");
+		break;
+
+	case kiv_os::erInvalid_Argument:
+		md_print_msg("Invalid input arugments.");
+		break;
+
+	case kiv_os::erFile_Not_Found:
+		md_print_msg("System can not find path.");
+		break;
+
+	case kiv_os::erDir_Not_Empty:
+		md_print_msg("Directory is not empty.");
+		break;
+
+	case kiv_os::erNo_Left_Space:
+		md_print_msg("Out of disk space.");
+		break;
+
+	case kiv_os::erPermission_Denied:
+		md_print_msg("Operation is not permitted.");
+		break;
+
+	case kiv_os::erOut_Of_Memory:
+		md_print_msg("Out of memory.");
+		break;
+
+	case kiv_os::erIO:
+		md_print_msg("Disk error.");
+		break;
+	}
+}
+
+void md_print_msg(std::string msg)
+{
+	size_t writen = 0;
+
+	msg.append("\n\n");
+
+	bool res = kiv_os_rtl::Write_File(kiv_os::stdOutput, msg.c_str(), msg.size(), writen);
+	if (!res) {
+		return;
 	}
 }

@@ -13,3 +13,5 @@ static std::regex reg_md_recur("[^\\\\]+");
 extern "C" size_t __stdcall md(const kiv_os::TRegisters &regs);
 
 void create_directories(std::string &path);
+void md_print_error();
+void md_print_msg(std::string msg);
