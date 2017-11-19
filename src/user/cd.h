@@ -19,3 +19,5 @@ void change_dir_from_root(std::string &path);
 void change_dir_with_disk(std::string &path, bool change_disk);
 void path_compiler(std::string &path);
 void print();
+void print_error();
+void print_error(std::string msg);

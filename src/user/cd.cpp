@@ -60,13 +60,15 @@ void change_dir(std::string &path)
 	size_t writen = 0;
 	char *buffer = (char*)malloc(sizeof(char) * buffer_size);
 	if (!buffer) {
-		return; // TODO error
+		print_error("Out of memory.");
+		return;
 	}
 
 	bool res = kiv_os_rtl::Get_Current_Direcotry(buffer, buffer_size, writen);
 	if (!res) {
 		free(buffer);
-		return; // TODO error
+		print_error();
+		return;
 	}
 
 	std::string tmp(buffer);
@@ -76,7 +78,8 @@ void change_dir(std::string &path)
 	path_compiler(tmp);
 	res = kiv_os_rtl::Set_Current_Directory(tmp.c_str());
 	if (!res) {
-		return; // TODO error
+		print_error();
+		return;
 	}
 }
 
@@ -90,13 +93,15 @@ void change_dir_from_root(std::string &path)
 	size_t writen = 0;
 	char *buffer = (char*)malloc(sizeof(char) * buffer_size);
 	if (!buffer) {
-		return; // TODO error
+		print_error("Out of memory.");
+		return;
 	}
 
 	bool res = kiv_os_rtl::Get_Current_Direcotry(buffer, buffer_size, writen);
 	if (!res) {
 		free(buffer);
-		return; // TODO error
+		print_error();
+		return;
 	}
 
 	char * first = strchr(buffer, ':');
@@ -106,7 +111,7 @@ void change_dir_from_root(std::string &path)
 	}
 	else {
 		free(buffer);
-		return; // it is in root
+		return;
 	}
 
 	std::string tmp(buffer);
@@ -117,7 +122,8 @@ void change_dir_from_root(std::string &path)
 	path_compiler(tmp);
 	res = kiv_os_rtl::Set_Current_Directory(tmp.c_str());
 	if (!res) {
-		return; // TODO error
+		print_error();
+		return;
 	}
 }
 
@@ -130,18 +136,30 @@ void change_dir_from_root(std::string &path)
 void change_dir_with_disk(std::string &path, bool change_disk)
 {
 	size_t writen = 0;
+	char *buffer = (char*)malloc(sizeof(char) * buffer_size);
+	if (!buffer) {
+		print_error("Out of memory.");
+		return;
+	}
+
 	size_t pos = path.find(':');
 
-	std::string neco = path.substr(pos + 2, std::string::npos);
+	bool res = kiv_os_rtl::Get_Current_Direcotry(buffer, buffer_size, writen);
+	if (!res) {
+		free(buffer);
+		print_error();
+		return;
+	}
 
-	if (path.substr(pos + 2, std::string::npos) == "" && !change_disk) {
+	if(strncmp(buffer, path.c_str(), pos) && pos + 1 + delimeter_size < path.size() && !change_disk) {
 		return;
 	}
 
 	path_compiler(path);
-	bool res = kiv_os_rtl::Set_Current_Directory(path.c_str());
+	res = kiv_os_rtl::Set_Current_Directory(path.c_str());
 	if (!res) {
-		return; // TODO error
+		print_error();
+		return;
 	}
 }
 
@@ -173,22 +191,78 @@ void print()
 {
 	size_t read = 0, writen = 0;
 	char *buffer = (char*)malloc(sizeof(char) * buffer_size);
+	if (!buffer) {
+		print_error("Out of memory.");
+		return;
+	}
 
 	bool res = kiv_os_rtl::Get_Current_Direcotry(buffer, buffer_size, read);
 	if (!res) {
 		free(buffer);
-		return; // TODO error
+		print_error();
+		return;
 	}
 
 	res = kiv_os_rtl::Write_File(kiv_os::stdOutput, buffer, read, writen);
 	if (!res) {
 		free(buffer);
-		return; // TODO error
+		print_error();
+		return;
 	}
 	free(buffer);
 
 	res = kiv_os_rtl::Write_File(kiv_os::stdOutput, "\n\n", 2, writen);
 	if (!res) {	
-		return; // TODO error
+		print_error();
+		return;
+	}
+}
+
+void print_error()
+{
+	switch (kiv_os_rtl::Get_Last_Error()) {
+		case kiv_os::erInvalid_Handle:
+			print_error("Internal error. (Invalid Handle)");
+			break;
+
+		case kiv_os::erInvalid_Argument:
+			print_error("Invalid input arugments.");
+			break;
+
+		case kiv_os::erFile_Not_Found:
+			print_error("System can not find path.");
+			break;
+
+		case kiv_os::erDir_Not_Empty:
+			print_error(""); // only in remove
+			break;
+
+		case kiv_os::erNo_Left_Space:
+			print_error("Out of disk space.");
+			break;
+
+		case kiv_os::erPermission_Denied:
+			print_error("Operation is not permitted.");
+			break;
+
+		case kiv_os::erOut_Of_Memory:
+			print_error("Out of memory.");
+			break;
+
+		case kiv_os::erIO:
+			print_error("Disk error.");
+			break;
+	}
+}
+
+void print_error(std::string msg)
+{
+	size_t writen = 0;
+
+	msg.append("\n\n");
+
+	bool res = kiv_os_rtl::Write_File(kiv_os::stdOutput, msg.c_str(), msg.size(), writen);
+	if (!res) {
+		return;
 	}
 }
