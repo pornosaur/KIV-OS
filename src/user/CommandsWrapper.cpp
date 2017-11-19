@@ -222,7 +222,8 @@ std::vector<kiv_os::THandle> kiv_os_cmd::CommandsWrapper::Run_Commands()
 
 		//set stdin_t
 		if (cmd.is_redirect && cmd.redirect.type == redirect_to_command) { //input redirect
-			//TODO tsi.stdin_t = handle
+			redirect_input_h = kiv_os_rtl::Create_File(cmd.redirect.dest.c_str(), kiv_os::fmOpen_Always, 0);
+			tsi.stdin_t = redirect_input_h;
 		}
 		else {
 			if (&cmd == &commands.front()) {
