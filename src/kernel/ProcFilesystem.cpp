@@ -9,18 +9,20 @@ ProcFilesystem::ProcFilesystem() {
 }
 
 ProcFilesystem::~ProcFilesystem() {
+
 }
+
 kiv_os::THandle ProcFilesystem::add_process(std::shared_ptr<PCB> pcb) {
 	std::unique_lock<std::mutex> lck(proc_table_mutex);
 	std::vector<std::shared_ptr<PCB>>::iterator it = std::find_if(process_table.begin(), process_table.end(),
 		[&](std::shared_ptr<PCB> element) { return element == nullptr; });
 	if (it != process_table.end()) {
-		pcb->pid = std::distance(process_table.begin(), it);
+		pcb->pid = static_cast<kiv_os::THandle>(std::distance(process_table.begin(), it));
 		process_table[pcb->pid] = pcb;
 		return pcb->pid;
 	}
 	else {
-		//TODO vratit chybovy kod
+		return kiv_os::erInvalid_Handle;
 	}
 
 }
