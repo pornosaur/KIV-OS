@@ -63,8 +63,7 @@ void Shutdown_Kernel() {
 	FreeLibrary(User_Programs);
 
 	delete[] fat_memory;
-	delete[] processManager;
-	delete[] proc_filesystem;
+	delete processManager;
 	delete vfs;
 }
 
