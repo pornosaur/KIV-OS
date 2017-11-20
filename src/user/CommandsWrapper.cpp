@@ -8,7 +8,7 @@
 #include <cassert>
 
 const std::regex kiv_os_cmd::CommandsWrapper::r_split_pipe("\\s*([^\\|]+)");
-const std::regex kiv_os_cmd::CommandsWrapper::r_command("([^\\s]+)\\s");
+const std::regex kiv_os_cmd::CommandsWrapper::r_command("^([^\\>^\\<^\\s]+)\\s");
 
 kiv_os_cmd::CommandsWrapper::CommandsWrapper()
 {
@@ -120,7 +120,7 @@ bool kiv_os_cmd::CommandsWrapper::Parse_Command(struct cmd_item_t& cmd_item)
 bool kiv_os_cmd::CommandsWrapper::Parse_Redirect(struct cmd_item_t& cmd_item)
 {
 	std::smatch m_redirect;
-	static std::regex r_redirect("(\\s*[^\\>^\\<]*)(\\s([\\>\\<]{1,2})\\s?)\\s*([^\\>^\\s^\\<]*)");
+	static std::regex r_redirect("(\\s*[^\\>^\\<]*)(([\\>\\<]{1,2})\\s?)\\s*([^\\>^\\s^\\<]*)");
 	std::string parse_args = cmd_item.args_line;
 
 	struct redirect_t tmp_redir;
@@ -142,7 +142,11 @@ bool kiv_os_cmd::CommandsWrapper::Parse_Redirect(struct cmd_item_t& cmd_item)
 			return false;
 		}
 
-		if ((*(m_redirect[2].str().end() - 1) != SPACE) || (*(m_redirect[2].str().begin()) != SPACE)) {
+		if (*(m_redirect[2].str().end() - 1) != SPACE) {
+			return false;
+		}
+
+		if (!m_redirect[1].str().empty() && (*(m_redirect[1].str().end() - 1) != SPACE)) {
 			return false;
 		}
 
@@ -160,9 +164,12 @@ bool kiv_os_cmd::CommandsWrapper::Parse_Redirect(struct cmd_item_t& cmd_item)
 			return false;
 		}
 	
-		tmp_redir.dest = std::string(m_redirect[4].str());
+			tmp_redir.dest = std::string(m_redirect[4].str());
 		if (!redirect) {
 			cmd_item.args_line = std::string(m_redirect[1].str());
+			if (!cmd_item.args_line.empty()) {
+				cmd_item.args_line.pop_back(); 
+			}
 		}
 		redirect = true;
 		parse_args = m_redirect.suffix();
