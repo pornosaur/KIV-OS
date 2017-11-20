@@ -17,3 +17,4 @@ bool remove_recursively(std::string &path, const kiv_os::TRegisters &regs);
 bool remove_subfiles(std::string path, const kiv_os::TRegisters &regs);
 void check_params(std::string &parameters, bool &recursively, bool &quiet);
 bool ask_for_deletion(std::string &path);
+void rd_print_help();

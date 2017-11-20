@@ -19,6 +19,11 @@ size_t __stdcall rd(const kiv_os::TRegisters &regs)
 		return 0;
 	}
 
+	if (!str.find("/?")) {
+		rd_print_help();
+		return 0;
+	}
+
 	while (!str.empty() && std::regex_search(str, match, reg_rd)) {
 		std::string tmp = match[0].str();
 		str = match.suffix();
@@ -203,4 +208,17 @@ bool ask_for_deletion(std::string &path) {
 
 	free(input);
 	return false;
+}
+
+void rd_print_help()
+{
+	size_t writen;
+
+	std::string text("Removes (deletes) a directory.\n\nRD [/S] [/Q] [drive:]path\n\n\t/S\tRemoves all directories and files in the specified directory in addition to the directory itself.  Used to remove a directory tree.\n\n\t/Q\tQuiet mode, do not ask if ok to remove a directory tree with /S\n\n");
+
+	bool res = kiv_os_rtl::Write_File(kiv_os::stdOutput, text.c_str(), text.size(), writen);
+	if (!res) {
+		kiv_os_rtl::print_error();
+		return;
+	}
 }

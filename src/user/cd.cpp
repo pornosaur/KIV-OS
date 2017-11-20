@@ -16,6 +16,10 @@ size_t cmd_cd(const std::string &parameters)
 		cd_print();
 		return 0; // TODO
 	}
+	if (!str.find("/?")) {
+		cd_print_help();
+		return 0;
+	}
 
 	while (!str.empty() && std::regex_search(str, match, reg_cd)) {
 		
@@ -190,6 +194,19 @@ void cd_print()
 
 	res = kiv_os_rtl::Write_File(kiv_os::stdOutput, "\n\n", 2, writen);
 	if (!res) {	
+		kiv_os_rtl::print_error();
+		return;
+	}
+}
+
+void cd_print_help()
+{
+	size_t writen;
+
+	std::string text("Displays the name of or changes the current directory.\n\nCD[/D][drive:][path]\nCD[..]\n\n\t.. Specifies that you want to change to the parent directory.\n\nType CD without parameters to display the current drive and directory.\n\nUse the /D switch to change current drive in addition to changing current directory for a drive.\n\nFor names with spaces use double quotes[\"] or quotes['].\n\n");
+
+	bool res = kiv_os_rtl::Write_File(kiv_os::stdOutput, text.c_str(), text.size(), writen);
+	if (!res) {
 		kiv_os_rtl::print_error();
 		return;
 	}

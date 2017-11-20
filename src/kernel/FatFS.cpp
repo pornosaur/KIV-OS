@@ -11,7 +11,7 @@ FatFS::FatFS(char *memory, size_t memory_size, const std::string &disk_id)
 
 	if (result != 0 || FatFS::f_data->boot_record == NULL)
 	{
-		return; // TODO rict systemu ze nelze pracovat s FAT
+		return;
 	}
 
 	struct super_block * sb = FS::init_super_block(

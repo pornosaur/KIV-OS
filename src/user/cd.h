@@ -18,3 +18,4 @@ void change_dir(std::string &path);
 void change_dir_from_root(std::string &path);
 void change_dir_with_disk(std::string &path, bool change_disk);
 void cd_print();
+void cd_print_help();

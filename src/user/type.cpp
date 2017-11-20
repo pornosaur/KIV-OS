@@ -9,10 +9,16 @@ size_t __stdcall type(const kiv_os::TRegisters &regs)
 	bool console = false;
 	std::smatch match;
 	std::string str(params);
+
 	str.erase(0, str.find_first_not_of(erase_chars));
 
 	if (str.empty()) {
 		kiv_os_rtl::print_error("The syntax of the command is incorrect.");
+		return 0;
+	}
+
+	if (!str.find("/?")) {
+		type_print_help();
 		return 0;
 	}
 
@@ -117,4 +123,17 @@ bool is_string_name_lower(std::string name, std::string string)
 {
 	kiv_os_str::string_to_lower(name);
 	return !name.compare(string);
+}
+
+void type_print_help()
+{
+	size_t writen;
+
+	std::string text("Displays the contents of a text file or files.\n\nTYPE [drive:][path]filename\n\n");
+
+	bool res = kiv_os_rtl::Write_File(kiv_os::stdOutput, text.c_str(), text.size(), writen);
+	if (!res) {
+		kiv_os_rtl::print_error();
+		return;
+	}
 }

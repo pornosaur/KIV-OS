@@ -17,3 +17,4 @@ bool print_entry(kiv_os::TDir_Entry *entry);
 bool print_name(std::string name);
 bool get_current_dir(std::string &path);
 void check_params(std::string &parameters, bool &recursively);
+void dir_print_help();
