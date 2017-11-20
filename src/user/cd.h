@@ -17,5 +17,4 @@ size_t cmd_cd(const std::string &arguments);
 void change_dir(std::string &path);
 void change_dir_from_root(std::string &path);
 void change_dir_with_disk(std::string &path, bool change_disk);
-void path_compiler(std::string &path);
 void cd_print();

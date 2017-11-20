@@ -2,6 +2,10 @@
 
 #include "..\api\api.h"
 #include <cassert>
+#include <string>
+
+#define delimeter "\\"
+#define delimeter_size 1
 
 void HandleIO(kiv_os::TRegisters &regs);
 
@@ -17,3 +21,4 @@ void set_current_directory(kiv_os::TRegisters &regs);
 void create_pipe(kiv_os::TRegisters &regs);
 
 void set_error(kiv_os::TRegisters &regs, uint16_t code);
+void path_compiler(std::string &path);

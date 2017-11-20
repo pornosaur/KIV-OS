@@ -73,7 +73,6 @@ void change_dir(std::string &path)
 	tmp.append(delimeter_str).append(path);
 	free(buffer);
 
-	path_compiler(tmp);
 	res = kiv_os_rtl::Set_Current_Directory(tmp.c_str());
 	if (!res) {
 		kiv_os_rtl::print_error();
@@ -117,7 +116,6 @@ void change_dir_from_root(std::string &path)
 
 	free(buffer);
 
-	path_compiler(tmp);
 	res = kiv_os_rtl::Set_Current_Directory(tmp.c_str());
 	if (!res) {
 		kiv_os_rtl::print_error();
@@ -155,33 +153,11 @@ void change_dir_with_disk(std::string &path, bool change_disk)
 	}
 	free(buffer);
 
-	path_compiler(path);
 	res = kiv_os_rtl::Set_Current_Directory(path.c_str());
 	if (!res) {
 		kiv_os_rtl::print_error();
 		return;
 	}
-}
-
-/**
-* Transform absolute path with ".." to valid path.
-*/
-void path_compiler(std::string &path)
-{
-	size_t bck_pos = 0;
-	while ((bck_pos = path.find("..")) != std::string::npos)
-	{
-		size_t start_pos = path.rfind(delimeter_chr, bck_pos - 2);
-
-		if (start_pos == std::string::npos) {
-			path.erase(bck_pos - delimeter_size, 2 + delimeter_size);
-		}
-		else {
-			path.erase(start_pos, bck_pos - start_pos + 2);
-		}
-	}
-	path.erase(path.find_last_not_of(delimeter_str) + 1);
-	path.erase(0, path.find_first_not_of(delimeter_str));
 }
 
 /**

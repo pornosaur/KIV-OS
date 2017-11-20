@@ -8,7 +8,7 @@
 #include<mutex>
 
 #define delimeter "\\"
-#define delimeter_size 1;
+#define delimeter_size 1
 
 class FileHandler;
 
