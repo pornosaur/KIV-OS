@@ -102,7 +102,7 @@ bool kiv_os_cmd::CommandsWrapper::Parse_Command(struct cmd_item_t& cmd_item)
 		cmd_item.command = std::string(m_cmd[1].str());
 		cmd_item.args_line = m_cmd.suffix().str();
 		
-		if (!cmd_item.args_line.empty()) {
+		if (!cmd_item.args_line.empty() && cmd_item.args_line.back() == SPACE) {
 			cmd_item.args_line.pop_back();
 		}
 
