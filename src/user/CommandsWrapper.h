@@ -24,23 +24,14 @@
 
 namespace kiv_os_cmd {
 
-	enum redirect_type
-	{
-		redirect_to_file, 
-		redirect_to_file_append,
-		redirect_to_command
-	};
-
-	struct redirect_t {
-		std::string dest = "";				/* Writes the command output to a file or a device. */
-		redirect_type type;
-	};
-
 	struct cmd_item_t {
 		std::string command = "";
 		std::string args_line = "";
-		bool is_redirect = false;
-		struct redirect_t redirect;
+		bool is_output_redir = false;
+		bool is_input_redir = false;
+		bool is_append = false;
+		std::string out_dest = "";
+		std::string in_dest = "";
 	};
 
 	class CommandsWrapper {

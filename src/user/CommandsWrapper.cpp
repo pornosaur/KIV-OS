@@ -123,7 +123,6 @@ bool kiv_os_cmd::CommandsWrapper::Parse_Redirect(struct cmd_item_t& cmd_item)
 	static std::regex r_redirect("(\\s*[^\\>^\\<]*)(([\\>\\<]{1,2})\\s?)\\s*([^\\>^\\s^\\<]*)");
 	std::string parse_args = cmd_item.args_line;
 
-	struct redirect_t tmp_redir;
 	bool redirect = false;
 
 	std::string tmp_redirect = "";
@@ -154,30 +153,38 @@ bool kiv_os_cmd::CommandsWrapper::Parse_Redirect(struct cmd_item_t& cmd_item)
 		char redir_last = *(m_redirect[3].str().end() - 1);
 
 		if (m_redirect[3].str().size() == 2 && redir_first == '>' && redir_last == '>') {
-			tmp_redir.type = redirect_type::redirect_to_file_append;
+			cmd_item.is_append = true;
+			cmd_item.out_dest = std::string(m_redirect[4].str());
 		}
 		else if (m_redirect[3].str().size() == 1){
 			assert(redir_first == redir_last);
-			tmp_redir.type = (redir_first == '>' ? redirect_type::redirect_to_file : redirect_type::redirect_to_command);
+			cmd_item.is_append = false;
+
+			if (redir_first == '>') {
+				cmd_item.is_output_redir = true;
+				cmd_item.out_dest = std::string(m_redirect[4].str());
+			}
+			else {
+				cmd_item.is_input_redir = true;
+				cmd_item.in_dest = std::string(m_redirect[4].str());
+			}
 		}
 		else {
 			return false;
 		}
 	
-			tmp_redir.dest = std::string(m_redirect[4].str());
 		if (!redirect) {
 			cmd_item.args_line = std::string(m_redirect[1].str());
+			
 			if (!cmd_item.args_line.empty()) {
 				cmd_item.args_line.pop_back(); 
 			}
 		}
+
 		redirect = true;
 		parse_args = m_redirect.suffix();
 		tmp_redirect.clear();
 	}
-
-	cmd_item.redirect = tmp_redir;
-	cmd_item.is_redirect = redirect;
 
 	return true;
 }
@@ -225,8 +232,8 @@ std::vector<kiv_os::THandle> kiv_os_cmd::CommandsWrapper::Run_Commands()
 		tsi.stderr_t = kiv_os::stdError;
 
 		//set stdin_t
-		if (cmd.is_redirect && cmd.redirect.type == redirect_to_command) { //input redirect
-			redirect_input_h = kiv_os_rtl::Create_File(cmd.redirect.dest.c_str(), kiv_os::fmOpen_Always, 0);
+		if (cmd.is_output_redir) { //input redirect
+			redirect_input_h = kiv_os_rtl::Create_File(cmd.out_dest.c_str(), kiv_os::fmOpen_Always, 0);
 			if (redirect_input_h == 0) {
 				//TODO get_last_errr
 				break;
@@ -240,37 +247,32 @@ std::vector<kiv_os::THandle> kiv_os_cmd::CommandsWrapper::Run_Commands()
 			else {
 				tsi.stdin_t = creation_pipes[cmd_counter-1][READ_HANDLE];
 			}
+			
 		}
 
 		//set stdout_t
-		long position = 0;
-		if (cmd.is_redirect) {
-			if (cmd.redirect.type == redirect_to_file) {
-				redirect_output_h = kiv_os_rtl::Create_File(cmd.redirect.dest.c_str(), 0, 0);
+		if (cmd.is_input_redir || cmd.is_output_redir) {
+			if (cmd.is_output_redir) {
+				const uint8_t flags = cmd.is_append ? kiv_os::fmOpen_Always : 0;
+				redirect_output_h = kiv_os_rtl::Create_File(cmd.out_dest.c_str(), flags, 0);
+
 				if (redirect_output_h == 0) {
 					kiv_os_rtl::print_error();
 					break;
 				}
-				position = 0;
-				kiv_os_rtl::Set_File_Position(redirect_output_h, position, kiv_os::fsBeginning, kiv_os::fsSet_Size);
-				tsi.stdout_t = redirect_output_h;
-				tsi.stderr_t = redirect_output_h;
-			}
-			if (cmd.redirect.type == redirect_to_file_append) {
-				position = 0;
-				redirect_output_h = kiv_os_rtl::Create_File(cmd.redirect.dest.c_str(), kiv_os::fmOpen_Always, 0);
-				if (redirect_output_h == 0) {
-					redirect_output_h = kiv_os_rtl::Create_File(cmd.redirect.dest.c_str(), 0, 0);
+				
+				if (cmd.is_append) {
+					long position = 0;
 					if (redirect_output_h == 0) {
 						kiv_os_rtl::print_error();
-						break;
-					}
 
 				}
-				if (!kiv_os_rtl::Set_File_Position(redirect_output_h, position, kiv_os::fsEnd, kiv_os::fsSet_Position)) {
-					//TODO get_last_err
-					break;
+					if (!kiv_os_rtl::Set_File_Position(redirect_output_h, position, kiv_os::fsEnd, kiv_os::fsSet_Position)) {
+						//TODO get_last_err
+						break;
+					}
 				}
+
 				tsi.stdout_t = redirect_output_h;
 				tsi.stderr_t = redirect_output_h;
 			}
