@@ -92,6 +92,7 @@ bool remove_subfiles(std::string path, const kiv_os::TRegisters &regs)
 	
 	char *input = (char *)malloc(input_size);
 	if (!input) {
+		kiv_os_rtl::Close_File(handle);
 		kiv_os_rtl::print_error("Out of memory.");
 		return false;
 	}

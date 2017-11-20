@@ -37,8 +37,7 @@ size_t __stdcall type(const kiv_os::TRegisters &regs)
 			read_and_write(handle);
 
 			if (!console) {
-				bool res = kiv_os_rtl::Close_File(handle);
-				if (!res) {
+				if (!kiv_os_rtl::Close_File(handle)) {
 					kiv_os_rtl::print_error();
 					return 0;
 				}
