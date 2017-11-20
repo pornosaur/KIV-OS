@@ -253,24 +253,24 @@ std::vector<kiv_os::THandle> kiv_os_cmd::CommandsWrapper::Run_Commands()
 		//set stdout_t
 		if (cmd.is_input_redir || cmd.is_output_redir) {
 			if (cmd.is_output_redir) {
-				const uint8_t flags = cmd.is_append ? kiv_os::fmOpen_Always : 0;
-				redirect_output_h = kiv_os_rtl::Create_File(cmd.out_dest.c_str(), flags, 0);
+				uint8_t origin = kiv_os::fsBeginning, set_size = kiv_os::fsSet_Size, flags = 0;
+				long position = 0;
 
-				if (redirect_output_h == 0) {
+				if (cmd.is_append) {
+					flags = kiv_os::fmOpen_Always;
+					origin = kiv_os::fsEnd;
+					set_size = kiv_os::fsSet_Size;
+				}
+
+				redirect_output_h = kiv_os_rtl::Create_File(cmd.out_dest.c_str(), flags, 0);	
+
+				if (redirect_output_h == 0 && cmd.is_append) {
+					redirect_output_h = kiv_os_rtl::Create_File(cmd.out_dest.c_str(), 0, 0);
+				}
+
+				if (redirect_output_h == 0 || !kiv_os_rtl::Set_File_Position(redirect_output_h, position, origin, set_size)) {
 					kiv_os_rtl::print_error();
 					break;
-				}
-				
-				if (cmd.is_append) {
-					long position = 0;
-					if (redirect_output_h == 0) {
-						kiv_os_rtl::print_error();
-
-				}
-					if (!kiv_os_rtl::Set_File_Position(redirect_output_h, position, kiv_os::fsEnd, kiv_os::fsSet_Position)) {
-						//TODO get_last_err
-						break;
-					}
 				}
 
 				tsi.stdout_t = redirect_output_h;
