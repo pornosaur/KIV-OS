@@ -862,6 +862,8 @@ void Test_vfs::write_read_file()
 	assert(bytes == 10);
 	assert(file->get_dentry()->d_size == 10);
 	assert(result == kiv_os::erSuccess);
+	assert(file->ftell() == 10);
+	file->fseek(0, kiv_os::fsBeginning, kiv_os::fsSet_Position);
 
 	result = file->read(buffer, buff_size, bytes);
 	assert(result == kiv_os::erSuccess);
@@ -940,6 +942,8 @@ void Test_vfs::write_read_file_bigger_than_one_cluster()
 	assert(result == kiv_os::erSuccess);
 	assert(file->get_dentry()->d_size == 200);
 	assert(file->get_dentry()->d_blocks == 2);
+	assert(file->ftell() == 200);
+	file->fseek(0, kiv_os::fsBeginning, kiv_os::fsSet_Position);
 
 	result = file->read(buffer, buff_size, bytes);
 	assert(bytes == 200);
@@ -978,6 +982,8 @@ void Test_vfs::write_read_exactly_one_cluster()
 	assert(result == kiv_os::erSuccess);
 	assert(file->get_dentry()->d_size == 128);
 	assert(file->get_dentry()->d_blocks == 1);
+	assert(file->ftell() == 128);
+	file->fseek(0, kiv_os::fsBeginning, kiv_os::fsSet_Position);
 
 	result = file->read(buffer, buff_size, bytes);
 	assert(bytes == 128);
@@ -1054,6 +1060,8 @@ void Test_vfs::read_all_file_by_pieces()
 	result = file->write(text, 200, bytes);
 	assert(bytes == 200);
 	assert(result == kiv_os::erSuccess);
+	assert(file->ftell() == 200);
+	file->fseek(0, kiv_os::fsBeginning, kiv_os::fsSet_Position);
 
 
 	shuld_read = 31;
@@ -1105,6 +1113,8 @@ void Test_vfs::rewrite_file()
 	result = file->write(text1, 10, bytes);
 	assert(bytes == 10);
 	assert(result == kiv_os::erSuccess);
+	assert(file->ftell() == 10);
+	file->fseek(0, kiv_os::fsBeginning, kiv_os::fsSet_Position);
 
 	result = file->read(buffer, buff_size, bytes);
 	assert(bytes == 10);
@@ -1119,6 +1129,8 @@ void Test_vfs::rewrite_file()
 	result = file->write(text, 200, bytes);
 	assert(bytes == 200);
 	assert(result == kiv_os::erSuccess);
+	assert(file->ftell() == 200);
+	file->fseek(0, kiv_os::fsBeginning, kiv_os::fsSet_Position);
 
 	result = file->read(buffer, buff_size, bytes);
 	assert(bytes == 200);
@@ -1132,6 +1144,7 @@ void Test_vfs::rewrite_file()
 	assert(bytes == 10);
 	assert(result == kiv_os::erSuccess);
 	assert(file->get_dentry()->d_size == 20);
+	assert(file->ftell() == 20);
 
 	file->fseek(0, kiv_os::fsBeginning, 0);
 	result = file->read(buffer, buff_size, bytes);
@@ -1170,6 +1183,7 @@ void Test_vfs::write_zero_bytes_to_file()
 	result = file->write(text, 0, bytes);
 	assert(bytes == 0);
 	assert(result == kiv_os::erSuccess);
+	assert(file->ftell() == 0);
 
 	result = file->read(buffer, buff_size, bytes);
 	assert(bytes == 0);
@@ -1212,6 +1226,8 @@ void Test_vfs::create_file_with_space_in_name()
 	result = file->write(text, 10, bytes);
 	assert(bytes == 10);
 	assert(result == kiv_os::erSuccess);
+	assert(file->ftell() == 10);
+	file->fseek(0, kiv_os::fsBeginning, kiv_os::fsSet_Position);
 
 	char buffer[20];
 	result = file->read(buffer, 20, bytes);
@@ -1587,6 +1603,8 @@ void Test_vfs::write_to_twice_open_file()
 	result = file1->write(text, 34, bytes);
 	assert(bytes == 34);
 	assert(result == kiv_os::erSuccess);
+	assert(file1->ftell() == 34);
+	file1->fseek(0, kiv_os::fsBeginning, kiv_os::fsSet_Position);
 
 	result = file2->read(buffer, 200, bytes);
 	assert(bytes == 34);
