@@ -75,6 +75,7 @@ void delete_cluster(char *memory, size_t memory_size, unsigned int start_of_clus
 
 /**
  * Najde indexy clusteru ve fat tabulce, na kterych je soubor ulozen.
+ * 
  * @param file soubor u ktereho se hledaji clutery
  * @param clusters_size pointer na pocet clusteru v souboru, hodnota je nastavovana ve teto funkci
  * @param cluster_size velikost jednoho clusteru
