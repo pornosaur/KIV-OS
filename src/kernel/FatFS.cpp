@@ -358,6 +358,7 @@ int FatFS::fs_write_to_file(FileHandler *file, size_t *writed_bytes, char *buffe
 
 	switch (result) {
 	case 0:
+		file->fseek(0, kiv_os::fsEnd, kiv_os::fsSet_Position);
 		return ERR_SUCCESS;
 	case 7:
 		return ERR_DISK_IS_FULL;
