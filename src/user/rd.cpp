@@ -1,5 +1,8 @@
 #include "rd.h"
 
+/**
+* Command RD
+*/
 size_t __stdcall rd(const kiv_os::TRegisters &regs)
 {
 	kiv_os::TProcess_Startup_Info *tsi = reinterpret_cast<kiv_os::TProcess_Startup_Info*> (regs.rdi.r);
@@ -68,8 +71,14 @@ size_t __stdcall rd(const kiv_os::TRegisters &regs)
 	return 0; // TODO what return
 }
 
+/**
+* Recursively remove folder and every subfolders and subfiles.
+*
+* @param path path to file/folder which will be removed
+* @return true on success, false otherwise
+*/
 bool remove_recursively(std::string &path, const kiv_os::TRegisters &regs) {
-	
+
 	bool res = kiv_os_rtl::Remove_File(path.c_str());
 	if (res) {
 		return true; // succesly removed
@@ -92,6 +101,12 @@ bool remove_recursively(std::string &path, const kiv_os::TRegisters &regs) {
 	return true;
 }
 
+/**
+* Remove every files in folder and call remove_recursively to all subfolders
+*
+* @param path to file which subfiles/subfolders will be removed
+* @return true on success, false otherwise
+*/
 bool remove_subfiles(std::string path, const kiv_os::TRegisters &regs)
 {
 	kiv_os::THandle handle = kiv_os_rtl::Create_File(path.c_str(), kiv_os::fmOpen_Always, kiv_os::faDirectory);
@@ -100,7 +115,7 @@ bool remove_subfiles(std::string path, const kiv_os::TRegisters &regs)
 	}
 
 	size_t input_size = sizeof(kiv_os::TDir_Entry);
-	
+
 	char *input = (char *)malloc(input_size);
 	if (!input) {
 		kiv_os_rtl::Close_File(handle);
@@ -137,6 +152,11 @@ bool remove_subfiles(std::string path, const kiv_os::TRegisters &regs)
 	return true;
 }
 
+/**
+* Check if parameters starts with /q /Q /s /S.
+* If starts with /q or /Q set quiet to true and when starts with /s or /S set recursively to true.
+* Remove founded strings from parameters
+*/
 void check_params(std::string &parameters, bool &recursively, bool &quiet)
 {
 	std::smatch match;
@@ -164,6 +184,10 @@ void check_params(std::string &parameters, bool &recursively, bool &quiet)
 	}
 }
 
+/**
+* Print to stdOut text path and text "Are you sure (y/n)?" and wait for response.
+* Return true if answer was y(yes). On answer n(no) or on error return false.
+*/
 bool ask_for_deletion(std::string &path) {
 
 	char *input = (char *)malloc(buffer_size * sizeof(char));
@@ -210,6 +234,9 @@ bool ask_for_deletion(std::string &path) {
 	return false;
 }
 
+/**
+* Function print help for command RD to stdOutput
+*/
 void rd_print_help()
 {
 	size_t writen;

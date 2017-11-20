@@ -22,7 +22,7 @@ size_t cmd_cd(const std::string &parameters)
 	}
 
 	while (!str.empty() && std::regex_search(str, match, reg_cd)) {
-		
+
 		std::string tmp = match[2].str();
 		if (!tmp.empty()) {
 			change_disk = true;
@@ -36,7 +36,7 @@ size_t cmd_cd(const std::string &parameters)
 			if (tmp[0] == delimeter_chr) {
 				change_dir_from_root(tmp.erase(0, 1));
 			}
-			else if(tmp.find(":") == std::string::npos) {
+			else if (tmp.find(":") == std::string::npos) {
 				change_dir(tmp);
 			}
 			else {
@@ -44,7 +44,7 @@ size_t cmd_cd(const std::string &parameters)
 			}
 			break;
 		}
-		
+
 		str = match.suffix();
 	}
 
@@ -86,7 +86,7 @@ void change_dir(std::string &path)
 }
 
 /**
-* Change working dir with relative path witch starts at root directory.
+* Change working dir with relative path which starts at root directory.
 *
 * @param path relative path from root directory
 */
@@ -130,7 +130,7 @@ void change_dir_from_root(std::string &path)
 
 /**
 * Change working dir with absolute path.
-* 
+*
 * @param path absolute path
 * @param change_disk must be true to change disk and folder. To change only disk can be false
 */
@@ -152,7 +152,7 @@ void change_dir_with_disk(std::string &path, bool change_disk)
 		return;
 	}
 
-	if(strncmp(buffer, path.c_str(), pos) && pos + 1 + delimeter_size < path.size() && !change_disk) {
+	if (strncmp(buffer, path.c_str(), pos) && pos + 1 + delimeter_size < path.size() && !change_disk) {
 		free(buffer);
 		return;
 	}
@@ -166,8 +166,8 @@ void change_dir_with_disk(std::string &path, bool change_disk)
 }
 
 /**
- * Print to stdout actual working directory
- */
+* Print to stdOutput actual working directory.
+*/
 void cd_print()
 {
 	size_t read = 0, writen = 0;
@@ -193,12 +193,15 @@ void cd_print()
 	free(buffer);
 
 	res = kiv_os_rtl::Write_File(kiv_os::stdOutput, "\n\n", 2, writen);
-	if (!res) {	
+	if (!res) {
 		kiv_os_rtl::print_error();
 		return;
 	}
 }
 
+/**
+* Function print help for command CD to stdOutput
+*/
 void cd_print_help()
 {
 	size_t writen;

@@ -1,5 +1,8 @@
 #include "md.h"
 
+/**
+* Command MD
+*/
 size_t __stdcall md(const kiv_os::TRegisters &regs)
 {
 	kiv_os::TProcess_Startup_Info *tsi = reinterpret_cast<kiv_os::TProcess_Startup_Info*> (regs.rdi.r);
@@ -34,11 +37,14 @@ size_t __stdcall md(const kiv_os::TRegisters &regs)
 	return 0; // TODO what return
 }
 
+/**
+* Create every folder in path if no folder is created print error message to stdError
+*/
 void create_directories(std::string &path)
 {
 	bool created = false;
 	bool res;
-	
+
 	kiv_os::THandle handle;
 	std::smatch match;
 	std::string tmp_path;
@@ -49,7 +55,7 @@ void create_directories(std::string &path)
 
 		if (!tmp.empty()) {
 			tmp_path.append(tmp);
-			
+
 			// open dir if exists
 			handle = kiv_os_rtl::Create_File(tmp_path.c_str(), kiv_os::fmOpen_Always, kiv_os::faDirectory);
 			if (handle) {
@@ -85,6 +91,9 @@ void create_directories(std::string &path)
 	}
 }
 
+/**
+* Function print help for command MD to stdOutput
+*/
 void md_print_help()
 {
 	size_t writen;

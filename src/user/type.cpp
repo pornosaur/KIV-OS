@@ -1,16 +1,19 @@
 #include "type.h"
 #include <cassert>
 
+/**
+* Command TYPE
+*/
 size_t __stdcall type(const kiv_os::TRegisters &regs)
 {
 	kiv_os::TProcess_Startup_Info *tsi = reinterpret_cast<kiv_os::TProcess_Startup_Info*> (regs.rdi.r);
 	char* params = tsi->arg;
-	
+
 	bool console = false;
 	std::smatch match;
 	std::string str(params);
 
-	str.erase(0, str.find_first_not_of(erase_chars));
+	str.erase(0, str.find_first_not_of(erase_chars)); // remove redunadat chars from start of string
 
 	if (str.empty()) {
 		kiv_os_rtl::print_error("The syntax of the command is incorrect.");
@@ -28,7 +31,7 @@ size_t __stdcall type(const kiv_os::TRegisters &regs)
 	while (!str.empty() && std::regex_search(str, match, reg_type)) {
 		std::string tmp = match[0].str();
 		str = match.suffix();
-		
+
 		if (!tmp.empty()) {
 			tmp.erase(tmp.find_last_not_of(erase_chars) + 1);
 			tmp.erase(0, tmp.find_first_not_of(erase_chars));
@@ -62,10 +65,12 @@ size_t __stdcall type(const kiv_os::TRegisters &regs)
 }
 
 /**
- * write data all data from in to out
- */
-void read_and_write(kiv_os::THandle &in) {
-
+* write all data from in handle to stdOutput
+*
+* @param in handle from which will be read data
+*/
+void read_and_write(kiv_os::THandle &in)
+{
 	char *input = (char *)malloc(buffer_size * sizeof(char));
 	if (!input) {
 		kiv_os_rtl::print_error("Out of memory.");
@@ -96,15 +101,18 @@ void read_and_write(kiv_os::THandle &in) {
 }
 
 /**
- * if counter != 0 write name to stdout_t
- */
-void write_file_name(int &counter, std::string &name)
+* if counter != 0 write name to stdOutput
+*
+* @param print if is set to non zero value name will be printed
+* @param name string which will be printed
+*/
+void write_file_name(int &print, std::string &name)
 {
-	if (counter) {
+	if (print) {
 		size_t writen = 0;
 
 		bool res = kiv_os_rtl::Write_File(
-			kiv_os::stdOutput, 
+			kiv_os::stdOutput,
 			std::string("\n").append(name.append("\n\n\n")).c_str(),
 			name.length() + 4,
 			writen);
@@ -117,14 +125,20 @@ void write_file_name(int &counter, std::string &name)
 }
 
 /**
- * return true if name.lowerCase is equals to string 
- */
+* return true if name is in lower case  equals to string
+*
+* @param name string which will be transfer to lower case
+* @param second string to campare
+*/
 bool is_string_name_lower(std::string name, std::string string)
 {
 	kiv_os_str::string_to_lower(name);
 	return !name.compare(string);
 }
 
+/**
+* Function print help for command TYPE to stdOutput
+*/
 void type_print_help()
 {
 	size_t writen;
