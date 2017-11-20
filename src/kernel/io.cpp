@@ -243,20 +243,7 @@ void close_handle(kiv_os::TRegisters &regs) //TODO close pro konzoli?
 		return;
 	}
 
-	if (handle->close_handler()) {
-		processManager->close_handle(regs.rdx.x);
-		assert(handle.get());
-		//handle.reset();	/* Free a handler */
-	}
-	else {
-		// Handle is used by other process
-		//TODO: Last Error here !!
-	}
-
-	//HANDLE hnd = Resolve_kiv_os_Handle(regs.rdx.x);
-	//regs.flags.carry = !CloseHandle(hnd);
-	//if (!regs.flags.carry) Remove_Handle(regs.rdx.x);
-	//else regs.rax.r = GetLastError();
+	processManager->close_handle(regs.rdx.x);
 }
 
 void get_current_directory(kiv_os::TRegisters &regs) {
