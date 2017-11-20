@@ -58,14 +58,14 @@ void change_dir(std::string &path)
 	size_t writen = 0;
 	char *buffer = (char*)malloc(sizeof(char) * buffer_size);
 	if (!buffer) {
-		cd_print_error("Out of memory.");
+		kiv_os_rtl::print_error("Out of memory.");
 		return;
 	}
 
 	bool res = kiv_os_rtl::Get_Current_Direcotry(buffer, buffer_size, writen);
 	if (!res) {
 		free(buffer);
-		cd_print_error();
+		kiv_os_rtl::print_error();
 		return;
 	}
 
@@ -76,7 +76,7 @@ void change_dir(std::string &path)
 	path_compiler(tmp);
 	res = kiv_os_rtl::Set_Current_Directory(tmp.c_str());
 	if (!res) {
-		cd_print_error();
+		kiv_os_rtl::print_error();
 		return;
 	}
 }
@@ -91,14 +91,14 @@ void change_dir_from_root(std::string &path)
 	size_t writen = 0;
 	char *buffer = (char*)malloc(sizeof(char) * buffer_size);
 	if (!buffer) {
-		cd_print_error("Out of memory.");
+		kiv_os_rtl::print_error("Out of memory.");
 		return;
 	}
 
 	bool res = kiv_os_rtl::Get_Current_Direcotry(buffer, buffer_size, writen);
 	if (!res) {
 		free(buffer);
-		cd_print_error();
+		kiv_os_rtl::print_error();
 		return;
 	}
 
@@ -120,7 +120,7 @@ void change_dir_from_root(std::string &path)
 	path_compiler(tmp);
 	res = kiv_os_rtl::Set_Current_Directory(tmp.c_str());
 	if (!res) {
-		cd_print_error();
+		kiv_os_rtl::print_error();
 		return;
 	}
 }
@@ -136,7 +136,7 @@ void change_dir_with_disk(std::string &path, bool change_disk)
 	size_t writen = 0;
 	char *buffer = (char*)malloc(sizeof(char) * buffer_size);
 	if (!buffer) {
-		cd_print_error("Out of memory.");
+		kiv_os_rtl::print_error("Out of memory.");
 		return;
 	}
 
@@ -145,7 +145,7 @@ void change_dir_with_disk(std::string &path, bool change_disk)
 	bool res = kiv_os_rtl::Get_Current_Direcotry(buffer, buffer_size, writen);
 	if (!res) {
 		free(buffer);
-		cd_print_error();
+		kiv_os_rtl::print_error();
 		return;
 	}
 
@@ -158,7 +158,7 @@ void change_dir_with_disk(std::string &path, bool change_disk)
 	path_compiler(path);
 	res = kiv_os_rtl::Set_Current_Directory(path.c_str());
 	if (!res) {
-		cd_print_error();
+		kiv_os_rtl::print_error();
 		return;
 	}
 }
@@ -192,77 +192,28 @@ void cd_print()
 	size_t read = 0, writen = 0;
 	char *buffer = (char*)malloc(sizeof(char) * buffer_size);
 	if (!buffer) {
-		cd_print_error("Out of memory.");
+		kiv_os_rtl::print_error("Out of memory.");
 		return;
 	}
 
 	bool res = kiv_os_rtl::Get_Current_Direcotry(buffer, buffer_size, read);
 	if (!res) {
 		free(buffer);
-		cd_print_error();
+		kiv_os_rtl::print_error();
 		return;
 	}
 
 	res = kiv_os_rtl::Write_File(kiv_os::stdOutput, buffer, read, writen);
 	if (!res) {
 		free(buffer);
-		cd_print_error();
+		kiv_os_rtl::print_error();
 		return;
 	}
 	free(buffer);
 
 	res = kiv_os_rtl::Write_File(kiv_os::stdOutput, "\n\n", 2, writen);
 	if (!res) {	
-		cd_print_error();
-		return;
-	}
-}
-
-void cd_print_error()
-{
-	switch (kiv_os_rtl::Get_Last_Error()) {
-		case kiv_os::erInvalid_Handle:
-			cd_print_error("Internal error. (Invalid Handle)");
-			break;
-
-		case kiv_os::erInvalid_Argument:
-			cd_print_error("Invalid input arugments.");
-			break;
-
-		case kiv_os::erFile_Not_Found:
-			cd_print_error("System can not find path.");
-			break;
-
-		case kiv_os::erDir_Not_Empty:
-			cd_print_error("Directory is not empty.");
-			break;
-
-		case kiv_os::erNo_Left_Space:
-			cd_print_error("Out of disk space.");
-			break;
-
-		case kiv_os::erPermission_Denied:
-			cd_print_error("Operation is not permitted.");
-			break;
-
-		case kiv_os::erOut_Of_Memory:
-			cd_print_error("Out of memory.");
-			break;
-
-		case kiv_os::erIO:
-			cd_print_error("Disk error.");
-			break;
-	}
-}
-
-void cd_print_error(std::string msg)
-{
-	size_t writen = 0;
-
-	msg.append("\n\n");
-
-	bool res = kiv_os_rtl::Write_File(kiv_os::stdError, msg.c_str(), msg.size(), writen);
-	if (!res) {
+		kiv_os_rtl::print_error();
 		return;
 	}
 }

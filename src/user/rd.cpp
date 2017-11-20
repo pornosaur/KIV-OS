@@ -24,13 +24,13 @@ size_t __stdcall rd(const kiv_os::TRegisters &regs)
 			// Check if folder exists and if it is a directory
 			kiv_os::THandle handle = kiv_os_rtl::Create_File(tmp.c_str(), kiv_os::fmOpen_Always, kiv_os::faDirectory);
 			if (!handle) {
-				rd_print_error();
+				kiv_os_rtl::print_error();
 				return 0;
 			}
 
 			bool res = kiv_os_rtl::Close_File(handle);
 			if (!res) {
-				rd_print_error();
+				kiv_os_rtl::print_error();
 				return 0;
 			}
 
@@ -39,7 +39,7 @@ size_t __stdcall rd(const kiv_os::TRegisters &regs)
 				{
 					res = remove_recursively(tmp, regs);
 					if (!res) {
-						rd_print_error();
+						kiv_os_rtl::print_error();
 						return 0;
 					}
 				}
@@ -47,7 +47,7 @@ size_t __stdcall rd(const kiv_os::TRegisters &regs)
 			else {
 				res = kiv_os_rtl::Remove_File(tmp.c_str());
 				if (!res) {
-					rd_print_error();
+					kiv_os_rtl::print_error();
 					return 0;
 				}
 			}
@@ -92,7 +92,7 @@ bool remove_subfiles(std::string path, const kiv_os::TRegisters &regs)
 	
 	char *input = (char *)malloc(input_size);
 	if (!input) {
-		rd_print_msg("Out of memory.");
+		kiv_os_rtl::print_error("Out of memory.");
 		return false;
 	}
 
@@ -155,7 +155,7 @@ bool ask_for_deletion(std::string &path) {
 
 	char *input = (char *)malloc(buffer_size * sizeof(char));
 	if (!input) {
-		rd_print_msg("Out of memory.");
+		kiv_os_rtl::print_error("Out of memory.");
 		return false;
 	}
 
@@ -165,20 +165,20 @@ bool ask_for_deletion(std::string &path) {
 	while (res) {
 		res = kiv_os_rtl::Write_File(kiv_os::stdOutput, path.c_str(), path.size(), writen);
 		if (!res) {
-			rd_print_error();
+			kiv_os_rtl::print_error();
 			free(input);
 			return false;
 		}
 		res = kiv_os_rtl::Write_File(kiv_os::stdOutput, ", Are you sure (y/n)? ", 22, writen);
 		if (!res) {
-			rd_print_error();
+			kiv_os_rtl::print_error();
 			free(input);
 			return false;
 		}
 
 		res = kiv_os_rtl::Read_File(kiv_os::stdInput, input, buffer_size, read);
 		if (!res) {
-			rd_print_error();
+			kiv_os_rtl::print_error();
 			free(input);
 			return false;
 		}
@@ -195,53 +195,4 @@ bool ask_for_deletion(std::string &path) {
 
 	free(input);
 	return false;
-}
-
-void rd_print_error()
-{
-	switch (kiv_os_rtl::Get_Last_Error()) {
-	case kiv_os::erInvalid_Handle:
-		rd_print_msg("Internal error. (Invalid Handle)");
-		break;
-
-	case kiv_os::erInvalid_Argument:
-		rd_print_msg("Invalid input arugments.");
-		break;
-
-	case kiv_os::erFile_Not_Found:
-		rd_print_msg("System can not find path.");
-		break;
-
-	case kiv_os::erDir_Not_Empty:
-		rd_print_msg("Directory is not empty.");
-		break;
-
-	case kiv_os::erNo_Left_Space:
-		rd_print_msg("Out of disk space.");
-		break;
-
-	case kiv_os::erPermission_Denied:
-		rd_print_msg("Operation is not permitted.");
-		break;
-
-	case kiv_os::erOut_Of_Memory:
-		rd_print_msg("Out of memory.");
-		break;
-
-	case kiv_os::erIO:
-		rd_print_msg("Disk error.");
-		break;
-	}
-}
-
-void rd_print_msg(std::string msg)
-{
-	size_t writen = 0;
-
-	msg.append("\n\n");
-
-	bool res = kiv_os_rtl::Write_File(kiv_os::stdError, msg.c_str(), msg.size(), writen);
-	if (!res) {
-		return;
-	}
 }

@@ -158,3 +158,52 @@ bool kiv_os_rtl::Create_Pipe(kiv_os::THandle pipe_handles[2]) {
 
 	return result;
 }
+
+void kiv_os_rtl::print_error()
+{
+	switch (Last_Error) {
+		case kiv_os::erInvalid_Handle:
+			print_error("Internal error. (Invalid Handle)");
+			break;
+
+		case kiv_os::erInvalid_Argument:
+			print_error("Invalid input arugments.");
+			break;
+
+		case kiv_os::erFile_Not_Found:
+			print_error("System can not find path.");
+			break;
+
+		case kiv_os::erDir_Not_Empty:
+			print_error("Directory is not empty.");
+			break;
+
+		case kiv_os::erNo_Left_Space:
+			print_error("Out of disk space.");
+			break;
+
+		case kiv_os::erPermission_Denied:
+			print_error("Operation is not permitted.");
+			break;
+
+		case kiv_os::erOut_Of_Memory:
+			print_error("Out of memory.");
+			break;
+
+		case kiv_os::erIO:
+			print_error("Disk error.");
+			break;
+		}
+}
+
+void kiv_os_rtl::print_error(std::string msg)
+{
+	size_t writen = 0;
+
+	msg.append("\n\n");
+
+	bool res = kiv_os_rtl::Write_File(kiv_os::stdError, msg.c_str(), msg.size(), writen);
+	if (!res) {
+		return;
+	}
+}

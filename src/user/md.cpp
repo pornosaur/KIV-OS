@@ -44,7 +44,7 @@ void create_directories(std::string &path)
 			if (handle) {
 				res = kiv_os_rtl::Close_File(handle);
 				if (!res) {
-					md_print_error();
+					kiv_os_rtl::print_error();
 					return;
 				}
 				tmp_path.append(delimeter);
@@ -54,13 +54,13 @@ void create_directories(std::string &path)
 			// create dir
 			handle = kiv_os_rtl::Create_File(tmp_path.c_str(), 0, kiv_os::faDirectory);
 			if (!handle) {
-				md_print_error();
+				kiv_os_rtl::print_error();
 				return;
 			}
 
 			res = kiv_os_rtl::Close_File(handle);
 			if (!res) {
-				md_print_error();
+				kiv_os_rtl::print_error();
 				return;
 			}
 			tmp_path.append(delimeter);
@@ -69,56 +69,7 @@ void create_directories(std::string &path)
 	}
 
 	if (!created) {
-		md_print_msg(tmp_path.append(": Directory or subdirectory already exists."));
-		return;
-	}
-}
-
-void md_print_error()
-{
-	switch (kiv_os_rtl::Get_Last_Error()) {
-	case kiv_os::erInvalid_Handle:
-		md_print_msg("Internal error. (Invalid Handle)");
-		break;
-
-	case kiv_os::erInvalid_Argument:
-		md_print_msg("Invalid input arugments.");
-		break;
-
-	case kiv_os::erFile_Not_Found:
-		md_print_msg("System can not find path.");
-		break;
-
-	case kiv_os::erDir_Not_Empty:
-		md_print_msg("Directory is not empty.");
-		break;
-
-	case kiv_os::erNo_Left_Space:
-		md_print_msg("Out of disk space.");
-		break;
-
-	case kiv_os::erPermission_Denied:
-		md_print_msg("Operation is not permitted.");
-		break;
-
-	case kiv_os::erOut_Of_Memory:
-		md_print_msg("Out of memory.");
-		break;
-
-	case kiv_os::erIO:
-		md_print_msg("Disk error.");
-		break;
-	}
-}
-
-void md_print_msg(std::string msg)
-{
-	size_t writen = 0;
-
-	msg.append("\n\n");
-
-	bool res = kiv_os_rtl::Write_File(kiv_os::stdError, msg.c_str(), msg.size(), writen);
-	if (!res) {
+		kiv_os_rtl::print_error(tmp_path.append(": Directory or subdirectory already exists."));
 		return;
 	}
 }

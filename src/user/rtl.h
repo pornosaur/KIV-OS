@@ -36,4 +36,8 @@ namespace kiv_os_rtl {
 	//Vytvori pipe, kde: pipe_handles[0] == zapis; pipe_handles[1] == cteni
 	bool Create_Pipe(kiv_os::THandle pipe_handles[2]);
 
+	// Vypise chybovou hlasku do stdError podle hodnoty v promene LastError
+	void print_error();
+	// Vypise msg do stdError
+	void print_error(std::string msg);
 }
