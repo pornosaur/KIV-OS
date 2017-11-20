@@ -9,7 +9,7 @@
 #include "fat_structure.h"
 
 struct fat_data {
-	char *memory;
+	char *memory;			/* pole predstavuje fat disk*/
 	size_t memory_size;
 
 	struct boot_record *boot_record;
