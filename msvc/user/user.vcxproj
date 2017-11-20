@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\user\cd.cpp" />
     <ClCompile Include="..\..\src\user\CommandsWrapper.cpp" />
+    <ClCompile Include="..\..\src\user\dir.cpp" />
     <ClCompile Include="..\..\src\user\dllmain.cpp" />
     <ClCompile Include="..\..\src\user\echo.cpp" />
     <ClCompile Include="..\..\src\user\freq.cpp" />
@@ -42,6 +43,7 @@
     <ClInclude Include="..\..\src\api\api_extension.h" />
     <ClInclude Include="..\..\src\user\cd.h" />
     <ClInclude Include="..\..\src\user\CommandsWrapper.h" />
+    <ClInclude Include="..\..\src\user\dir.h" />
     <ClInclude Include="..\..\src\user\echo.h" />
     <ClInclude Include="..\..\src\user\freq.h" />
     <ClInclude Include="..\..\src\user\md.h" />

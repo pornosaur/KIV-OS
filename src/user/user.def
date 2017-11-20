@@ -12,5 +12,6 @@ EXPORTS
 	freq
 	ps
 	shutdown
+	dir
 	
 	
