@@ -7,6 +7,7 @@ size_t __stdcall md(const kiv_os::TRegisters &regs)
 
 	std::smatch match;
 	std::string str(params);
+	bool empty = true;
 
 	while (!str.empty() && std::regex_search(str, match, reg_md_multi)) {
 		std::string tmp = match[0].str();
@@ -16,8 +17,13 @@ size_t __stdcall md(const kiv_os::TRegisters &regs)
 			tmp.erase(tmp.find_last_not_of(erase_chars) + 1);
 			tmp.erase(0, tmp.find_first_not_of(erase_chars));
 
+			empty = false;
 			create_directories(tmp);
 		}
+	}
+
+	if (empty) {
+		kiv_os_rtl::print_error("The syntax of the command is incorrect.");
 	}
 
 	return 0; // TODO what return

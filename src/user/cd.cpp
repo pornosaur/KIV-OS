@@ -11,6 +11,7 @@ size_t cmd_cd(const std::string &parameters)
 	bool change_disk = false;
 	std::string str(parameters);
 
+	str.erase(0, str.find_first_not_of(erase_chars));
 	if (str.empty()) {
 		cd_print();
 		return 0; // TODO

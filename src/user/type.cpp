@@ -9,6 +9,12 @@ size_t __stdcall type(const kiv_os::TRegisters &regs)
 	bool console = false;
 	std::smatch match;
 	std::string str(params);
+	str.erase(0, str.find_first_not_of(erase_chars));
+
+	if (str.empty()) {
+		kiv_os_rtl::print_error("The syntax of the command is incorrect.");
+		return 0;
+	}
 
 	kiv_os::THandle handle;
 	int counter = 0;

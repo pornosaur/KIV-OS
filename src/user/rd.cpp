@@ -12,6 +12,12 @@ size_t __stdcall rd(const kiv_os::TRegisters &regs)
 	bool recursively = false;
 
 	check_params(str, recursively, quiet);
+	str.erase(0, str.find_first_not_of(erase_chars));
+
+	if (str.empty()) {
+		kiv_os_rtl::print_error("The syntax of the command is incorrect.");
+		return 0;
+	}
 
 	while (!str.empty() && std::regex_search(str, match, reg_rd)) {
 		std::string tmp = match[0].str();

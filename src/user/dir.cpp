@@ -15,7 +15,7 @@ size_t __stdcall dir(const kiv_os::TRegisters &regs)
 	check_params(str, recursively);
 	str.erase(0, str.find_first_not_of(erase_chars));
 
-	if (str == "") {
+	if (str.empty()) {
 		if (!get_current_dir(str)) {
 			return 0;
 		}
