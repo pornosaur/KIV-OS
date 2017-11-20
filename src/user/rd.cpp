@@ -41,7 +41,7 @@ size_t __stdcall rd(const kiv_os::TRegisters &regs)
 			}
 
 			if (recursively) {
-				if (!quiet && ask_for_deletion(tmp))
+				if (quiet || ask_for_deletion(tmp))
 				{
 					res = remove_recursively(tmp, regs);
 					if (!res) {
