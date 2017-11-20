@@ -182,7 +182,8 @@ int FatFS::fs_read_dir(FileHandler *file, size_t *read_bytes, char *buffer, size
 		}
 		
 		if (file_position + file->ftell() <= positions[i]) {
-			strncpy_s(dir_entry.file_name, files[i].file_name, NAME_SIZE);
+			memset(dir_entry.file_name, 0, NAME_SIZE);
+			memcpy_s(dir_entry.file_name, NAME_SIZE, files[i].file_name, strlen(files[i].file_name));
 			dir_entry.file_attributes = 0;
 
 			if (files[i].file_type == OBJECT_DIRECTORY) {

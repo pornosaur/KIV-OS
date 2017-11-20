@@ -109,7 +109,8 @@ bool remove_subfiles(std::string path, const kiv_os::TRegisters &regs)
 		entry = reinterpret_cast<kiv_os::TDir_Entry *>(input);
 		if (entry) {
 			std::string tmp(path);
-			res = remove_recursively(tmp.append(entry->file_name), regs);
+			std::string name(entry->file_name, entry->file_name + sizeof entry->file_name / sizeof entry->file_name[0]);
+			res = remove_recursively(tmp.append(name), regs);
 		}
 
 	} while (res && read > 0);
