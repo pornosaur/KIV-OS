@@ -2,6 +2,7 @@
 #include "rtl.h"
 
 #include <regex>
+#include <vld.h>
 
 
 size_t __stdcall wc(const kiv_os::TRegisters &regs) {
@@ -34,10 +35,12 @@ size_t __stdcall wc(const kiv_os::TRegisters &regs) {
 
 	std::string out = "\t" + std::to_string(lines) + " \t" + std::to_string(words)
 		+ " \t" + std::to_string(characters) + " " + str +"\n";
-	const char *output = kiv_os_str::copy_string(out);
 
 	size_t written;
-	kiv_os_rtl::Write_File(kiv_os::stdOutput, output, out.size(), written);
+	kiv_os_rtl::Write_File(kiv_os::stdOutput, out.c_str(), out.size(), written);
+
+	free(input);
+	input = NULL;
 
 	return 0;
 }
