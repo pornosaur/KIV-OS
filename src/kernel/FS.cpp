@@ -76,19 +76,19 @@ int FS::sb_remove_dentry(struct dentry *m_dentry) {
 
 	struct dentry *parent = m_dentry->d_parent;
 
-	if (parent == NULL && m_dentry->d_subdirectories == NULL && m_dentry->d_next_subdir == NULL) {
+	if (parent == NULL) {
 		delete m_dentry;
 		return 0;
 	}
 
-	if (parent != NULL && m_dentry->d_next_subdir != NULL) {
+	if (m_dentry->d_next_subdir != NULL) {
 		parent->d_subdirectories = m_dentry->d_next_subdir;
 		delete m_dentry;
 		parent->d_count--;
 		return 0;
 	}
 
-	if (parent != NULL && parent->d_count > 1)
+	if (parent->d_count > 1)
 	{
 		if (parent->d_subdirectories == m_dentry)
 		{
