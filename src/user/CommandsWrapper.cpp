@@ -218,7 +218,6 @@ std::vector<kiv_os::THandle> kiv_os_cmd::CommandsWrapper::Run_Commands()
 		kiv_os_rtl::Create_Pipe(&pipe_handles[0]); //0 - write, 1 -read
 		creation_pipes.push_back(pipe_handles);
 	}
-	
 	for (const auto &cmd : commands) {
 		kiv_os::TProcess_Startup_Info tsi;
 		tsi.stdin_t = kiv_os::stdInput; //nastaveni std - jiz presmerovanych
@@ -241,26 +240,32 @@ std::vector<kiv_os::THandle> kiv_os_cmd::CommandsWrapper::Run_Commands()
 			else {
 				tsi.stdin_t = creation_pipes[cmd_counter-1][READ_HANDLE];
 			}
-			
 		}
 
 		//set stdout_t
+		long position = 0;
 		if (cmd.is_redirect) {
 			if (cmd.redirect.type == redirect_to_file) {
 				redirect_output_h = kiv_os_rtl::Create_File(cmd.redirect.dest.c_str(), 0, 0);
 				if (redirect_output_h == 0) {
-					//TODO get_last_errr
+					kiv_os_rtl::print_error();
 					break;
 				}
+				position = 0;
+				kiv_os_rtl::Set_File_Position(redirect_output_h, position, kiv_os::fsBeginning, kiv_os::fsSet_Size);
 				tsi.stdout_t = redirect_output_h;
 				tsi.stderr_t = redirect_output_h;
 			}
 			if (cmd.redirect.type == redirect_to_file_append) {
-				long position = 0;
+				position = 0;
 				redirect_output_h = kiv_os_rtl::Create_File(cmd.redirect.dest.c_str(), kiv_os::fmOpen_Always, 0);
 				if (redirect_output_h == 0) {
-					//TODO get_last_errr
-					break;
+					redirect_output_h = kiv_os_rtl::Create_File(cmd.redirect.dest.c_str(), 0, 0);
+					if (redirect_output_h == 0) {
+						kiv_os_rtl::print_error();
+						break;
+					}
+
 				}
 				if (!kiv_os_rtl::Set_File_Position(redirect_output_h, position, kiv_os::fsEnd, kiv_os::fsSet_Position)) {
 					//TODO get_last_err
@@ -277,10 +282,10 @@ std::vector<kiv_os::THandle> kiv_os_cmd::CommandsWrapper::Run_Commands()
 			}
 			else
 			{
-				tsi.stdout_t = creation_pipes[cmd_counter][WRITE_HANDLE]; 
+				tsi.stdout_t = creation_pipes[cmd_counter][WRITE_HANDLE];
 				tsi.stderr_t = creation_pipes[cmd_counter][WRITE_HANDLE];
 			}
-			
+
 		}
 
 		if (cmd.command == "cd") {
@@ -294,7 +299,7 @@ std::vector<kiv_os::THandle> kiv_os_cmd::CommandsWrapper::Run_Commands()
 				proc_handles.push_back(proc_handle); //pridani handlu do pole s handly
 			}
 			else {
-				//TODO get_err
+				kiv_os_rtl::print_error();
 				break;
 			}
 		}
@@ -307,7 +312,7 @@ std::vector<kiv_os::THandle> kiv_os_cmd::CommandsWrapper::Run_Commands()
 			redirect_output_h = kiv_os::erInvalid_Handle;
 		}
 		cmd_counter++;
-		
+
 	}
 	/*Close pipe handles*/
 	for (std::vector<kiv_os::THandle> pipe_handle : creation_pipes) {
