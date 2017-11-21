@@ -11,13 +11,18 @@ size_t cmd_cd(const std::string &parameters)
 	bool change_disk = false;
 	std::string str(parameters);
 
+	str.erase(str.find_last_not_of(erase_chars) + 1);
 	str.erase(0, str.find_first_not_of(erase_chars));
+	
 	if (str.empty()) {
 		cd_print();
 		return 0; // TODO
 	}
 	if (!str.find("/?")) {
 		cd_print_help();
+		return 0;
+	}
+	if (str == ".") {
 		return 0;
 	}
 

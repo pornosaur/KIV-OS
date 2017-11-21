@@ -336,6 +336,6 @@ void path_compiler(std::string &path)
 			path.erase(start_pos, bck_pos - start_pos + 2);
 		}
 	}
-	path.erase(path.find_last_not_of(delimeter) + 1);
-	path.erase(0, path.find_first_not_of(delimeter));
+	path.erase(path.find_last_not_of(path_erase_chr) + 1);
+	path.erase(0, path.find_first_not_of(path_erase_chr));
 }

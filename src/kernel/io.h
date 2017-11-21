@@ -4,6 +4,7 @@
 #include <cassert>
 #include <string>
 
+#define path_erase_chr "\\."
 #define delimeter "\\"
 #define delimeter_size 1
 
