@@ -39,10 +39,6 @@ void ProcessManager::handle_proc(kiv_os::TRegisters &regs) {
 	}
 }
 
-#undef stdin
-#undef stdout
-#undef stderr
-
 void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_Info *tsi, kiv_os::TRegisters &regs) {
 
 	kiv_os::TEntry_Point program = (kiv_os::TEntry_Point)GetProcAddress(User_Programs, prog_name);
@@ -72,13 +68,13 @@ void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_In
 
 		pcb->open_files.push_back(nullptr);
 		pcb->workind_dir = pcb_context->workind_dir;
-		std::shared_ptr<Handler> stdin_handle = pcb_context->open_files[tsi->stdin];
-		std::shared_ptr<Handler> stdout_handle = pcb_context->open_files[tsi->stdout];
-		std::shared_ptr<Handler> stderr_handle = pcb_context->open_files[tsi->stderr];
+		std::shared_ptr<Handler> stdin_handle = pcb_context->open_files[tsi->stdin_t];
+		std::shared_ptr<Handler> stdout_handle = pcb_context->open_files[tsi->stdout_t];
+		std::shared_ptr<Handler> stderr_handle = pcb_context->open_files[tsi->stderr_t];
 
-		pcb->open_files.push_back(pcb_context->open_files[tsi->stdin]);
-		pcb->open_files.push_back(pcb_context->open_files[tsi->stdout]);
-		pcb->open_files.push_back(pcb_context->open_files[tsi->stderr]);
+		pcb->open_files.push_back(pcb_context->open_files[tsi->stdin_t]);
+		pcb->open_files.push_back(pcb_context->open_files[tsi->stdout_t]);
+		pcb->open_files.push_back(pcb_context->open_files[tsi->stderr_t]);
 
 		stdin_handle->inc_count();
 		stdout_handle->inc_count();
@@ -105,20 +101,6 @@ void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_In
 	}
 	
 	regs.rax.r = static_cast<decltype(regs.rdx.x)>(proc_handle);
-
-}
-void ProcessManager::run_init_proc() {
-	std::shared_ptr<PCB> pcb = std::make_shared<PCB>();
-	pcb->proc_name = "Init";
-	std::shared_ptr<PCB> pcb_context;
-	pcb_context = get_proc_context();
-	kiv_os::THandle proc_handle = proc_filesystem->add_process(pcb);
-	pcb->ppid = 0; //TODO realy 0?
-	pcb->workind_dir = "C:";
-	pcb->open_files.push_back(nullptr);
-	pcb->open_files.push_back(std::make_shared<Console>(kiv_os::stdInput));
-	pcb->open_files.push_back(std::make_shared<Console>(kiv_os::stdOutput));
-	pcb->open_files.push_back(std::make_shared<Console>(kiv_os::stdError));
 
 }
 

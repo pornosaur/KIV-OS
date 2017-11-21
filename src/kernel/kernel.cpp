@@ -85,13 +85,13 @@ void __stdcall Run_VM() {
 	//spustime shell - v realnem OS bychom ovsem spousteli login
 	//kiv_os::TEntry_Point shell = (kiv_os::TEntry_Point)GetProcAddress(User_Programs, "shell");
 	//if (shell) {
-	//processManager->run_init_proc();
+		
 		kiv_os::TRegisters regs{ 0 };
 		kiv_os::TProcess_Startup_Info tsi;
 		tsi.arg = "shell"; //argumenty
-		//tsi.stdin_t = kiv_os::stdInput; //nastaveni std - jiz presmerovanych
-		//tsi.stdout_t = kiv_os::stdOutput;
-		//tsi.stderr_t = kiv_os::stdError;
+		tsi.stdin_t = kiv_os::stdInput; //nastaveni std - jiz presmerovanych
+		tsi.stdout_t = kiv_os::stdOutput;
+		tsi.stderr_t = kiv_os::stdError;
 		kiv_os::THandle proc_handles[1];
 		
 		processManager->create_process("shell", &tsi, regs);

@@ -213,10 +213,6 @@ void kiv_os_cmd::CommandsWrapper::Print_Error()
 	Clear();
 }
 
-#undef stdin
-#undef stdout
-#undef stderr
-
 std::vector<kiv_os::THandle> kiv_os_cmd::CommandsWrapper::Run_Commands()
 {
 	std::vector<kiv_os::THandle> proc_handles;
@@ -232,9 +228,9 @@ std::vector<kiv_os::THandle> kiv_os_cmd::CommandsWrapper::Run_Commands()
 	}
 	for (const auto &cmd : commands) {
 		kiv_os::TProcess_Startup_Info tsi;
-		tsi.stdin = kiv_os::stdInput; //nastaveni std - jiz presmerovanych
-		tsi.stdout = kiv_os::stdOutput;
-		tsi.stderr = kiv_os::stdError;
+		tsi.stdin_t = kiv_os::stdInput; //nastaveni std - jiz presmerovanych
+		tsi.stdout_t = kiv_os::stdOutput;
+		tsi.stderr_t = kiv_os::stdError;
 
 		//set stdin_t
 		if (cmd.is_input_redir) { //input redirect
@@ -243,14 +239,14 @@ std::vector<kiv_os::THandle> kiv_os_cmd::CommandsWrapper::Run_Commands()
 				kiv_os_rtl::print_error();
 				break;
 			}
-			tsi.stdin = redirect_input_h;
+			tsi.stdin_t = redirect_input_h;
 		}
 		else {
 			if (&cmd == &commands.front()) {
-				tsi.stdin = kiv_os::stdInput;
+				tsi.stdin_t = kiv_os::stdInput;
 			}
 			else {
-				tsi.stdin = creation_pipes[cmd_counter-1][READ_HANDLE];
+				tsi.stdin_t = creation_pipes[cmd_counter-1][READ_HANDLE];
 			}
 			
 		}
@@ -277,18 +273,18 @@ std::vector<kiv_os::THandle> kiv_os_cmd::CommandsWrapper::Run_Commands()
 					break;
 				}
 
-				tsi.stdout = redirect_output_h;
-				tsi.stderr = redirect_output_h;
+				tsi.stdout_t = redirect_output_h;
+				tsi.stderr_t = redirect_output_h;
 		}
 		else {
 			if (&cmd == &commands.back()) {
-				tsi.stdout = kiv_os::stdOutput;
-				tsi.stderr = kiv_os::stdError;
+				tsi.stdout_t = kiv_os::stdOutput;
+				tsi.stderr_t = kiv_os::stdError;
 			}
 			else
 			{
-				tsi.stdout = creation_pipes[cmd_counter][WRITE_HANDLE];
-				tsi.stderr = creation_pipes[cmd_counter][WRITE_HANDLE];
+				tsi.stdout_t = creation_pipes[cmd_counter][WRITE_HANDLE];
+				tsi.stderr_t = creation_pipes[cmd_counter][WRITE_HANDLE];
 			}
 
 		}

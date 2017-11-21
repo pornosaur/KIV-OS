@@ -12,7 +12,7 @@ size_t __stdcall wc(const kiv_os::TRegisters &regs) {
 
 	kiv_os::THandle handle;
 	if (strlen(str) == 0) {
-		handle = kiv_os::stdInput;
+		handle = tsi->stdin_t;
 	}
 	else {
 		handle = kiv_os_rtl::Create_File(str, kiv_os::fmOpen_Always, 0);		//TODO open file on disk
