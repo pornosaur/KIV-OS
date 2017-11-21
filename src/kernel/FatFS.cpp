@@ -2,7 +2,6 @@
 
 FatFS::FatFS(char *memory, size_t memory_size, const std::string &disk_id)
 {
-
 	f_data = new struct fat_data();
 	f_data->memory = memory;
 	f_data->memory_size = memory_size;
@@ -34,8 +33,9 @@ FatFS::~FatFS()
 	delete f_data;
 }
 
-int FatFS::init_fat_disk(char *memory, size_t memory_size, uint16_t cluster_size) {
 
+int FatFS::init_fat_disk(char *memory, size_t memory_size, uint16_t cluster_size)
+{
 	uint8_t fat_copies = (uint8_t)2u;
 	uint16_t b_record_size = sizeof(struct boot_record);
 	uint16_t reserved_cluster_count = (b_record_size / cluster_size) + ((b_record_size % cluster_size) ? 1 : 0);
@@ -78,6 +78,7 @@ int FatFS::init_fat_disk(char *memory, size_t memory_size, uint16_t cluster_size
 
 	return ERR_SUCCESS;
 }
+
 
 int FatFS::fs_create_dir(FileHandler **directory, const std::string &absolute_path)
 {
@@ -126,6 +127,7 @@ int FatFS::fs_create_dir(FileHandler **directory, const std::string &absolute_pa
 	return ERR_SUCCESS;
 }
 
+
 int FatFS::fs_remove_emtpy_dir(FileHandler *file)
 {
 	if (file == NULL || file->get_dentry() == NULL || file->get_dentry()->d_file_type != FS::FS_OBJECT_DIRECTORY) {
@@ -156,6 +158,7 @@ int FatFS::fs_remove_emtpy_dir(FileHandler *file)
 			return ERR_DISK_ERROR;
 	}
 }
+
 
 int FatFS::fs_read_dir(FileHandler *file, size_t *read_bytes, char *buffer, size_t buffer_size)
 {
@@ -205,6 +208,7 @@ int FatFS::fs_read_dir(FileHandler *file, size_t *read_bytes, char *buffer, size
 	return ERR_SUCCESS;
 }
 
+
 int FatFS::fs_create_file(FileHandler **file, const std::string &absolute_path)
 {
 	struct dentry *m_dentry = NULL;
@@ -221,6 +225,7 @@ int FatFS::fs_create_file(FileHandler **file, const std::string &absolute_path)
 	f_dentry = FatFS::find_object_in_directory(m_dentry, absolute_path.substr(start, end), FS_OBJECT_FILE);
 
 	if (f_dentry != NULL) {
+		// remove existing file
 		if (f_dentry->d_count > 0) {
 			return ERR_FILE_OPEN_BY_OTHER;
 		}
@@ -260,6 +265,7 @@ int FatFS::fs_create_file(FileHandler **file, const std::string &absolute_path)
 	return ERR_SUCCESS;
 }
 
+
 int FatFS::fs_open_object(FileHandler **object, const std::string &absolute_path, unsigned int type)
 {
 	struct dentry *m_dentry = NULL;
@@ -284,6 +290,7 @@ int FatFS::fs_open_object(FileHandler **object, const std::string &absolute_path
 	return ERR_SUCCESS;
 }
 
+
 struct dentry *FatFS::find_object_in_directory(struct dentry *m_dentry, const std::string& dentry_name, unsigned int type) {
 	
 	struct dentry *f_dentry = FS::sb_find_dentry_in_dentry(m_dentry, dentry_name, type);
@@ -302,6 +309,7 @@ struct dentry *FatFS::find_object_in_directory(struct dentry *m_dentry, const st
 	}
 	return f_dentry;
 }
+
 
 dentry * FatFS::find_path(const std::string &absolute_path, size_t * start, size_t * end)
 {
@@ -333,6 +341,7 @@ dentry * FatFS::find_path(const std::string &absolute_path, size_t * start, size
 
 	return m_dentry;
 }
+
 
 int FatFS::fs_write_to_file(FileHandler *file, size_t *writed_bytes, char *buffer, size_t buffer_size)
 {
@@ -369,6 +378,7 @@ int FatFS::fs_write_to_file(FileHandler *file, size_t *writed_bytes, char *buffe
 	}
 }
 
+
 int FatFS::fs_read_file(FileHandler *file, size_t *read_bytes, char *buffer, size_t buffer_size)
 {
 	if (file == NULL || file->get_dentry() == NULL || file->get_dentry()->d_file_type != FS::FS_OBJECT_FILE) {
@@ -389,6 +399,7 @@ int FatFS::fs_read_file(FileHandler *file, size_t *read_bytes, char *buffer, siz
 	}
 }
 
+
 int FatFS::fs_remove_file(FileHandler *file)
 {
 	if (file == NULL || file->get_dentry() == NULL || file->get_dentry()->d_file_type != FS::FS_OBJECT_FILE) {
@@ -399,7 +410,6 @@ int FatFS::fs_remove_file(FileHandler *file)
 	}
 
 	int result = fat_delete_file_by_name(FatFS::f_data, file->get_dentry()->d_name.c_str(), file->get_dentry()->d_parent->d_position);
-
 
 	switch (result) {
 	case 0:
@@ -413,6 +423,7 @@ int FatFS::fs_remove_file(FileHandler *file)
 		return ERR_DISK_ERROR;
 	}
 }
+
 
 int FatFS::fs_set_file_size(FileHandler * file, size_t file_size)
 {
