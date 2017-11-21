@@ -1,15 +1,11 @@
 #include "Vfs.h"
 
 
-Vfs::Vfs()
-{
-}
-
-
 Vfs::~Vfs()
 {
 	for (std::pair<std::string, FS*> pair : file_systems) delete pair.second;
 }
+
 
 uint16_t Vfs::create_dir(FileHandler ** directory, const std::string &absolute_path)
 {
@@ -31,6 +27,7 @@ uint16_t Vfs::create_dir(FileHandler ** directory, const std::string &absolute_p
 
 	return FS::translate_return_codes(ret_code);
 }
+
 
 uint16_t Vfs::remove_emtpy_dir(const std::string &absolute_path)
 {
@@ -57,6 +54,7 @@ uint16_t Vfs::remove_emtpy_dir(const std::string &absolute_path)
 	return FS::translate_return_codes(ret_code2);
 }
 
+
 uint16_t Vfs::open_object(FileHandler ** object, const std::string &absolute_path, unsigned int type)
 {
 	size_t start = 0;
@@ -76,6 +74,7 @@ uint16_t Vfs::open_object(FileHandler ** object, const std::string &absolute_pat
 
 	return FS::translate_return_codes(ret_code);
 }
+
 
 uint16_t Vfs::create_file(FileHandler ** file, const std::string &absolute_path)
 {
@@ -97,6 +96,7 @@ uint16_t Vfs::create_file(FileHandler ** file, const std::string &absolute_path)
 
 	return FS::translate_return_codes(ret_code);
 }
+
 
 uint16_t Vfs::remove_file(const std::string &absolute_path)
 {
@@ -124,6 +124,7 @@ uint16_t Vfs::remove_file(const std::string &absolute_path)
 	return FS::translate_return_codes(ret_code2);
 }
 
+
 uint16_t Vfs::register_fs(const std::string &name, FS * fs)
 {
 	if (fs == NULL) {
@@ -137,6 +138,7 @@ uint16_t Vfs::register_fs(const std::string &name, FS * fs)
 	file_systems.insert(std::pair<std::string, FS*>(name, fs));
 	return kiv_os::erSuccess;
 }
+
 
 FS *Vfs::find_fs_by_name(const std::string &name)
 {	
