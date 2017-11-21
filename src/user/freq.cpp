@@ -8,17 +8,13 @@ size_t __stdcall freq(const kiv_os::TRegisters &regs) {
 	kiv_os::TProcess_Startup_Info *tsi = reinterpret_cast<kiv_os::TProcess_Startup_Info*> (regs.rdi.r);
 	char *str = tsi->arg;
 
-
-	kiv_os::THandle handle_read = tsi->stdin_t;
-	kiv_os::THandle handle_write = tsi->stdout_t;
-
 	char *read_buff = (char *)malloc(1024 * sizeof(char));
 	int freq_table[256] = { 0 };
 	size_t read = 0;
 	bool res_read = false;
 
 	do {
-		res_read = kiv_os_rtl::Read_File(handle_read, read_buff, 1024, read);
+		res_read = kiv_os_rtl::Read_File(kiv_os::stdInput, read_buff, 1024, read);
 
 		if (res_read && read) {
 			for (size_t i = 0; i < read; i++) {
@@ -41,7 +37,7 @@ size_t __stdcall freq(const kiv_os::TRegisters &regs) {
 	}
 
 	size_t written;
-	bool a = kiv_os_rtl::Write_File(handle_write, result.c_str(), result.size(), written);
+	bool a = kiv_os_rtl::Write_File(kiv_os::stdOutput, result.c_str(), result.size(), written);
 
 	free(read_buff);
 	read_buff = NULL;
