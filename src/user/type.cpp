@@ -1,5 +1,6 @@
-#include "type.h"
 #include <cassert>
+#include "type.h"
+#include "rtl.h"
 
 
 size_t __stdcall type(const kiv_os::TRegisters &regs)
@@ -11,7 +12,7 @@ size_t __stdcall type(const kiv_os::TRegisters &regs)
 	std::smatch match;
 	std::string str(params);
 
-	str.erase(0, str.find_first_not_of(erase_chars)); // remove redunadat chars from start of string
+	str.erase(0, str.find_first_not_of(ERASE_CHARS)); // remove redunadat chars from start of string
 
 	if (str.empty()) {
 		kiv_os_rtl::print_error("The syntax of the command is incorrect.");
@@ -31,8 +32,8 @@ size_t __stdcall type(const kiv_os::TRegisters &regs)
 		str = match.suffix();
 
 		if (!tmp.empty()) {
-			tmp.erase(tmp.find_last_not_of(erase_chars) + 1);
-			tmp.erase(0, tmp.find_first_not_of(erase_chars));
+			tmp.erase(tmp.find_last_not_of(ERASE_CHARS) + 1);
+			tmp.erase(0, tmp.find_first_not_of(ERASE_CHARS));
 
 			if (is_string_name_lower(tmp, "nul")) {
 				counter++;
@@ -65,7 +66,7 @@ size_t __stdcall type(const kiv_os::TRegisters &regs)
 
 void read_and_write(kiv_os::THandle &in)
 {
-	char *input = (char *)malloc(buffer_size * sizeof(char));
+	char *input = (char *)malloc(BUFFER_SIZE * sizeof(char));
 	if (!input) {
 		kiv_os_rtl::print_error("Out of memory.");
 		return;
@@ -75,7 +76,7 @@ void read_and_write(kiv_os::THandle &in)
 	bool res = true;
 
 	do {
-		res = kiv_os_rtl::Read_File(in, input, buffer_size, read);
+		res = kiv_os_rtl::Read_File(in, input, BUFFER_SIZE, read);
 		if (!res || read == 0) break;
 
 		res = kiv_os_rtl::Write_File(kiv_os::stdOutput, input, read, writen);

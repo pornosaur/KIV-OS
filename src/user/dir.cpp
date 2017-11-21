@@ -1,7 +1,7 @@
 #include "dir.h"
-
 #include <vector>
 
+#include "rtl.h"
 
 size_t __stdcall dir(const kiv_os::TRegisters &regs)
 {
@@ -14,7 +14,7 @@ size_t __stdcall dir(const kiv_os::TRegisters &regs)
 	bool recursively = false;
 
 	check_params(str, recursively);
-	str.erase(0, str.find_first_not_of(erase_chars));
+	str.erase(0, str.find_first_not_of(ERASE_CHARS));
 
 	if (str.empty()) {
 		if (!get_current_dir(str)) {
@@ -32,8 +32,8 @@ size_t __stdcall dir(const kiv_os::TRegisters &regs)
 		str = match.suffix();
 
 		if (!tmp.empty()) {
-			tmp.erase(tmp.find_last_not_of(erase_chars) + 1);
-			tmp.erase(0, tmp.find_first_not_of(erase_chars));
+			tmp.erase(tmp.find_last_not_of(ERASE_CHARS) + 1);
+			tmp.erase(0, tmp.find_first_not_of(ERASE_CHARS));
 
 			if (!print_directory(tmp, regs, recursively)) {
 				kiv_os_rtl::print_error();
@@ -71,7 +71,7 @@ bool print_directory(std::string path, const kiv_os::TRegisters &regs, bool &rec
 	bool res;
 
 	print_name(path);
-	path.append(delimeter);
+	path.append(DELIMETER);
 
 	do {
 		res = kiv_os_rtl::Read_File(handle, input, input_size, read);
@@ -133,13 +133,13 @@ bool print_name(std::string name)
 bool get_current_dir(std::string &path)
 {
 	size_t writen = 0;
-	char *buffer = (char*)malloc(sizeof(char) * buffer_size);
+	char *buffer = (char*)malloc(sizeof(char) * BUFFER_SIZE);
 	if (!buffer) {
 		kiv_os_rtl::print_error("Out of memory.");
 		return false;
 	}
 
-	if (!kiv_os_rtl::Get_Current_Direcotry(buffer, buffer_size, writen))
+	if (!kiv_os_rtl::Get_Current_Direcotry(buffer, BUFFER_SIZE, writen))
 	{
 		free(buffer);
 		kiv_os_rtl::print_error();

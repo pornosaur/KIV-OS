@@ -1,13 +1,12 @@
 #include "../api/api.h"
 #include "string.h"
-#include "rtl.h"
 
 #include <regex>
 
 /* chars which are deleted from input arguments from left and right */
-#define erase_chars " \n\r\t\"'\\"
+#define ERASE_CHARS " \n\r\t\"'\\"
 /* path delimeter */
-#define delimeter "\\"
+#define DELIMETER "\\"
 
 static std::regex reg_md_multi("\"([\\S\\s][^\"]+)\"|\'([\\S\\s][^\']+)\'|(\\S+)");
 static std::regex reg_md_recur("[^\\\\]+");

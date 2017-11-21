@@ -1,4 +1,5 @@
 #include "rd.h"
+#include "rtl.h"
 
 
 size_t __stdcall rd(const kiv_os::TRegisters &regs)
@@ -13,7 +14,7 @@ size_t __stdcall rd(const kiv_os::TRegisters &regs)
 	bool recursively = false;
 
 	check_params(str, recursively, quiet);
-	str.erase(0, str.find_first_not_of(erase_chars));
+	str.erase(0, str.find_first_not_of(ERASE_CHARS));
 
 	if (str.empty()) {
 		kiv_os_rtl::print_error("The syntax of the command is incorrect.");
@@ -30,8 +31,8 @@ size_t __stdcall rd(const kiv_os::TRegisters &regs)
 		str = match.suffix();
 
 		if (!tmp.empty()) {
-			tmp.erase(tmp.find_last_not_of(erase_chars) + 1);
-			tmp.erase(0, tmp.find_first_not_of(erase_chars));
+			tmp.erase(tmp.find_last_not_of(ERASE_CHARS) + 1);
+			tmp.erase(0, tmp.find_first_not_of(ERASE_CHARS));
 
 			// Check if folder exists and if it is a directory
 			kiv_os::THandle handle = kiv_os_rtl::Create_File(tmp.c_str(), kiv_os::fmOpen_Always, kiv_os::faDirectory);
@@ -113,7 +114,7 @@ bool remove_subfiles(std::string path, const kiv_os::TRegisters &regs)
 	kiv_os::TDir_Entry *entry;
 	size_t read = 0;
 	bool res;
-	path.append(delimeter);
+	path.append(DELIMETER);
 
 	do {
 		res = kiv_os_rtl::Read_File(handle, input, input_size, read);
@@ -170,7 +171,7 @@ void check_params(std::string &parameters, bool &recursively, bool &quiet)
 
 bool ask_for_deletion(std::string &path) {
 
-	char *input = (char *)malloc(buffer_size * sizeof(char));
+	char *input = (char *)malloc(BUFFER_SIZE * sizeof(char));
 	if (!input) {
 		kiv_os_rtl::print_error("Out of memory.");
 		return false;
@@ -193,7 +194,7 @@ bool ask_for_deletion(std::string &path) {
 			return false;
 		}
 
-		res = kiv_os_rtl::Read_File(kiv_os::stdInput, input, buffer_size, read);
+		res = kiv_os_rtl::Read_File(kiv_os::stdInput, input, BUFFER_SIZE, read);
 		if (!res) {
 			kiv_os_rtl::print_error();
 			free(input);

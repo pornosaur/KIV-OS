@@ -1,4 +1,5 @@
 #include "md.h"
+#include "rtl.h"
 
 size_t __stdcall md(const kiv_os::TRegisters &regs)
 {
@@ -19,8 +20,8 @@ size_t __stdcall md(const kiv_os::TRegisters &regs)
 		str = match.suffix();
 
 		if (!tmp.empty()) {
-			tmp.erase(tmp.find_last_not_of(erase_chars) + 1);
-			tmp.erase(0, tmp.find_first_not_of(erase_chars));
+			tmp.erase(tmp.find_last_not_of(ERASE_CHARS) + 1);
+			tmp.erase(0, tmp.find_first_not_of(ERASE_CHARS));
 
 			empty = false;
 			create_directories(tmp);
@@ -59,7 +60,7 @@ void create_directories(std::string &path)
 					kiv_os_rtl::print_error();
 					return;
 				}
-				tmp_path.append(delimeter);
+				tmp_path.append(DELIMETER);
 				continue;
 			}
 
@@ -75,7 +76,7 @@ void create_directories(std::string &path)
 				kiv_os_rtl::print_error();
 				return;
 			}
-			tmp_path.append(delimeter);
+			tmp_path.append(DELIMETER);
 			created = true;
 		}
 	}

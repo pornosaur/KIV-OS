@@ -159,7 +159,7 @@ int fat_create_file(struct fat_data *f_data, struct dir_file **new_file, const c
 		return 12; // OUT OF MEMORY
 	}
 
-	init_object(*new_file, file_name, 0, OBJECT_FILE, 0);
+	init_object(*new_file, file_name, 0, (uint8_t)OBJECT_FILE, 0);
 
 	write_to_dir(f_data->memory, f_data->memory_size, *new_file, (uint32_t)*dir_position);
 
@@ -185,7 +185,7 @@ struct dir_file *fat_get_object_info_by_name(struct fat_data *f_data, const char
 	position = f_data->start_of_root_dir + (act_fat_position * f_data->boot_record->cluster_size);
 
 	// check if file exists
-	struct dir_file *dir_file = get_object_in_dir(f_data->memory, f_data->memory_size, file_name, file_type, position, f_data->max_dir_entries, dir_position);
+	struct dir_file *dir_file = get_object_in_dir(f_data->memory, f_data->memory_size, file_name, file_type, position, f_data->max_dir_entries, (uint32_t*)dir_position);
 
 	return dir_file;
 }
@@ -320,7 +320,7 @@ int fat_create_dir(struct fat_data *f_data, struct dir_file **new_dir, const cha
 		return 12; // OUT OF MEMORY
 	}
 
-	init_object(*new_dir, dir_name, f_data->boot_record->dir_clusters * f_data->boot_record->cluster_size, OBJECT_DIRECTORY, clusters[0]);
+	init_object(*new_dir, dir_name, f_data->boot_record->dir_clusters * f_data->boot_record->cluster_size, (uint8_t)OBJECT_DIRECTORY, clusters[0]);
 
 	write_empty_dir_to_fat(f_data->memory, f_data->memory_size, clusters, (uint32_t)file_cluster_count, f_data->start_of_root_dir, f_data->boot_record->cluster_size);
 	write_to_dir(f_data->memory, f_data->memory_size, *new_dir, (uint32_t)*dir_position);
@@ -369,7 +369,7 @@ int fat_delete_empty_dir(struct fat_data *f_data, const char *dir_name, uint32_t
 
 	parent_position = f_data->start_of_root_dir + (act_fat_position * f_data->boot_record->cluster_size);
 
-	file = get_object_in_dir(f_data->memory, f_data->memory_size, dir_name, OBJECT_DIRECTORY, parent_position, f_data->max_dir_entries, &position);
+	file = get_object_in_dir(f_data->memory, f_data->memory_size, dir_name, OBJECT_DIRECTORY, parent_position, f_data->max_dir_entries, (uint32_t*)&position);
 	if (file == NULL || file->file_type != OBJECT_DIRECTORY) {
 		free(file);
 		return 3; // PAHT NOT FOUND

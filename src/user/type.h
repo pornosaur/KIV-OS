@@ -1,15 +1,14 @@
 #include "../api/api.h"
 #include "string.h"
-#include "rtl.h"
 
 #include <regex>
 
 /* chars which are deleted from input arguments from left and right */
-#define erase_chars " \n\r\t\"'\\"
+#define ERASE_CHARS " \n\r\t\"'\\"
 /* path delimeter */
-#define delimeter "\\"
+#define DELIMETER "\\"
 /* size of read buffer */
-#define buffer_size 1024
+#define BUFFER_SIZE 1024
 
 static std::regex reg_type("\"([\\S\\s][^\"]+)\"|\'([\\S\\s][^\']+)\'|(\\S+)");
 

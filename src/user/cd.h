@@ -1,19 +1,18 @@
 #include "../api/api.h"
 #include "string.h"
-#include "rtl.h"
 
 #include <regex>
 
 /* chars which are deleted from input arguments from left and right */
-#define erase_chars " \n\r\t\"'"
+#define ERASE_CHARS " \n\r\t\"'"
 /* path delimeter in char */
-#define delimeter_chr '\\'
+#define DELIMETER_CHR '\\'
 /* path delimeter in string */
-#define delimeter_str "\\"
+#define DELIMETER_STR "\\"
 /* size of path delimeter */
-#define delimeter_size 1
+#define DELIMETER_SIZE 1
 /* size of read buffer */
-#define buffer_size 2048
+#define BUFFER_SIZE 2048
 
 static std::regex reg_cd("([^\\/]+)|(\\/d|\\/D)");
 

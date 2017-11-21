@@ -13,7 +13,7 @@ FatFS::FatFS(char *memory, size_t memory_size, const std::string &disk_id)
 		return;
 	}
 
-	struct super_block * sb = FS::init_super_block(
+	struct super_block * m_sb = FS::init_super_block(
 		FatFS::f_data->boot_record->cluster_size, 0,
 		FatFS::f_data->boot_record->usable_cluster_count * FatFS::f_data->boot_record->cluster_size,
 		NULL, 1, disk_id);
@@ -23,7 +23,7 @@ FatFS::FatFS(char *memory, size_t memory_size, const std::string &disk_id)
 	root->d_count = 1;
 	root->d_mounted = 1;
 
-	sb->s_root = root;
+	m_sb->s_root = root;
 }
 
 
@@ -36,12 +36,12 @@ FatFS::~FatFS()
 
 int FatFS::init_fat_disk(char *memory, size_t memory_size, uint16_t cluster_size)
 {
-	uint8_t fat_copies = (uint8_t)2u;
+	uint8_t fat_copies = static_cast<uint8_t>(2u);
 	uint16_t b_record_size = sizeof(struct boot_record);
 	uint16_t reserved_cluster_count = (b_record_size / cluster_size) + ((b_record_size % cluster_size) ? 1 : 0);
 	uint16_t reserved_size = reserved_cluster_count * cluster_size;
 	
-	uint32_t usable_size = (uint32_t)(memory_size - reserved_size);
+	uint32_t usable_size = static_cast<uint32_t>(memory_size - reserved_size);
 	uint32_t usable_cluster_count = usable_size / (cluster_size + (sizeof(uint32_t) * fat_copies)); // uint32_t size of record in fat table
 
 	// create boot_record
@@ -466,7 +466,7 @@ struct dir_file *FatFS::create_dir_file(struct dentry *dentry)
 	struct dir_file *d_file = new struct dir_file();
 	strcpy_s(d_file->file_name, dentry->d_name.c_str());
 	d_file->file_size = dentry->d_size;
-	d_file->file_type = dentry->d_file_type;
+	d_file->file_type = static_cast<uint8_t>(dentry->d_file_type);
 	d_file->first_cluster = dentry->d_position;
 
 	return d_file;
