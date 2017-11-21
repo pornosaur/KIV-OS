@@ -10,14 +10,14 @@ size_t __stdcall wc(const kiv_os::TRegisters &regs) {
 	
 	char *str = tsi->arg;		
 
-	kiv_os::THandle handle = tsi->stdin_t;		//TODO DELETE this definition, only declaration;
-	/*if (strlen(str) == 0) {
+	kiv_os::THandle handle;
+	if (strlen(str) == 0) {
 		handle = tsi->stdin_t;
 	}
 	else {
-		//handle = kiv_os_rtl::Create_File(str, kiv_os::fmOpen_Always);		//TODO open file on disk
+		handle = kiv_os_rtl::Create_File(str, kiv_os::fmOpen_Always, 0);		//TODO open file on disk
 	}
-	//shandle = kiv_os::stdInput;*/
+
 
 	size_t read, lines = 0, words = 0, characters = 0;
 
@@ -40,7 +40,7 @@ size_t __stdcall wc(const kiv_os::TRegisters &regs) {
 	kiv_os_rtl::Write_File(kiv_os::stdOutput, out.c_str(), out.size(), written);
 
 	free(input);
-	input = NULL;
+	input = nullptr;
 
 	return 0;
 }
