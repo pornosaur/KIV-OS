@@ -7,7 +7,9 @@
 #include "FS.h"
 #include "FileHandler.h"
 
-
+/**
+ * Virtual file system create connection to file systems
+ */
 class Vfs
 {
 public:

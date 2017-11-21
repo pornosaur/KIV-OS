@@ -1,9 +1,7 @@
 #include "type.h"
 #include <cassert>
 
-/**
-* Command TYPE
-*/
+
 size_t __stdcall type(const kiv_os::TRegisters &regs)
 {
 	kiv_os::TProcess_Startup_Info *tsi = reinterpret_cast<kiv_os::TProcess_Startup_Info*> (regs.rdi.r);
@@ -61,14 +59,10 @@ size_t __stdcall type(const kiv_os::TRegisters &regs)
 		counter++;
 	}
 
-	return 0; // TODO what return
+	return 0;
 }
 
-/**
-* write all data from in handle to stdOutput
-*
-* @param in handle from which will be read data
-*/
+
 void read_and_write(kiv_os::THandle &in)
 {
 	char *input = (char *)malloc(buffer_size * sizeof(char));
@@ -100,12 +94,7 @@ void read_and_write(kiv_os::THandle &in)
 	}
 }
 
-/**
-* if counter != 0 write name to stdOutput
-*
-* @param print if is set to non zero value name will be printed
-* @param name string which will be printed
-*/
+
 void write_file_name(int &print, std::string &name)
 {
 	if (print) {
@@ -124,21 +113,14 @@ void write_file_name(int &print, std::string &name)
 	}
 }
 
-/**
-* return true if name is in lower case  equals to string
-*
-* @param name string which will be transfer to lower case
-* @param second string to campare
-*/
+
 bool is_string_name_lower(std::string name, std::string string)
 {
 	kiv_os_str::string_to_lower(name);
 	return !name.compare(string);
 }
 
-/**
-* Function print help for command TYPE to stdOutput
-*/
+
 void type_print_help()
 {
 	size_t writen;

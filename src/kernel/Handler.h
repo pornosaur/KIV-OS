@@ -19,7 +19,7 @@ public:
 	virtual uint16_t read(char* buffer, size_t length, size_t& read) = 0;		/* length = size buff */
 	virtual uint16_t write(char* buffer, size_t length, size_t& written) = 0;	/* length = size buffer*/
 	
-	virtual uint16_t fseek(long offset, uint8_t origin, uint8_t set_size) = 0;
+	virtual uint16_t fseek(long offset, uint8_t origin, uint8_t set_size) = 0; /* origin = api fs const; set_size = api fsSet const */
 	
 	size_t ftell() { return position; }
 	uint8_t get_flags() { return flags; }
@@ -27,7 +27,7 @@ public:
 	void inc_count() { count++; }
 	void dec_count() { if (count > 0) count--; }
 	
-
+	/** decrement counter and return true if counter is 0 */
 	bool close_handler() {
 		dec_count();
 		return get_count() <= 0;

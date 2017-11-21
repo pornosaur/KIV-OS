@@ -1,10 +1,5 @@
 #include "cd.h"
 
-/**
-* Command cd
-*
-* @param parameters string contains argument /d and path
-*/
 size_t cmd_cd(const std::string &parameters)
 {
 	std::smatch match;
@@ -16,7 +11,7 @@ size_t cmd_cd(const std::string &parameters)
 	
 	if (str.empty()) {
 		cd_print();
-		return 0; // TODO
+		return 0;
 	}
 	if (!str.find("/?")) {
 		cd_print_help();
@@ -53,14 +48,10 @@ size_t cmd_cd(const std::string &parameters)
 		str = match.suffix();
 	}
 
-	return 0; // TODO what return
+	return 0;
 }
 
-/**
-* Change working dir with relative path.
-*
-* @param path relative path
-*/
+
 void change_dir(std::string &path)
 {
 	std::smatch match;
@@ -90,11 +81,7 @@ void change_dir(std::string &path)
 	}
 }
 
-/**
-* Change working dir with relative path which starts at root directory.
-*
-* @param path relative path from root directory
-*/
+
 void change_dir_from_root(std::string &path)
 {
 	size_t writen = 0;
@@ -133,12 +120,7 @@ void change_dir_from_root(std::string &path)
 	}
 }
 
-/**
-* Change working dir with absolute path.
-*
-* @param path absolute path
-* @param change_disk must be true to change disk and folder. To change only disk can be false
-*/
+
 void change_dir_with_disk(std::string &path, bool change_disk)
 {
 	size_t writen = 0;
@@ -170,9 +152,7 @@ void change_dir_with_disk(std::string &path, bool change_disk)
 	}
 }
 
-/**
-* Print to stdOutput actual working directory.
-*/
+
 void cd_print()
 {
 	size_t read = 0, writen = 0;
@@ -204,9 +184,7 @@ void cd_print()
 	}
 }
 
-/**
-* Function print help for command CD to stdOutput
-*/
+
 void cd_print_help()
 {
 	size_t writen;

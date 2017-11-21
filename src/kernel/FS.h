@@ -12,6 +12,9 @@
 
 class FileHandler;
 
+/**
+ * Abstract class for all file systems
+ */
 class FS
 {
 public:

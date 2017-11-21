@@ -1,8 +1,5 @@
 #include "md.h"
 
-/**
-* Command MD
-*/
 size_t __stdcall md(const kiv_os::TRegisters &regs)
 {
 	kiv_os::TProcess_Startup_Info *tsi = reinterpret_cast<kiv_os::TProcess_Startup_Info*> (regs.rdi.r);
@@ -34,12 +31,10 @@ size_t __stdcall md(const kiv_os::TRegisters &regs)
 		kiv_os_rtl::print_error("The syntax of the command is incorrect.");
 	}
 
-	return 0; // TODO what return
+	return 0;
 }
 
-/**
-* Create every folder in path if no folder is created print error message to stdError
-*/
+
 void create_directories(std::string &path)
 {
 	bool created = false;
@@ -91,9 +86,7 @@ void create_directories(std::string &path)
 	}
 }
 
-/**
-* Function print help for command MD to stdOutput
-*/
+
 void md_print_help()
 {
 	size_t writen;

@@ -5,7 +5,9 @@
 #include "FS.h"
 #include "../api/api.h"
 
-
+/**
+ * Handler for file systems and VFS
+ */
 class FileHandler : public Handler
 {
 
