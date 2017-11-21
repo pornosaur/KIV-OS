@@ -14,7 +14,6 @@ struct super_block {
 	struct dentry			*s_root;			/* directory mount point */
 	unsigned int			s_count;			/* superblock ref count */
 	std::string				s_id;				/* text name */
-	struct super_block		*s_next;			/* next mounted disk */
 };
 
 struct dentry {
