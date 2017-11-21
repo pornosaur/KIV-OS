@@ -1,10 +1,5 @@
 #include "FS.h"
 
-FS::FS()
-{
-}
-
-
 FS::~FS()
 {
 	if (sb != NULL) {
@@ -13,6 +8,7 @@ FS::~FS()
 	delete sb;
 	sb = NULL;
 }
+
 
 struct super_block *FS::init_super_block(
 	unsigned long s_blocksize,
@@ -29,11 +25,11 @@ struct super_block *FS::init_super_block(
 	s_block->s_root = s_root;
 	s_block->s_count = s_count;
 	s_block->s_id = s_id;
-	s_block->s_next = FS::sb;
 
 	FS::sb = s_block;
 	return s_block;
 }
+
 
 struct dentry* FS::init_dentry(
 	struct dentry *d_parent,
@@ -67,6 +63,7 @@ struct dentry* FS::init_dentry(
 
 	return d_entry;
 }
+
 
 int FS::sb_remove_dentry(struct dentry *m_dentry) {
 
@@ -114,6 +111,7 @@ int FS::sb_remove_dentry(struct dentry *m_dentry) {
 	return 0;
 }
 
+
 void FS::sb_remove_all_dentry(struct dentry **d_entry) {
 
 	if (*d_entry == NULL) {
@@ -126,6 +124,7 @@ void FS::sb_remove_all_dentry(struct dentry **d_entry) {
 	delete *d_entry;
 	*d_entry = NULL;
 }
+
 
 struct dentry *FS::sb_find_dentry_in_dentry(struct dentry * f_dentry, const std::string &name, unsigned int file_type) {
 
@@ -148,6 +147,7 @@ struct dentry *FS::sb_find_dentry_in_dentry(struct dentry * f_dentry, const std:
 
 	return NULL;
 }
+
 
 uint16_t FS::translate_return_codes(int fs_ret_code)
 {
