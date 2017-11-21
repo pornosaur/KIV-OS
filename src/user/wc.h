@@ -7,4 +7,4 @@
 
 extern "C" size_t __stdcall wc(const kiv_os::TRegisters &regs);
 
-inline void calculate(std::string &str, size_t &lines, size_t &words);
+inline void calculate(std::string &str, size_t &lines, size_t &words, bool &before_word);
