@@ -1,5 +1,6 @@
 #include "FileHandler.h"
 
+
 FileHandler::~FileHandler()
 {
 	if (dentry != NULL)
@@ -8,12 +9,13 @@ FileHandler::~FileHandler()
 		file_system->m_mutex.lock(); // lock FS
 		
 		dentry->d_count--;
-		file_system->sb_remove_dentry(dentry); // nesmaze se kdyz na nej nekdo odkazuje
+		file_system->sb_remove_dentry(dentry); // do not delete when someone is pointed to (counter > 0)
 		dentry = NULL;
 		
 		file_system->m_mutex.unlock(); // unlock FS
 	}
 }
+
 
 uint16_t FileHandler::read(char * buffer, size_t length, size_t & read)
 {
@@ -36,6 +38,7 @@ uint16_t FileHandler::read(char * buffer, size_t length, size_t & read)
 	
 }
 
+
 uint16_t FileHandler::write(char * buffer, size_t length, size_t & written)
 {
 	if (dentry == NULL || dentry->d_fs == NULL) {
@@ -50,6 +53,7 @@ uint16_t FileHandler::write(char * buffer, size_t length, size_t & written)
 
 	return FS::translate_return_codes(ret_code);
 }
+
 
 uint16_t FileHandler::fseek(long offset, uint8_t origin, uint8_t set_size)
 {
@@ -89,6 +93,7 @@ uint16_t FileHandler::fseek(long offset, uint8_t origin, uint8_t set_size)
 	position = (size_t)new_position;
 	return kiv_os::erSuccess;
 }
+
 
 dentry * FileHandler::get_dentry()
 {
