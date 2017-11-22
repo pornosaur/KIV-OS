@@ -7,10 +7,7 @@
 #include <memory>
 
 
-
 void HandleIO(kiv_os::TRegisters &regs) {
-
-	//V ostre verzi pochopitelne do switche dejte volani funkci a ne primo vykonny kod
 	
 	switch (regs.rax.l) {
 		case kiv_os::scCreate_File: {
@@ -75,7 +72,7 @@ void create_file(kiv_os::TRegisters &regs) {
 	uint16_t ret_code = 0;
 
 	if (path.find(":") == std::string::npos) {
-		path = processManager->get_proc_work_dir() + delimeter + path;
+		path = processManager->get_proc_work_dir() + DELIMETER + path;
 	}
 
 	path_compiler(path);
@@ -110,17 +107,6 @@ void create_file(kiv_os::TRegisters &regs) {
 	kiv_os::THandle t_handle = processManager->add_handle(shared_handler);
 
 	regs.rax.x = t_handle;
-
-	//pro stdout/in/err neni potreba vytvaret soubor
-	//TODO volani FS pro otevreni souboru
-	//TODO catch errors
-	
-	/*HANDLE result = CreateFileA((char*)regs.rdx.r, GENERIC_READ | GENERIC_WRITE, (DWORD)regs.rcx.r, 0, OPEN_EXISTING, 0, 0);
-	//zde je treba podle Rxc doresit shared_read, shared_write, OPEN_EXISING, etc. podle potreby
-	regs.flags.carry = result == INVALID_HANDLE_VALUE;
-	if (!regs.flags.carry) regs.rax.x = Convert_Native_Handle(result);
-	else regs.rax.r = GetLastError();
-	*/
 }
 
 void write_file(kiv_os::TRegisters &regs) {
@@ -139,16 +125,6 @@ void write_file(kiv_os::TRegisters &regs) {
 	}
 	
 	regs.rax.r = written;
-
-		/*
-		HANDLE hnd = Resolve_kiv_os_Handle(regs.rdx.x);
-		regs.flags.carry = hnd == INVALID_HANDLE_VALUE;
-		if (!regs.flags.carry) regs.flags.carry = !WriteFile(hnd, reinterpret_cast<void*>(regs.rdi.r), (DWORD)regs.rcx.r, &written, NULL);
-		if (!regs.flags.carry) regs.rax.r = written;
-		else regs.rax.r = GetLastError();
-		*/
-	
-	
 }
 
 void read_file(kiv_os::TRegisters &regs) {
@@ -167,14 +143,6 @@ void read_file(kiv_os::TRegisters &regs) {
 	}
 
 	regs.rax.r = read;
-
-		/*HANDLE hnd = Resolve_kiv_os_Handle(regs.rdx.x);
-		regs.flags.carry = hnd == INVALID_HANDLE_VALUE;
-		if (!regs.flags.carry) regs.flags.carry = !ReadFile(hnd, reinterpret_cast<void*>(regs.rdi.r), (DWORD)regs.rcx.r, &read, NULL);
-		if (!regs.flags.carry) regs.rax.r = read;
-		else regs.rax.r = GetLastError();*/
-	
-
 }
 
 void delete_file(kiv_os::TRegisters &regs)
@@ -182,10 +150,9 @@ void delete_file(kiv_os::TRegisters &regs)
 	std::string path(reinterpret_cast<char*>(regs.rdx.r));
 
 	if (path.find(":") == std::string::npos) {
-		path = processManager->get_proc_work_dir() + delimeter + path;
+		path = processManager->get_proc_work_dir() + DELIMETER + path;
 	}
 	path_compiler(path);
-	// TODO(nice to have) remove file or dentry by one call
 
 	uint16_t ret_code = vfs->remove_file(path); // remove file
 
@@ -277,7 +244,7 @@ void set_current_directory(kiv_os::TRegisters &regs) {
 	}
 
 	if (new_path.find(":") == std::string::npos) {
-		new_path = processManager->get_proc_work_dir() + delimeter + new_path;
+		new_path = processManager->get_proc_work_dir() + DELIMETER + new_path;
 	}
 	path_compiler(new_path);
 
@@ -319,23 +286,21 @@ void set_error(kiv_os::TRegisters &regs, uint16_t code) {
 	return;
 }
 
-/**
-* Transform absolute path with ".." to valid path.
-*/
+
 void path_compiler(std::string &path)
 {
 	size_t bck_pos = 0;
 	while ((bck_pos = path.find("..")) != std::string::npos)
 	{
-		size_t start_pos = path.rfind(delimeter, bck_pos - 2);
+		size_t start_pos = path.rfind(DELIMETER, bck_pos - 2);
 
 		if (start_pos == std::string::npos) {
-			path.erase(bck_pos - delimeter_size, 2 + delimeter_size);
+			path.erase(bck_pos - DELIMETER_SIZE, 2 + DELIMETER_SIZE);
 		}
 		else {
 			path.erase(start_pos, bck_pos - start_pos + 2);
 		}
 	}
-	path.erase(path.find_last_not_of(path_erase_chr) + 1);
-	path.erase(0, path.find_first_not_of(path_erase_chr));
+	path.erase(path.find_last_not_of(PATH_ERASE_CHR) + 1);
+	path.erase(0, path.find_first_not_of(PATH_ERASE_CHR));
 }
