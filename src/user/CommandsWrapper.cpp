@@ -300,6 +300,10 @@ std::vector<kiv_os::THandle> kiv_os_cmd::CommandsWrapper::Run_Commands()
 				proc_handles.push_back(proc_handle); //pridani handlu do pole s handly
 			}
 			else {
+				if (tsi.arg != nullptr) {
+					free(tsi.arg);
+				}
+				
 				kiv_os_rtl::print_error();
 				break;
 			}

@@ -42,6 +42,7 @@ void ProcessManager::handle_proc(kiv_os::TRegisters &regs) {
 void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_Info *tsi, kiv_os::TRegisters &regs) {
 
 	kiv_os::TEntry_Point program = (kiv_os::TEntry_Point)GetProcAddress(User_Programs, prog_name);
+
 	if (program == nullptr) {
 		regs.flags.carry = 1;
 		regs.rax.r = static_cast<decltype(regs.flags.carry)>(kiv_os::erInvalid_Argument);
@@ -50,35 +51,30 @@ void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_In
 	}
 
 	std::shared_ptr<PCB> pcb = std::make_shared<PCB>();
-	pcb->proc_name = prog_name;
 	std::shared_ptr<PCB> pcb_context;
+
+	pcb->proc_name = prog_name;
 	pcb_context = get_proc_context();
-	
-	
-	kiv_os::THandle proc_handle = proc_filesystem->add_process(pcb);
+
+	proc_filesystem->add_process(pcb);
+
 	if (pcb->pid != 0) {
-		
-		if (pcb_context == nullptr || proc_handle == kiv_os::erInvalid_Handle) {
-			proc_filesystem->remove_process(proc_handle);
+
+		if (pcb_context == nullptr) {
 			regs.flags.carry = 1;
 			regs.rax.r = static_cast<decltype(regs.flags.carry)>(kiv_os::erOut_Of_Memory);
 			return;
 		}
+
 		pcb->ppid = pcb_context->pid;
+		pcb->workind_dir = pcb_context->workind_dir;
 
 		pcb->open_files.push_back(nullptr);
-		pcb->workind_dir = pcb_context->workind_dir;
-		std::shared_ptr<Handler> stdin_handle = pcb_context->open_files[tsi->stdin_t];
-		std::shared_ptr<Handler> stdout_handle = pcb_context->open_files[tsi->stdout_t];
-		std::shared_ptr<Handler> stderr_handle = pcb_context->open_files[tsi->stderr_t];
-
 		pcb->open_files.push_back(pcb_context->open_files[tsi->stdin_t]);
 		pcb->open_files.push_back(pcb_context->open_files[tsi->stdout_t]);
 		pcb->open_files.push_back(pcb_context->open_files[tsi->stderr_t]);
 
-		stdin_handle->inc_count();
-		stdout_handle->inc_count();
-		stderr_handle->inc_count();
+
 	}
 	else { //first process
 		pcb->ppid = 0; //TODO realy 0?
@@ -90,9 +86,17 @@ void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_In
 	}
 
 	proc_filesystem->lock_pfs();
-	std::thread proc_thread = std::thread (&ProcessManager::run_process, this, program, regs);
-	pcb->proc_thread = std::move(proc_thread);
+	
+	std::shared_ptr<TCB> tcb = proc_filesystem->add_thread(pcb);
+	if (tcb == nullptr) {
+		regs.flags.carry = 1;
+		regs.rax.r = static_cast<decltype(regs.flags.carry)>(kiv_os::erOut_Of_Memory);
+		return;
+	}
+	std::thread proc_thread = std::thread(&ProcessManager::run_process, this, program, regs);
+	tcb->proc_thread = std::move(proc_thread);
 	proc_filesystem->unlock_pfs();
+
 	if (pcb->pid == 0) {
 		std::cout << "LOG: Init process " << prog_name << " start" << std::endl;
 	}
@@ -100,58 +104,56 @@ void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_In
 		std::cout << "LOG: Process "<< prog_name <<" in process " << pcb_context->proc_name << " created w/ pid " << pcb->pid << std::endl;
 	}
 	
-	regs.rax.r = static_cast<decltype(regs.rdx.x)>(proc_handle);
+	regs.rax.r = static_cast<decltype(regs.rdx.x)>(tcb->tid);
 
 }
 
 void ProcessManager::create_thread(kiv_os::TThread_Proc thread_proc, void *data, kiv_os::TRegisters &regs) {
 	
-	std::shared_ptr<PCB> pcb = std::make_shared<PCB>();
-	pcb->proc_name = "thread";
 	std::shared_ptr<PCB> pcb_context = get_proc_context();
-	kiv_os::THandle proc_handle = proc_filesystem->add_process(pcb);
 
-	
-	if (pcb_context == nullptr || proc_handle == kiv_os::erInvalid_Handle) {
-		proc_filesystem->remove_process(proc_handle);
+	if (pcb_context == nullptr) {
 		regs.flags.carry = 1;
 		regs.rax.r = static_cast<decltype(regs.flags.carry)>(kiv_os::erOut_Of_Memory);
 		return;
 	}
 	
-	pcb->ppid = pcb_context->pid;
-	pcb->open_files = pcb_context->open_files;
-	
 	proc_filesystem->lock_pfs();
-	/*for (std::shared_ptr<Handler> open_file : pcb->open_files) {
-		if (open_file != nullptr) {
-			open_file->inc_count();
-		}
-	}*/
-	std::thread proc_thread = std::thread(&ProcessManager::run_thread, this, thread_proc, data, regs);
-	pcb->proc_thread = move(proc_thread);
+
+	std::shared_ptr<TCB> tcb = proc_filesystem->add_thread(pcb_context);
+	if (tcb == nullptr) {
+		regs.flags.carry = 1;
+		regs.rax.r = static_cast<decltype(regs.flags.carry)>(kiv_os::erOut_Of_Memory);
+		return;
+	}
+
+	std::thread thread = std::thread(&ProcessManager::run_thread, this, thread_proc, data, regs);
+	tcb->proc_thread = std::move(thread);
 	proc_filesystem->unlock_pfs();
 
 	std::cout << "LOG: Thread for process " << pcb_context->proc_name << " created w/ pid " << pcb_context->pid << std::endl;
-	regs.rax.r = static_cast<decltype(regs.rdx.x)>(proc_handle);
+	regs.rax.r = static_cast<decltype(regs.rdx.x)>(tcb->tid);
 }
-void ProcessManager::wait_for(kiv_os::THandle *proc_handles, size_t proc_count) {
 
-	std::shared_ptr<PCB> pcb;
-	kiv_os::THandle proc_handle;
+kiv_os::THandle ProcessManager::wait_for(kiv_os::THandle *proc_handles, size_t proc_count) {
+
+	std::shared_ptr<TCB> tcb;
+	kiv_os::THandle proc_handle = kiv_os::erInvalid_Handle;
+
 	for (int i = 0; i < proc_count; i++) {
 		proc_handle = proc_handles[i];
-		pcb = proc_filesystem->get_pcb_by_handle(proc_handle);
-
-		std::cout << "LOG: Process " << pcb->proc_name << " waiting" << std::endl;
-		if (pcb->proc_thread.joinable()) {
-			pcb->proc_thread.join();
+		tcb = proc_filesystem->get_tcb_by_handle(proc_handle);
+		if (tcb != nullptr) {
+			std::cout << "LOG: Process " << tcb->pcb->proc_name << " waiting" << std::endl;
+			if (tcb->proc_thread.joinable()) {
+				tcb->proc_thread.join();
+			}
+			std::cout << "LOG: Process " << tcb->pcb->proc_name <<
+				" w/ pid " << tcb->pcb->pid << " ended" << std::endl;
+			proc_filesystem->remove_thread(proc_handles[i]);
 		}
-		std::cout << "LOG: Process " << pcb->proc_name <<
-			" w/ pid "<< pcb->pid<<" ended" << std::endl;
-		proc_filesystem->remove_process(proc_handles[i]);
 	}
-	//TODO return hadnle
+	return proc_handle;
 }
 
 std::shared_ptr<PCB> ProcessManager::get_proc_context() {
@@ -172,31 +174,27 @@ kiv_os::THandle ProcessManager::add_handle(std::shared_ptr<Handler> handle) {
 		pcb->open_files[std::distance(pcb->open_files.begin(), it)] = handle;
 		return static_cast<kiv_os::THandle>(std::distance(pcb->open_files.begin(), it));
 	}
+
 }
 
 void ProcessManager::run_process(kiv_os::TEntry_Point program,  kiv_os::TRegisters &regs) {
 	kiv_os::TProcess_Startup_Info *tsi = reinterpret_cast<kiv_os::TProcess_Startup_Info*> (regs.rdi.r);
-	char *args = NULL;
-	if (tsi != NULL) {
+	char *args = nullptr;
+	if (tsi != nullptr) {
 		args = tsi->arg;
 	}
 	
 	program(regs);
-	std::shared_ptr<PCB> pcb = get_proc_context();
-	for (int i = 0; i < pcb->open_files.size() ; i++) {
+	close_handles();
 
-		if (pcb->open_files[i] != nullptr) {
-			pcb->open_files[i]->dec_count();
-			pcb->open_files[i].reset();
-		}
+	if (args != nullptr) {
+		free(args);
+		args = nullptr;
 	}
-
-	free(args);
-	args = NULL;
+	
 }
 
 void ProcessManager::run_thread(kiv_os::TThread_Proc thread_proc, void *data, kiv_os::TRegisters &regs) {
-
 	thread_proc(data);
 	close_handles();
 }
@@ -204,7 +202,6 @@ void ProcessManager::run_thread(kiv_os::TThread_Proc thread_proc, void *data, ki
 bool ProcessManager::close_handle(const kiv_os::THandle hnd) {
 	std::shared_ptr<PCB> pcb = get_proc_context();
 	if (hnd < pcb->open_files.size() && pcb->open_files[hnd] != nullptr) {
-		pcb->open_files[hnd]->dec_count();
 		pcb->open_files[hnd].reset();
 		pcb->open_files[hnd] = nullptr;
 		return true;
@@ -237,7 +234,6 @@ void ProcessManager::close_handles() {
 	std::shared_ptr<PCB> pcb = get_proc_context();
 	for (int i = 0; i < pcb->open_files.size(); i++) {
 		if (pcb->open_files[i] != nullptr) {
-			pcb->open_files[i]->dec_count();
 			pcb->open_files[i].reset();
 		}
 	}
