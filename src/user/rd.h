@@ -1,3 +1,6 @@
+#undef stdin
+#undef stdout
+#undef stderr
 #include "../api/api.h"
 #include "string.h"
 

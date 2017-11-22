@@ -3,6 +3,9 @@
 #include "Handler.h"
 #include "VfsStructures.h"
 #include "FS.h"
+#undef stdin
+#undef stdout
+#undef stderr
 #include "../api/api.h"
 
 /**

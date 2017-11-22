@@ -6,7 +6,6 @@
 #include <regex>
 #include <memory>
 #include <cassert>
-
 const std::regex kiv_os_cmd::CommandsWrapper::r_split_pipe("\\s*([^\\|]+)");
 const std::regex kiv_os_cmd::CommandsWrapper::r_command("^([^\\>^\\<^\\s]+)\\s");
 
@@ -228,9 +227,9 @@ std::vector<kiv_os::THandle> kiv_os_cmd::CommandsWrapper::Run_Commands()
 	}
 	for (const auto &cmd : commands) {
 		kiv_os::TProcess_Startup_Info tsi;
-		tsi.stdin_t = kiv_os::stdInput; //nastaveni std - jiz presmerovanych
-		tsi.stdout_t = kiv_os::stdOutput;
-		tsi.stderr_t = kiv_os::stdError;
+		tsi.stdin = kiv_os::stdInput; //nastaveni std - jiz presmerovanych
+		tsi.stdout = kiv_os::stdOutput;
+		tsi.stderr = kiv_os::stdError;
 
 		//set stdin_t
 		if (cmd.is_input_redir) { //input redirect
@@ -239,14 +238,14 @@ std::vector<kiv_os::THandle> kiv_os_cmd::CommandsWrapper::Run_Commands()
 				kiv_os_rtl::print_error();
 				break;
 			}
-			tsi.stdin_t = redirect_input_h;
+			tsi.stdin = redirect_input_h;
 		}
 		else {
 			if (&cmd == &commands.front()) {
-				tsi.stdin_t = kiv_os::stdInput;
+				tsi.stdin = kiv_os::stdInput;
 			}
 			else {
-				tsi.stdin_t = creation_pipes[cmd_counter-1][READ_HANDLE];
+				tsi.stdin = creation_pipes[cmd_counter-1][READ_HANDLE];
 			}
 			
 		}
@@ -273,18 +272,18 @@ std::vector<kiv_os::THandle> kiv_os_cmd::CommandsWrapper::Run_Commands()
 					break;
 				}
 
-				tsi.stdout_t = redirect_output_h;
-				tsi.stderr_t = redirect_output_h;
+				tsi.stdout = redirect_output_h;
+				tsi.stderr = redirect_output_h;
 		}
 		else {
 			if (&cmd == &commands.back()) {
-				tsi.stdout_t = kiv_os::stdOutput;
-				tsi.stderr_t = kiv_os::stdError;
+				tsi.stdout = kiv_os::stdOutput;
+				tsi.stderr = kiv_os::stdError;
 			}
 			else
 			{
-				tsi.stdout_t = creation_pipes[cmd_counter][WRITE_HANDLE];
-				tsi.stderr_t = creation_pipes[cmd_counter][WRITE_HANDLE];
+				tsi.stdout = creation_pipes[cmd_counter][WRITE_HANDLE];
+				tsi.stderr = creation_pipes[cmd_counter][WRITE_HANDLE];
 			}
 
 		}

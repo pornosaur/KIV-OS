@@ -1,5 +1,7 @@
 #pragma once
-
+#undef stdin
+#undef stdout
+#undef stderr
 #include "..\api\api.h"
 
 
