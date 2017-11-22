@@ -40,7 +40,7 @@ size_t __stdcall sort(const kiv_os::TRegisters &regs) {
 	return 0;
 }
 
-bool __stdcall compare_nocase(const std::string& first, const std::string& second)
+bool compare_nocase(const std::string& first, const std::string& second)
 {
 	size_t i = 0;
 	while ((i < first.length()) && (i<second.length()))
