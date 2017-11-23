@@ -26,7 +26,8 @@ class ProcessManager {
 		kiv_os::THandle wait_for(kiv_os::THandle *proc_handles, size_t proc_count);
 		kiv_os::THandle add_handle(std::shared_ptr<Handler> handle);
 		bool close_handle(const kiv_os::THandle handle);
-		
+		void init();
+		void run_init();
 		std::string ProcessManager::get_proc_work_dir();
 		void ProcessManager::set_proc_work_dir(std::string working_dir);
 		std::shared_ptr<Handler> ProcessManager::get_handle_object(const kiv_os::THandle hnd);

@@ -6,6 +6,7 @@
 
 #include <sstream>
 ProcFilesystem::ProcFilesystem() {
+	process_table.push_back(nullptr);
 	thread_table.resize(THREAD_TABLE_SIZE, nullptr);
 }
 
@@ -15,7 +16,7 @@ ProcFilesystem::~ProcFilesystem() {
 
 void ProcFilesystem::add_process(std::shared_ptr<PCB> pcb) {
 	std::unique_lock<std::mutex> lck(proc_table_mutex);
-	std::vector<std::shared_ptr<PCB>>::iterator it = std::find_if(process_table.begin(), process_table.end(), //only add
+	std::vector<std::shared_ptr<PCB>>::iterator it = std::find_if(process_table.begin() + 1, process_table.end(), //only add
 		[&](std::shared_ptr<PCB> element) { return element == nullptr; });
 	if (it != process_table.end()) {
 		pcb->pid = static_cast<kiv_os::THandle>(std::distance(process_table.begin(), it));

@@ -17,13 +17,13 @@ void ProcessManager::handle_proc(kiv_os::TRegisters &regs) {
 		if (regs.rcx.l == kiv_os::clCreate_Process) { //create process
 			char *prog_name = reinterpret_cast<char*> (regs.rdx.r);
 			kiv_os::TProcess_Startup_Info *tsi = reinterpret_cast<kiv_os::TProcess_Startup_Info*> (regs.rdi.r);
-			
+
 
 			create_process(prog_name, tsi, regs);
 		}
 		if (regs.rcx.l == kiv_os::clCreate_Thread) { //create thread
 			kiv_os::TThread_Proc thread_proc = reinterpret_cast<kiv_os::TThread_Proc> (regs.rdx.r);
-			void *data = reinterpret_cast<void*> (regs.rdi.r); 
+			void *data = reinterpret_cast<void*> (regs.rdi.r);
 
 			create_thread(thread_proc, data, regs);
 		}
@@ -59,32 +59,19 @@ void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_In
 
 	proc_filesystem->add_process(pcb);
 
-	if (pcb->pid != 0) {
-
-		if (pcb_context == nullptr) {
-			regs.flags.carry = 1;
-			regs.rax.r = static_cast<decltype(regs.flags.carry)>(kiv_os::erOut_Of_Memory);
-			return;
-		}
-
-		pcb->ppid = pcb_context->pid;
-		pcb->workind_dir = pcb_context->workind_dir;
-
-		pcb->open_files.push_back(nullptr);
-		pcb->open_files.push_back(pcb_context->open_files[tsi->stdin]);
-		pcb->open_files.push_back(pcb_context->open_files[tsi->stdout]);
-		pcb->open_files.push_back(pcb_context->open_files[tsi->stderr]);
-
-
+	if (pcb_context == nullptr) {
+		regs.flags.carry = 1;
+		regs.rax.r = static_cast<decltype(regs.flags.carry)>(kiv_os::erOut_Of_Memory);
+		return;
 	}
-	else { //first process
-		pcb->ppid = 0; //TODO realy 0?
-		pcb->workind_dir = "C:";
-		pcb->open_files.push_back(nullptr);
-		pcb->open_files.push_back(std::make_shared<Console>(kiv_os::stdInput));
-		pcb->open_files.push_back(std::make_shared<Console>(kiv_os::stdOutput));
-		pcb->open_files.push_back(std::make_shared<Console>(kiv_os::stdError));
-	}
+
+	pcb->ppid = pcb_context->pid;
+	pcb->workind_dir = pcb_context->workind_dir;
+
+	pcb->open_files.push_back(nullptr);
+	pcb->open_files.push_back(pcb_context->open_files[tsi->stdin]);
+	pcb->open_files.push_back(pcb_context->open_files[tsi->stdout]);
+	pcb->open_files.push_back(pcb_context->open_files[tsi->stderr]);
 
 	char *args = nullptr;
 	if (tsi != nullptr) {
@@ -92,7 +79,7 @@ void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_In
 	}
 
 	proc_filesystem->lock_pfs();
-	
+
 	std::shared_ptr<TCB> tcb = proc_filesystem->add_thread(pcb);
 	if (tcb == nullptr) {
 		regs.flags.carry = 1;
@@ -100,7 +87,6 @@ void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_In
 		return;
 	}
 
-	
 	std::thread proc_thread = std::thread(&ProcessManager::run_process, this, program, regs, args);
 	tcb->proc_thread = std::move(proc_thread);
 	proc_filesystem->unlock_pfs();
@@ -111,13 +97,13 @@ void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_In
 	else {
 		//std::cout << "LOG: Process "<< prog_name <<" in process " << pcb_context->proc_name << " created w/ pid " << pcb->pid << std::endl;
 	}
-	
+
 	regs.rax.r = static_cast<decltype(regs.rdx.x)>(tcb->tid);
 
 }
 
 void ProcessManager::create_thread(kiv_os::TThread_Proc thread_proc, void *data, kiv_os::TRegisters &regs) {
-	
+
 	std::shared_ptr<PCB> pcb_context = get_proc_context();
 
 	if (pcb_context == nullptr) {
@@ -125,7 +111,7 @@ void ProcessManager::create_thread(kiv_os::TThread_Proc thread_proc, void *data,
 		regs.rax.r = static_cast<decltype(regs.flags.carry)>(kiv_os::erOut_Of_Memory);
 		return;
 	}
-	
+
 	proc_filesystem->lock_pfs();
 
 	std::shared_ptr<TCB> tcb = proc_filesystem->add_thread(pcb_context);
@@ -173,7 +159,7 @@ kiv_os::THandle ProcessManager::add_handle(std::shared_ptr<Handler> handle) {
 	std::shared_ptr<PCB> pcb = get_proc_context();
 	std::vector<std::shared_ptr<Handler>>::iterator it = std::find_if(pcb->open_files.begin() + 1, pcb->open_files.end(),
 		[&](std::shared_ptr<Handler> element) { return element == nullptr; });
-	 
+
 	if (it == pcb->open_files.end()) {
 		pcb->open_files.push_back(handle);
 		return static_cast<kiv_os::THandle>(pcb->open_files.size() - 1);
@@ -185,7 +171,7 @@ kiv_os::THandle ProcessManager::add_handle(std::shared_ptr<Handler> handle) {
 
 }
 
-void ProcessManager::run_process(kiv_os::TEntry_Point program,  kiv_os::TRegisters &regs, char *args) {
+void ProcessManager::run_process(kiv_os::TEntry_Point program, kiv_os::TRegisters &regs, char *args) {
 	regs.rdi.r = reinterpret_cast<decltype(regs.rdi.r)> (args);
 
 	program(regs);
@@ -195,7 +181,7 @@ void ProcessManager::run_process(kiv_os::TEntry_Point program,  kiv_os::TRegiste
 		free(args);
 		args = nullptr;
 	}
-	
+
 }
 
 void ProcessManager::run_thread(kiv_os::TThread_Proc thread_proc, void *data, kiv_os::TRegisters &regs) {
@@ -213,7 +199,7 @@ bool ProcessManager::close_handle(const kiv_os::THandle hnd) {
 	else {
 		return false;
 	}
-	
+
 }
 
 void ProcessManager::set_proc_work_dir(std::string working_dir) {
@@ -241,4 +227,48 @@ void ProcessManager::close_handles() {
 			pcb->open_files[i].reset();
 		}
 	}
+}
+
+void ProcessManager::init() {
+	size_t const proc_count = 1;
+	//first pcb
+	std::shared_ptr<PCB> pcb = std::make_shared<PCB>();
+	pcb->proc_name = "INIT";
+	pcb->pid = 1;
+	pcb->ppid = 0;
+	pcb->workind_dir = "C:";
+	//init console
+	pcb->open_files.push_back(nullptr);
+	pcb->open_files.push_back(std::make_shared<Console>(kiv_os::stdInput));
+	pcb->open_files.push_back(std::make_shared<Console>(kiv_os::stdOutput));
+	pcb->open_files.push_back(std::make_shared<Console>(kiv_os::stdError));
+
+	proc_filesystem->add_process(pcb);
+
+	proc_filesystem->lock_pfs();
+	std::shared_ptr<TCB> tcb = proc_filesystem->add_thread(pcb);
+	std::thread proc_thread = std::thread(&ProcessManager::run_init, this);
+	tcb->proc_thread = std::move(proc_thread);
+	proc_filesystem->unlock_pfs();
+
+	kiv_os::THandle proc_handles[proc_count];
+	proc_handles[0] = tcb->tid;
+	processManager->wait_for(proc_handles, proc_count);
+}
+
+void ProcessManager::run_init() {
+	size_t const param_size = 6;
+	size_t const proc_count = 1;
+	kiv_os::TRegisters regs{ 0 };
+	kiv_os::TProcess_Startup_Info tsi;
+	tsi.arg = (char*)malloc(param_size * sizeof(char));
+	strcpy_s(tsi.arg, param_size, "shell");
+	tsi.stdin = kiv_os::stdInput;
+	tsi.stdout = kiv_os::stdOutput;
+	tsi.stderr = kiv_os::stdError;
+	kiv_os::THandle proc_handles[proc_count];
+
+	processManager->create_process("shell", &tsi, regs);
+	proc_handles[0] = static_cast<kiv_os::THandle>(regs.rax.r);
+	processManager->wait_for(proc_handles, proc_count);
 }

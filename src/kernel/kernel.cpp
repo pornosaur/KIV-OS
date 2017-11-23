@@ -55,7 +55,7 @@ void Initialize_Kernel() {
 	FileHandler *file = NULL;
 	vfs->create_file(&file, "C:\\joke.txt");
 	size_t writen = 0;
-	file->write("Teacher: \"Kids, what does the chicken give you ? \"\n Student : \"Meat!\"\n Teacher : \"Very good! Now what does the pig give you?\"\n Student : \"Bacon!\"\n Teacher : \"Great! And what does the fat cow give you?\"\n Student : \"Homework!\"", 224, writen);
+	file->write("Teacher: \"Kids, what does the chicken give you ? \"\n Student : \"Meat!\"\n Teacher : \"Very good! Now what does the pig give you?\"\n Student : \"Bacon!\"\n Teacher : \"Great! And what does the fat cow give you?\"\n Student : \"Homework!\"", 238, writen);
 	delete file;
 	file = NULL;
 	// =============================================================================================================
@@ -84,25 +84,7 @@ void __stdcall Sys_Call(kiv_os::TRegisters &regs)
 void __stdcall Run_VM() {
 	Initialize_Kernel();
 
-	//spustime shell - v realnem OS bychom ovsem spousteli login
-	//kiv_os::TEntry_Point shell = (kiv_os::TEntry_Point)GetProcAddress(User_Programs, "shell");
-	//if (shell) {
+	processManager->init();
 		
-		
-		kiv_os::TRegisters regs{ 0 };
-		kiv_os::TProcess_Startup_Info tsi;
-		tsi.arg = (char*)malloc(5 * sizeof(char));
-		strcpy_s(tsi.arg, 5, "INIT");
-		tsi.stdin = kiv_os::stdInput; //nastaveni std - jiz presmerovanych
-		tsi.stdout = kiv_os::stdOutput;
-		tsi.stderr = kiv_os::stdError;
-		kiv_os::THandle proc_handles[1];
-		
-		processManager->create_process("shell", &tsi, regs);
-		proc_handles[0] = static_cast<kiv_os::THandle>(regs.rax.r);
-		processManager->wait_for(proc_handles, 1);
-
-	//}
-
 	Shutdown_Kernel();
 }
