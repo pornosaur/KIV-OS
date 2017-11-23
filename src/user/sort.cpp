@@ -5,9 +5,7 @@
 
 size_t __stdcall sort(const kiv_os::TRegisters regs)
 {
-	kiv_os::TProcess_Startup_Info *tsi = reinterpret_cast<kiv_os::TProcess_Startup_Info*> (regs.rdi.r);
-
-	std::string str(tsi->arg);
+	std::string str(reinterpret_cast<char*> (regs.rdi.r));
 	str.erase(str.find_last_not_of(ERASE_CHARS) + 1);
 	str.erase(0, str.find_first_not_of(ERASE_CHARS));
 
