@@ -85,7 +85,6 @@ void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_In
 		pcb->open_files.push_back(std::make_shared<Console>(kiv_os::stdError));
 	}
 
-	kiv_os::TProcess_Startup_Info *tsi = reinterpret_cast<kiv_os::TProcess_Startup_Info*> (regs.rdi.r);
 	char *args = nullptr;
 	if (tsi != nullptr) {
 		args = tsi->arg;
