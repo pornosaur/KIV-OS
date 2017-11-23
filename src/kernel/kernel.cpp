@@ -88,9 +88,11 @@ void __stdcall Run_VM() {
 	//kiv_os::TEntry_Point shell = (kiv_os::TEntry_Point)GetProcAddress(User_Programs, "shell");
 	//if (shell) {
 		
+		
 		kiv_os::TRegisters regs{ 0 };
 		kiv_os::TProcess_Startup_Info tsi;
-		tsi.arg = "shell"; //argumenty
+		tsi.arg = (char*)malloc(5 * sizeof(char));
+		strcpy_s(tsi.arg, 5, "INIT");
 		tsi.stdin = kiv_os::stdInput; //nastaveni std - jiz presmerovanych
 		tsi.stdout = kiv_os::stdOutput;
 		tsi.stderr = kiv_os::stdError;
