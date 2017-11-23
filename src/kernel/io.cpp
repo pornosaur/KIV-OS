@@ -129,7 +129,6 @@ void write_file(kiv_os::TRegisters &regs) {
 
 void read_file(kiv_os::TRegisters &regs) {
 	size_t read;
-	//Unlock_Kernel();	//TODO: Can I allow to interruption while reading a file?
 	std::shared_ptr<Handler> handle = processManager->get_handle_object(regs.rdx.x);
 	if (!handle) {
 		set_error(regs, kiv_os::erInvalid_Handle);
@@ -202,7 +201,7 @@ void get_file_position(kiv_os::TRegisters &regs)
 	regs.rax.r = handler->ftell();
 }
 
-void close_handle(kiv_os::TRegisters &regs) //TODO close pro konzoli? 
+void close_handle(kiv_os::TRegisters &regs)
 { 
 	std::shared_ptr<Handler> handle = processManager->get_handle_object(regs.rdx.x);
 	if (!handle) {
@@ -266,8 +265,6 @@ void set_current_directory(kiv_os::TRegisters &regs) {
 
 void create_pipe(kiv_os::TRegisters &regs)
 {
-	//TODO debug auto
-	//TODO return errors
 	kiv_os::THandle* pipe_handles = reinterpret_cast<kiv_os::THandle*>(regs.rdx.r);
 
 	Pipe *pipe = new Pipe();
