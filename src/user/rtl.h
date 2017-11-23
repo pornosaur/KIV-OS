@@ -9,7 +9,7 @@
 
 namespace kiv_os_rtl {
 
-	size_t Get_Last_Error();
+	uint16_t Get_Last_Error();
 
 	kiv_os::THandle Create_File(const char* file_name, size_t flags, uint8_t atributes);
 	//podle flags otevre, vytvori soubor a vrati jeho deskriptor

@@ -5,9 +5,9 @@
 extern "C" __declspec(dllimport) void __stdcall Sys_Call(kiv_os::TRegisters &context);
 
 
-std::atomic<size_t> Last_Error;
+std::atomic<uint16_t> Last_Error;
 
-size_t kiv_os_rtl::Get_Last_Error() {
+uint16_t kiv_os_rtl::Get_Last_Error() {
 	return Last_Error;
 }
 
@@ -21,7 +21,7 @@ kiv_os::TRegisters Prepare_SysCall_Context(uint8_t major, uint8_t minor) {
 bool Do_SysCall(kiv_os::TRegisters &regs) {
 	Sys_Call(regs);
 
-	if (regs.flags.carry) Last_Error = regs.rax.r;
+	if (regs.flags.carry) Last_Error = static_cast<uint16_t>(regs.rax.r);
 		else Last_Error = kiv_os::erSuccess;
 
 	return !regs.flags.carry;
@@ -30,8 +30,8 @@ bool Do_SysCall(kiv_os::TRegisters &regs) {
 kiv_os::THandle kiv_os_rtl::Create_File(const char* file_name, size_t flags, uint8_t atributes) {
 	kiv_os::TRegisters regs = Prepare_SysCall_Context(kiv_os::scIO, kiv_os::scCreate_File);
 	regs.rdx.r = reinterpret_cast<decltype(regs.rdx.r)>(file_name);
-	regs.rcx.r = flags;
-	regs.rdi.r = atributes;
+	regs.rcx.r = static_cast<decltype(regs.rcx.r)>(flags);
+	regs.rdi.r = static_cast<decltype(regs.rdi.r)>(atributes);
 	regs.flags.carry = 0;
 
 	const bool result = Do_SysCall(regs);
@@ -48,11 +48,11 @@ bool kiv_os_rtl::Write_File(const kiv_os::THandle file_handle, const void *buffe
 	kiv_os::TRegisters regs = Prepare_SysCall_Context(kiv_os::scIO, kiv_os::scWrite_File);
 	regs.rdx.x = static_cast<decltype(regs.rdx.x)>(file_handle);
 	regs.rdi.r = reinterpret_cast<decltype(regs.rdi.r)>(buffer);
-	regs.rcx.r = buffer_size;	
+	regs.rcx.r = static_cast<decltype(regs.rcx.r)>(buffer_size);	
 	regs.flags.carry = 0;
 
 	const bool result = Do_SysCall(regs);
-	written = regs.rax.r;
+	written = static_cast<size_t>(regs.rax.r);
 	return result;
 }
 
@@ -68,11 +68,11 @@ bool kiv_os_rtl::Read_File(const kiv_os::THandle file_handle, void *buffer, cons
 	kiv_os::TRegisters regs = Prepare_SysCall_Context(kiv_os::scIO, kiv_os::scRead_File);
 	regs.rdx.x = static_cast<decltype(regs.rdx.x)>(file_handle);
 	regs.rdi.r = reinterpret_cast<decltype(regs.rdi.r)>(buffer);
-	regs.rcx.r = buffer_size;
+	regs.rcx.r = static_cast<decltype(regs.rcx.r)>(buffer_size);
 	regs.flags.carry = 0;
 
 	const bool result = Do_SysCall(regs);
-	read = regs.rax.r;
+	read = static_cast<size_t>(regs.rax.r);
 	return result;
 }
 
@@ -88,7 +88,7 @@ bool kiv_os_rtl::Set_File_Position(const kiv_os::THandle file_handle, long &posi
 	kiv_os::TRegisters regs = Prepare_SysCall_Context(kiv_os::scIO, kiv_os::scSet_File_Position);
 	regs.rdx.x = static_cast<decltype(regs.rdx.x)>(file_handle);
 	regs.rdi.r = static_cast<decltype(regs.rdi.r)>(position);
-	regs.rcx.l = origin;
+	regs.rcx.l = static_cast<decltype(regs.rcx.l)>(origin);
 	regs.rcx.h = static_cast<decltype(regs.rcx.h)>(set_size);
 	regs.flags.carry = 0;
 
@@ -101,7 +101,7 @@ bool kiv_os_rtl::Get_File_Position(const kiv_os::THandle file_handle, size_t &po
 	regs.flags.carry = 0;
 
 	const bool result = Do_SysCall(regs);
-	position = regs.rax.r;
+	position = static_cast<size_t>(regs.rax.r);
 	return result;
 }
 
@@ -116,11 +116,11 @@ bool kiv_os_rtl::Set_Current_Directory(const char *path) {
 bool kiv_os_rtl::Get_Current_Direcotry(const void *buffer, const size_t buffer_size, size_t &read) {
 	kiv_os::TRegisters regs = Prepare_SysCall_Context(kiv_os::scIO, kiv_os::scGet_Current_Directory);
 	regs.rdx.r = reinterpret_cast<decltype(regs.rdx.r)>(buffer);
-	regs.rcx.r = buffer_size;
+	regs.rcx.r = static_cast<decltype(regs.rcx.r)>(buffer_size);
 	regs.flags.carry = 0;
 
 	const bool result = Do_SysCall(regs);
-	read = regs.rax.r;
+	read = static_cast<size_t>(regs.rax.r);
 	return result;
 }
 
@@ -159,9 +159,7 @@ bool kiv_os_rtl::Wait_For(std::vector<kiv_os::THandle> proc_handles, const size_
 		regs.rcx.r = static_cast<decltype(regs.rcx.r)>(proc_handles.size());
 		regs.flags.carry = 0;
 
-		const bool result = Do_SysCall(regs);
-
-		return result;
+		return Do_SysCall(regs);
 	}
 	
 	return true;
@@ -172,9 +170,7 @@ bool kiv_os_rtl::Create_Pipe(kiv_os::THandle pipe_handles[2]) {
 	regs.rdx.r = reinterpret_cast<decltype(regs.rdx.r)>(pipe_handles);
 	regs.flags.carry = 0;
 
-	const bool result = Do_SysCall(regs);
-
-	return result;
+	return Do_SysCall(regs);
 }
 
 void kiv_os_rtl::print_error()
