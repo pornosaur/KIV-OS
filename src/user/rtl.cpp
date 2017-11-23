@@ -32,6 +32,8 @@ kiv_os::THandle kiv_os_rtl::Create_File(const char* file_name, size_t flags, uin
 	regs.rdx.r = reinterpret_cast<decltype(regs.rdx.r)>(file_name);
 	regs.rcx.r = flags;
 	regs.rdi.r = atributes;
+	regs.flags.carry = 0;
+
 	const bool result = Do_SysCall(regs);
 
 	if (result) {
@@ -47,6 +49,7 @@ bool kiv_os_rtl::Write_File(const kiv_os::THandle file_handle, const void *buffe
 	regs.rdx.x = static_cast<decltype(regs.rdx.x)>(file_handle);
 	regs.rdi.r = reinterpret_cast<decltype(regs.rdi.r)>(buffer);
 	regs.rcx.r = buffer_size;	
+	regs.flags.carry = 0;
 
 	const bool result = Do_SysCall(regs);
 	written = regs.rax.r;
@@ -56,6 +59,8 @@ bool kiv_os_rtl::Write_File(const kiv_os::THandle file_handle, const void *buffe
 bool kiv_os_rtl::Close_File(const kiv_os::THandle file_handle) {
 	kiv_os::TRegisters regs = Prepare_SysCall_Context(kiv_os::scIO, kiv_os::scClose_Handle);
 	regs.rdx.x = static_cast<decltype(regs.rdx.x)>(file_handle);
+	regs.flags.carry = 0;
+
 	return Do_SysCall(regs);
 }
 
@@ -64,6 +69,7 @@ bool kiv_os_rtl::Read_File(const kiv_os::THandle file_handle, void *buffer, cons
 	regs.rdx.x = static_cast<decltype(regs.rdx.x)>(file_handle);
 	regs.rdi.r = reinterpret_cast<decltype(regs.rdi.r)>(buffer);
 	regs.rcx.r = buffer_size;
+	regs.flags.carry = 0;
 
 	const bool result = Do_SysCall(regs);
 	read = regs.rax.r;
@@ -73,6 +79,8 @@ bool kiv_os_rtl::Read_File(const kiv_os::THandle file_handle, void *buffer, cons
 bool kiv_os_rtl::Remove_File(const char* file_name) {
 	kiv_os::TRegisters regs = Prepare_SysCall_Context(kiv_os::scIO, kiv_os::scDelete_File);
 	regs.rdx.r = reinterpret_cast<decltype(regs.rdx.r)>(file_name);
+	regs.flags.carry = 0;
+
 	return Do_SysCall(regs);
 }
 
@@ -82,12 +90,15 @@ bool kiv_os_rtl::Set_File_Position(const kiv_os::THandle file_handle, long &posi
 	regs.rdi.r = static_cast<decltype(regs.rdi.r)>(position);
 	regs.rcx.l = origin;
 	regs.rcx.h = static_cast<decltype(regs.rcx.h)>(set_size);
+	regs.flags.carry = 0;
+
 	return Do_SysCall(regs);
 }
 
 bool kiv_os_rtl::Get_File_Position(const kiv_os::THandle file_handle, size_t &position) {
 	kiv_os::TRegisters regs = Prepare_SysCall_Context(kiv_os::scIO, kiv_os::scGet_File_Position);
 	regs.rdx.x = static_cast<decltype(regs.rdx.x)>(file_handle);
+	regs.flags.carry = 0;
 
 	const bool result = Do_SysCall(regs);
 	position = regs.rax.r;
@@ -97,6 +108,8 @@ bool kiv_os_rtl::Get_File_Position(const kiv_os::THandle file_handle, size_t &po
 bool kiv_os_rtl::Set_Current_Directory(const char *path) {
 	kiv_os::TRegisters regs = Prepare_SysCall_Context(kiv_os::scIO, kiv_os::scSet_Current_Directory);
 	regs.rdx.r = reinterpret_cast<decltype(regs.rdx.r)>(path);
+	regs.flags.carry = 0;
+
 	return Do_SysCall(regs);
 }
 
@@ -104,6 +117,7 @@ bool kiv_os_rtl::Get_Current_Direcotry(const void *buffer, const size_t buffer_s
 	kiv_os::TRegisters regs = Prepare_SysCall_Context(kiv_os::scIO, kiv_os::scGet_Current_Directory);
 	regs.rdx.r = reinterpret_cast<decltype(regs.rdx.r)>(buffer);
 	regs.rcx.r = buffer_size;
+	regs.flags.carry = 0;
 
 	const bool result = Do_SysCall(regs);
 	read = regs.rax.r;
@@ -115,6 +129,7 @@ bool kiv_os_rtl::Create_Process(const char *program_name, kiv_os::TProcess_Start
 	regs.rcx.l = kiv_os::clCreate_Process;
 	regs.rdx.r = reinterpret_cast<decltype(regs.rdx.r)>(program_name);
 	regs.rdi.r = reinterpret_cast<decltype(regs.rdi.r)>(&tsi);
+	regs.flags.carry = 0;
 	
 	const bool result = Do_SysCall(regs);
 	process_handle = static_cast<kiv_os::THandle>(regs.rax.x);
@@ -124,6 +139,7 @@ bool kiv_os_rtl::Create_Process(const char *program_name, kiv_os::TProcess_Start
 bool kiv_os_rtl::Create_Thread(kiv_os::TThread_Proc ttp, void *data, kiv_os::THandle &process_handle) {
 	kiv_os::TRegisters regs = Prepare_SysCall_Context(kiv_os::scProc, kiv_os::scClone);
 	regs.rcx.l = kiv_os::clCreate_Thread;
+	regs.flags.carry = 0;
 
 	regs.rdx.r = reinterpret_cast<decltype(regs.rdx.r)>(ttp);
 	regs.rdi.r = reinterpret_cast<decltype(regs.rdi.r)> (data);
@@ -141,6 +157,7 @@ bool kiv_os_rtl::Wait_For(std::vector<kiv_os::THandle> proc_handles, const size_
 		kiv_os::THandle *proc_handles_arr = &proc_handles[0];
 		regs.rdx.r = reinterpret_cast<decltype(regs.rdx.r)>(proc_handles_arr);
 		regs.rcx.r = static_cast<decltype(regs.rcx.r)>(proc_handles.size());
+		regs.flags.carry = 0;
 
 		const bool result = Do_SysCall(regs);
 
@@ -153,6 +170,7 @@ bool kiv_os_rtl::Wait_For(std::vector<kiv_os::THandle> proc_handles, const size_
 bool kiv_os_rtl::Create_Pipe(kiv_os::THandle pipe_handles[2]) {
 	kiv_os::TRegisters regs = Prepare_SysCall_Context(kiv_os::scIO, kiv_os::scCreate_Pipe);
 	regs.rdx.r = reinterpret_cast<decltype(regs.rdx.r)>(pipe_handles);
+	regs.flags.carry = 0;
 
 	const bool result = Do_SysCall(regs);
 
