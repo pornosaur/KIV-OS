@@ -19,7 +19,7 @@ static std::regex reg_type("\"([\\S\\s][^\"]+)\"|\'([\\S\\s][^\']+)\'|(\\S+)");
 /**
 * Command TYPE
 */
-extern "C" size_t __stdcall type(const kiv_os::TRegisters &regs);
+extern "C" size_t __stdcall type(const kiv_os::TRegisters regs);
 
 /**
 * write all data from in handle to stdOutput

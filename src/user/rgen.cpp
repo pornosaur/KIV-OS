@@ -1,7 +1,7 @@
 #include "rgen.h"
 #include "rtl.h"
 #include "string.h"
-size_t __stdcall rgen(const kiv_os::TRegisters &regs) {
+size_t __stdcall rgen(const kiv_os::TRegisters regs) {
 	size_t written;
 	kiv_os::THandle proc_handle;
 	std::vector<kiv_os::THandle> proc_handles;

@@ -1,7 +1,7 @@
 #include "ps.h"
 #include "rtl.h"
 
-size_t __stdcall ps(const kiv_os::TRegisters &regs) {
+size_t __stdcall ps(const kiv_os::TRegisters regs) {
 	size_t read, written;
 	char *input = (char *)calloc(MAX_SIZE_BUFFER_IN, sizeof(char));
 
