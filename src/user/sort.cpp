@@ -11,9 +11,6 @@ size_t __stdcall sort(const kiv_os::TRegisters regs)
 	str.erase(str.find_last_not_of(ERASE_CHARS) + 1);
 	str.erase(0, str.find_first_not_of(ERASE_CHARS));
 
-	std::list<std::string> mylist;
-	std::list<std::string>::iterator it;
-
 	// read buffer initialization
 	char *input = (char *)malloc(BUFFER_SIZE * sizeof(char));
 	if (!input) {
@@ -22,11 +19,17 @@ size_t __stdcall sort(const kiv_os::TRegisters regs)
 	}
 
 	kiv_os::THandle handle = str.empty() ? kiv_os::stdInput : kiv_os_rtl::Create_File(str.c_str(), kiv_os::fmOpen_Always, 0);
+	if (!handle) {
+		kiv_os_rtl::print_error();
+		return 0;
+	}
 
 	bool res = false;
-	std::smatch match;
 	size_t read = 0;
-
+	std::smatch match;
+	std::list<std::string> mylist;
+	std::list<std::string>::iterator it;
+	// Read data from handle and save to list
 	do {
 		res = kiv_os_rtl::Read_File(handle, input, BUFFER_SIZE, read);
 		if (!res || read == 0) break;
@@ -39,17 +42,17 @@ size_t __stdcall sort(const kiv_os::TRegisters regs)
 			}
 			tmp = match.suffix();
 		}
-		
 	} while (res && read > 0);
 	free(input);
 
-	if (!res) {
+	if (!res) { // if result in previous loop was false
 		kiv_os_rtl::print_error();
 		return 0;
 	}
 	
-	mylist.sort(compare_nocase);
+	mylist.sort(compare_nocase); // sort list
 
+	// Write to stdOutput
 	size_t writen = 0;
 	for (it = mylist.begin(); it != mylist.end(); ++it)
 	{
@@ -62,14 +65,9 @@ size_t __stdcall sort(const kiv_os::TRegisters regs)
 		return 0;
 	}
 
-	res = kiv_os_rtl::Write_File(kiv_os::stdOutput, "\n\n", 2, writen);
-	if (!res) {
-		kiv_os_rtl::print_error();
-		return 0;
-	}
-
 	return 0;
 }
+
 
 bool compare_nocase(const std::string& first, const std::string& second)
 {
