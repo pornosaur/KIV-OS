@@ -187,7 +187,7 @@ kiv_os::THandle ProcessManager::add_handle(std::shared_ptr<Handler> handle) {
 
 void ProcessManager::run_process(kiv_os::TEntry_Point program,  kiv_os::TRegisters &regs, char *args) {
 	kiv_os::TProcess_Startup_Info *tsi = reinterpret_cast<kiv_os::TProcess_Startup_Info*> (regs.rdi.r);
-	regs.rdi.r = reinterpret_cast<char*> (&args);
+	regs.rdi.r = reinterpret_cast<decltype(regs.rdi.r)> (&args);
 
 	program(regs);
 	close_handles();
