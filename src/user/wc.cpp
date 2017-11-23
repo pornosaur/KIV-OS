@@ -22,8 +22,13 @@ size_t __stdcall wc(const kiv_os::TRegisters &regs) {
 	}
 
 	char *input = (char *)malloc(BUFFER_SIZE * sizeof(char));
-	size_t total_lines = 0, total_words = 0, total_characters = 0;
+	if (!input) {
+		kiv_os_rtl::print_error("Out of memory.");
+		return 0;
+	}
 
+	size_t total_lines = 0, total_words = 0, total_characters = 0;
+	size_t counter = 0;
 	while (stdin || (!params.empty() && std::regex_search(params, match, reg_wc))) {
 		size_t read, lines = 0, words = 0, characters = 0;
 
@@ -41,6 +46,8 @@ size_t __stdcall wc(const kiv_os::TRegisters &regs) {
 					kiv_os_rtl::print_error();
 					return 0;
 				}
+
+				counter++;
 			}
 		}
 
@@ -81,7 +88,7 @@ size_t __stdcall wc(const kiv_os::TRegisters &regs) {
 		stdin = false;
 	}
 
-	if (!console) {
+	if (!console && counter > 1) {
 		std::string out = "\t" + std::to_string(total_lines) + " \t" + std::to_string(total_words)
 			+ " \t" + std::to_string(total_characters) + " total\n";
 
