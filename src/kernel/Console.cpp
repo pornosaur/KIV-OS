@@ -52,6 +52,7 @@ uint16_t Console::read(char* buffer, size_t length, size_t& read) {
 			
 			if ((!mStdInOpen) & (read_dw > 2)) {
 				read_dw -= 3;
+				mStdInOpen = true;
 			}
 			//delete the sequence, if it is necessary
 
