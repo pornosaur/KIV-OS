@@ -10,7 +10,6 @@ size_t __stdcall wc(const kiv_os::TRegisters &regs) {
 	
 	char *str = tsi->arg;		
 
-	kiv_os::THandle handle = tsi->stdin_t;;
 	/*if (strlen(str) == 0) {
 		handle = kiv_os::stdInput;
 	}
