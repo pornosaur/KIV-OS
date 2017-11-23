@@ -216,7 +216,7 @@ void rd_print_help()
 {
 	size_t writen;
 
-	std::string text("Removes (deletes) a directory.\n\nRD [/S] [/Q] [drive:]path\n\n\t/S\tRemoves all directories and files in the specified directory in addition to the directory itself.  Used to remove a directory tree.\n\n\t/Q\tQuiet mode, do not ask if ok to remove a directory tree with /S\n\n");
+	std::string text("Removes (deletes) a directory.\n\nRD [/S] [/Q] [drive:]path\n\n\t/S\tRemoves all directories and files in the specified directory in addition to the directory itself.  Used to remove a directory tree.\n\n\t/Q\tQuiet mode, do not ask if ok to remove a directory tree with /S\n");
 
 	bool res = kiv_os_rtl::Write_File(kiv_os::stdOutput, text.c_str(), text.size(), writen);
 	if (!res) {

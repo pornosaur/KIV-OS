@@ -38,12 +38,6 @@ size_t __stdcall dir(const kiv_os::TRegisters regs)
 			}
 		}
 	}
-	size_t writen;
-	if (!kiv_os_rtl::Write_File(kiv_os::stdOutput, "\n", 1, writen)) {
-		kiv_os_rtl::print_error();
-		return 0;
-	}
-
 	return 0;
 }
 
@@ -177,7 +171,7 @@ void dir_print_help()
 {
 	size_t writen;
 
-	std::string text("Displays a list of files and subdirectories in a directory.\n\nDIR [drive:][path][filename] [/S]\n\n\t[drive:][path][filename]\n\t\tSpecifies drive, directory, and/or files to list.\n\n\t/S\tDisplays files in specified directory and all subdirectories.\n\n");
+	std::string text("Displays a list of files and subdirectories in a directory.\n\nDIR [drive:][path][filename] [/S]\n\n\t[drive:][path][filename]\n\t\tSpecifies drive, directory, and/or files to list.\n\n\t/S\tDisplays files in specified directory and all subdirectories.\n");
 
 	bool res = kiv_os_rtl::Write_File(kiv_os::stdOutput, text.c_str(), text.size(), writen);
 	if (!res) {

@@ -83,12 +83,6 @@ void read_and_write(kiv_os::THandle &in)
 		kiv_os_rtl::print_error();
 		return;
 	}
-
-	res = kiv_os_rtl::Write_File(kiv_os::stdOutput, "\n", 1, writen);
-	if (!res || writen == 0) {
-		kiv_os_rtl::print_error();
-		return;
-	}
 }
 
 
@@ -122,7 +116,7 @@ void type_print_help()
 {
 	size_t writen;
 
-	std::string text("Displays the contents of a text file or files.\n\nTYPE [drive:][path]filename\n\n");
+	std::string text("Displays the contents of a text file or files.\n\nTYPE [drive:][path]filename\n");
 
 	bool res = kiv_os_rtl::Write_File(kiv_os::stdOutput, text.c_str(), text.size(), writen);
 	if (!res) {

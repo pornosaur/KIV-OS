@@ -89,7 +89,7 @@ void md_print_help()
 {
 	size_t writen;
 
-	std::string text("Creates a directory.\n\nMD [drive:]path\n\nMD creates any intermediate directories in the path, if needed.\nFor example, assume \a does not exist then:\n\n\tmd \\a\\b\\c\\d\n\nis the same as:\n\n\tmd \\a\n\tcd \\a\n\tmd b\n\tcd b\n\tmd c\n\tcd c\n\tmd d\n\n");
+	std::string text("Creates a directory.\n\nMD [drive:]path\n\nMD creates any intermediate directories in the path, if needed.\nFor example, assume \a does not exist then:\n\n\tmd \\a\\b\\c\\d\n\nis the same as:\n\n\tmd \\a\n\tcd \\a\n\tmd b\n\tcd b\n\tmd c\n\tcd c\n\tmd d\n");
 
 	bool res = kiv_os_rtl::Write_File(kiv_os::stdOutput, text.c_str(), text.size(), writen);
 	if (!res) {
