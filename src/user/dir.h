@@ -18,7 +18,7 @@ static std::regex reg_dir("(/s|/S)|\"([\\S\\s][^\"]+)\"|\'([\\S\\s][^\']+)\'|(\\
 /**
 * Command DIR
 */
-extern "C" size_t __stdcall dir(const kiv_os::TRegisters &regs);
+extern "C" size_t __stdcall dir(const kiv_os::TRegisters regs);
 
 /**
 * Print content of directory to stdOutput. If recursively is set to true, content of subdirectories will be also printed.

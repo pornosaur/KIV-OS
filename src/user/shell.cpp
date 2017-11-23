@@ -12,7 +12,7 @@
 /* Variable for loop in the shell */
 int run_system = 1;
 
-size_t __stdcall shell(const kiv_os::TRegisters &regs) {
+size_t __stdcall shell(const kiv_os::TRegisters regs) {
 	size_t written, read;
 	int run_shell = 1;
 

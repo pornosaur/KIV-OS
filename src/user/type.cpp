@@ -3,14 +3,10 @@
 #include "rtl.h"
 
 
-size_t __stdcall type(const kiv_os::TRegisters &regs)
-{
-	kiv_os::TProcess_Startup_Info *tsi = reinterpret_cast<kiv_os::TProcess_Startup_Info*> (regs.rdi.r);
-	char* params = tsi->arg;
-
+size_t __stdcall type(const kiv_os::TRegisters regs) {
 	bool console = false;
 	std::smatch match;
-	std::string str(params);
+	std::string str(reinterpret_cast<char*> (regs.rdi.r));
 
 	str.erase(0, str.find_first_not_of(ERASE_CHARS)); // remove redunadat chars from start of string
 

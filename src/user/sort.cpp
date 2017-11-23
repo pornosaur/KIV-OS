@@ -3,7 +3,7 @@
 #include "rtl.h"
 
 
-size_t __stdcall sort(const kiv_os::TRegisters &regs) {
+size_t __stdcall sort(const kiv_os::TRegisters regs) {
 	
 	std::list<std::string> mylist;
 	std::list<std::string>::iterator it;

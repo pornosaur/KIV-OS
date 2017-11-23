@@ -34,6 +34,6 @@ class ProcessManager {
 		ProcFilesystem *proc_filesystem;
 		void close_handles();
 		std::shared_ptr<PCB> get_proc_context();
-		void run_process(kiv_os::TEntry_Point program, kiv_os::TRegisters &regs);
+		void run_process(kiv_os::TEntry_Point program, kiv_os::TRegisters &regs, char *args);
 		void ProcessManager::run_thread(kiv_os::TThread_Proc thread_proc, void *data, kiv_os::TRegisters &regs);
 };

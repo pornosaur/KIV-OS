@@ -1,14 +1,10 @@
 #include "freq.h"
 #include "rtl.h"
 
-#include <iostream>
 #include <cstring>
 
 
-size_t __stdcall freq(const kiv_os::TRegisters &regs) {
-	kiv_os::TProcess_Startup_Info *tsi = reinterpret_cast<kiv_os::TProcess_Startup_Info*> (regs.rdi.r);
-	char *str = tsi->arg;
-
+size_t __stdcall freq(const kiv_os::TRegisters regs) {
 	char *read_buff = (char *)malloc(1024 * sizeof(char));
 	int freq_table[256] = { 0 };
 	size_t read = 0;

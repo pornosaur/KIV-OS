@@ -3,13 +3,10 @@
 
 #include "rtl.h"
 
-size_t __stdcall dir(const kiv_os::TRegisters &regs)
+size_t __stdcall dir(const kiv_os::TRegisters regs)
 {
-	kiv_os::TProcess_Startup_Info *tsi = reinterpret_cast<kiv_os::TProcess_Startup_Info*> (regs.rdi.r);
-	char* params = tsi->arg;
-
 	std::smatch match;
-	std::string str(params);
+	std::string str(reinterpret_cast<char*> (regs.rdi.r));
 
 	bool recursively = false;
 

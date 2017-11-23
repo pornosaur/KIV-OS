@@ -5,11 +5,9 @@
 
 static const std::regex reg_wc("\"([\\S\\s][^\"]+)\"|\'([\\S\\s][^\']+)\'|(\\S+)");
 
-size_t __stdcall wc(const kiv_os::TRegisters &regs) {
-	kiv_os::TProcess_Startup_Info *tsi = reinterpret_cast<kiv_os::TProcess_Startup_Info*> (regs.rdi.r);
-	
+size_t __stdcall wc(const kiv_os::TRegisters regs) {	
 	std::smatch match;
-	std::string params(tsi->arg);
+	std::string params(reinterpret_cast<char*> (regs.rdi.r));
 
 	params.erase(0, params.find_first_not_of(ERASE_CHARS)); // remove redunadat chars from start of string
 

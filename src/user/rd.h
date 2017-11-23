@@ -19,7 +19,7 @@ static std::regex reg_rd_params("(/s|/S)|(/q|/Q)|\"([\\S\\s][^\"]+)\"|\'([\\S\\s
 /**
 * Command RD
 */
-extern "C" size_t __stdcall rd(const kiv_os::TRegisters &regs);
+extern "C" size_t __stdcall rd(const kiv_os::TRegisters regs);
 
 /**
 * Recursively remove folder and every subfolders and subfiles.

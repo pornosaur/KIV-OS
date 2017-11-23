@@ -85,6 +85,12 @@ void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_In
 		pcb->open_files.push_back(std::make_shared<Console>(kiv_os::stdError));
 	}
 
+	kiv_os::TProcess_Startup_Info *tsi = reinterpret_cast<kiv_os::TProcess_Startup_Info*> (regs.rdi.r);
+	char *args = nullptr;
+	if (tsi != nullptr) {
+		args = tsi->arg;
+	}
+
 	proc_filesystem->lock_pfs();
 	
 	std::shared_ptr<TCB> tcb = proc_filesystem->add_thread(pcb);
@@ -93,7 +99,9 @@ void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_In
 		regs.rax.r = static_cast<decltype(regs.flags.carry)>(kiv_os::erOut_Of_Memory);
 		return;
 	}
-	std::thread proc_thread = std::thread(&ProcessManager::run_process, this, program, regs);
+
+	
+	std::thread proc_thread = std::thread(&ProcessManager::run_process, this, program, regs, args);
 	tcb->proc_thread = std::move(proc_thread);
 	proc_filesystem->unlock_pfs();
 
@@ -177,13 +185,10 @@ kiv_os::THandle ProcessManager::add_handle(std::shared_ptr<Handler> handle) {
 
 }
 
-void ProcessManager::run_process(kiv_os::TEntry_Point program,  kiv_os::TRegisters &regs) {
+void ProcessManager::run_process(kiv_os::TEntry_Point program,  kiv_os::TRegisters &regs, char *args) {
 	kiv_os::TProcess_Startup_Info *tsi = reinterpret_cast<kiv_os::TProcess_Startup_Info*> (regs.rdi.r);
-	char *args = nullptr;
-	if (tsi != nullptr) {
-		args = tsi->arg;
-	}
-	
+	regs.rdi.r = reinterpret_cast<char*> (&args);
+
 	program(regs);
 	close_handles();
 

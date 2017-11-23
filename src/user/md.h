@@ -17,7 +17,7 @@ static std::regex reg_md_recur("[^\\\\]+");
 /**
 * Command MD
 */
-extern "C" size_t __stdcall md(const kiv_os::TRegisters &regs);
+extern "C" size_t __stdcall md(const kiv_os::TRegisters regs);
 
 /**
 * Create every folder in path if no folder is created print error message to stdError
