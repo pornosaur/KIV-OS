@@ -55,7 +55,7 @@ void Initialize_Kernel() {
 	FileHandler *file = NULL;
 	vfs->create_file(&file, "C:\\joke.txt");
 	size_t writen = 0;
-	file->write("Teacher: \"Kids, what does the chicken give you ? \"\n Student : \"Meat!\"\n Teacher : \"Very good! Now what does the pig give you?\"\n Student : \"Bacon!\"\n Teacher : \"Great! And what does the fat cow give you?\"\n Student : \"Homework!\"", 238, writen);
+	file->write("Teacher: \"Kids, what does the chicken give you ? \"\n Student : \"Meat!\"\n Teacher : \"Very good! Now what does the pig give you?\"\n Student : \"Bacon!\"\n Teacher : \"Great! And what does the fat cow give you?\"\n Student : \"Homework!\"", 224, writen);
 	delete file;
 	file = NULL;
 	// =============================================================================================================
