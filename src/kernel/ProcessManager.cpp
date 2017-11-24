@@ -18,7 +18,6 @@ void ProcessManager::handle_proc(kiv_os::TRegisters &regs) {
 			char *prog_name = reinterpret_cast<char*> (regs.rdx.r);
 			kiv_os::TProcess_Startup_Info *tsi = reinterpret_cast<kiv_os::TProcess_Startup_Info*> (regs.rdi.r);
 
-
 			create_process(prog_name, tsi, regs);
 		}
 		if (regs.rcx.l == kiv_os::clCreate_Thread) { //create thread
@@ -56,7 +55,6 @@ void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_In
 
 	pcb->proc_name = prog_name;
 	pcb_context = get_proc_context();
-
 	proc_filesystem->add_process(pcb);
 
 	if (pcb_context == nullptr) {
@@ -67,7 +65,6 @@ void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_In
 
 	pcb->ppid = pcb_context->pid;
 	pcb->workind_dir = pcb_context->workind_dir;
-
 	pcb->open_files.push_back(nullptr);
 	pcb->open_files.push_back(pcb_context->open_files[tsi->stdin]);
 	pcb->open_files.push_back(pcb_context->open_files[tsi->stdout]);
@@ -79,7 +76,7 @@ void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_In
 	}
 
 	proc_filesystem->lock_pfs();
-
+	//add thread
 	std::shared_ptr<TCB> tcb = proc_filesystem->add_thread(pcb);
 	if (tcb == nullptr) {
 		regs.flags.carry = 1;
@@ -90,13 +87,6 @@ void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_In
 	std::thread proc_thread = std::thread(&ProcessManager::run_process, this, program, regs, args);
 	tcb->proc_thread = std::move(proc_thread);
 	proc_filesystem->unlock_pfs();
-
-	if (pcb->pid == 0) {
-		//std::cout << "LOG: Init process " << prog_name << " start" << std::endl;
-	}
-	else {
-		//std::cout << "LOG: Process "<< prog_name <<" in process " << pcb_context->proc_name << " created w/ pid " << pcb->pid << std::endl;
-	}
 
 	regs.rax.r = static_cast<decltype(regs.rdx.x)>(tcb->tid);
 
@@ -138,12 +128,10 @@ kiv_os::THandle ProcessManager::wait_for(kiv_os::THandle *proc_handles, size_t p
 		proc_handle = proc_handles[i];
 		tcb = proc_filesystem->get_tcb_by_handle(proc_handle);
 		if (tcb != nullptr) {
-			/*std::cout << "LOG: Process " << tcb->pcb->proc_name << " waiting" << std::endl;*/
+
 			if (tcb->proc_thread.joinable()) {
 				tcb->proc_thread.join();
 			}
-			/*std::cout << "LOG: Process " << tcb->pcb->proc_name <<
-				" w/ pid " << tcb->pcb->pid << " ended" << std::endl;*/
 			proc_filesystem->remove_thread(proc_handles[i]);
 		}
 	}
