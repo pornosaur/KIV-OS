@@ -73,6 +73,7 @@ void print_path(char *input, size_t counter, const std::string &str)
 	size_t written = 0, read = 0;
 	if (counter) {
 		kiv_os_rtl::Get_Current_Direcotry(input, BUFFER_SIZE, read);
+		kiv_os_rtl::Write_File(kiv_os::stdOutput, "\n", 1, written);
 		kiv_os_rtl::Write_File(kiv_os::stdOutput, input, read, written);
 		kiv_os_rtl::Write_File(kiv_os::stdOutput, ">", 1, written);
 	}
