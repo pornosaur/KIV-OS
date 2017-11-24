@@ -23,7 +23,7 @@ size_t __stdcall shell(const kiv_os::TRegisters regs) {
 	kiv_os_cmd::CommandsWrapper cmd_w;
 
 	while (run_system && run_shell ) {
-		kiv_os_rtl::Get_Current_Direcotry(input, BUFFER_SIZE, read);
+		kiv_os_rtl::Get_Current_Direcotry(input, MAX_SIZE_BUFFER_IN, read);
 		kiv_os_rtl::Write_File(kiv_os::stdOutput, "\n", 1, written);
 		kiv_os_rtl::Write_File(kiv_os::stdOutput, input, read, written);
 		kiv_os_rtl::Write_File(kiv_os::stdOutput , ">", 1, written);
