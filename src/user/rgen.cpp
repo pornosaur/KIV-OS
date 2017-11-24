@@ -23,7 +23,7 @@ size_t __stdcall rgen(const kiv_os::TRegisters regs) {
 	return 0;
 }
 
-void wait_for_eof(const void *data) {
+void __stdcall wait_for_eof(const void *data) {
 	size_t read;
 	char *input = (char *)calloc(MAX_SIZE_BUFFER_IN, sizeof(char));
 
