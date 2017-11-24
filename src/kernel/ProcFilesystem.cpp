@@ -1,9 +1,8 @@
 #include "ProcFilesystem.h"
 #include "FileHandler.h"
+
 #include <algorithm>
-
 #include <string>
-
 #include <sstream>
 ProcFilesystem::ProcFilesystem() {
 	process_table.push_back(nullptr);
@@ -46,11 +45,6 @@ std::shared_ptr<TCB> ProcFilesystem::add_thread(std::shared_ptr<PCB> pcb) {
 
 }
 
-std::shared_ptr<PCB> ProcFilesystem::get_process(kiv_os::THandle pid) {
-	std::unique_lock<std::mutex> lck(proc_table_mutex);
-	return process_table[pid];	
-}
-
 void ProcFilesystem::remove_thread(kiv_os::THandle handle) {
 	std::unique_lock<std::mutex> lck(proc_table_mutex);
 	if (thread_table[handle]->pcb.use_count() <=2) { //last pointer in tcb
@@ -62,7 +56,7 @@ void ProcFilesystem::remove_thread(kiv_os::THandle handle) {
 }
 
 int ProcFilesystem::fs_open_object(FileHandler **object, const std::string &absolute_path, unsigned int type) {
-	struct dentry *f_dentry = NULL;
+	struct dentry *f_dentry = nullptr;
 
 	if (absolute_path.compare("procfs") == 0) {
 		read_proc = true;
