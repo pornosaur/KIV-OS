@@ -35,7 +35,7 @@ void Initialize_Kernel() {
 	
 	
 	// virtual memory initialization
-	size_t memory_size = 4096;
+	size_t memory_size = 65536;
 	fat_memory = new char[memory_size];
 
 	// intialization FAT
