@@ -7,7 +7,7 @@
 
 
 //#define MAX_BUFFER_SIZE		4096	/* maximum size for the pipe buffer */
-#define MAX_BUFFER_SIZE		8	/* FOR TEST */ //TODO RESET MAX SIZE BUFFER
+#define MAX_BUFFER_SIZE		4096	/* FOR TEST */ //TODO RESET MAX SIZE BUFFER
 
 class Pipe {
 
