@@ -7,7 +7,7 @@ Pipe::~Pipe()
 	 assert(!is_pipe_alive()); 
 	 delete[] buffer_pipe; 
 
-	 buffer_pipe = NULL;
+	 buffer_pipe = nullptr;
 
 	 assert(!buffer_pipe);
 }
