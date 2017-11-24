@@ -1,11 +1,12 @@
 #pragma once
 
 #include "Handler.h"
+
 #include <condition_variable>
 #include <mutex>
 #include <cassert>
 
-#define MAX_BUFFER_SIZE		4096		/* cyclic buffer size */
+#define MAX_BUFFER_SIZE		4096	/* cyclic buffer size */
 
 class Pipe {
 
@@ -39,8 +40,27 @@ public:
 	 * @return true if reader >= 1 and writer >= 1.
 	 */
 	bool is_pipe_alive();
-
+	 
+	/**
+	 * Write content of input buffer to the pipe buffer.
+	 *
+	 * @param buffer input buffer 
+	 * @param offset position in input buffer
+	 * @param length size of input buffer
+	 * @param written written byte to the pipe buffer
+	 * @return error code
+	 */
 	uint16_t pipe_write(char* buffer, size_t offset, size_t length, size_t& written);
+
+	/**
+	 * Read content of the pipe buffer to output buffer.
+	 * 
+	 * @param buffer output buffer
+	 * @param offset position in the pipe buffer
+	 * @param length size of output buffer
+	 * @param read read byte from the pipe buffer
+	 * @return error code
+	 */
 	uint16_t pipe_read(char* buffer, size_t offset, size_t length, size_t& read);
 
 	/**
