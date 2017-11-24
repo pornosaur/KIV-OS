@@ -33,7 +33,7 @@ void ProcessManager::handle_proc(kiv_os::TRegisters &regs) {
 	case kiv_os::scWait_For: { //wait for processes
 		Unlock_Kernel();
 		kiv_os::THandle *proc_handles = reinterpret_cast<kiv_os::THandle*> (regs.rdx.r);
-		size_t proc_count = regs.rcx.r;
+		size_t proc_count = static_cast<size_t>(regs.rcx.r);
 		wait_for(proc_handles, proc_count);
 		break;
 	}
@@ -134,7 +134,7 @@ kiv_os::THandle ProcessManager::wait_for(kiv_os::THandle *proc_handles, size_t p
 	std::shared_ptr<TCB> tcb;
 	kiv_os::THandle proc_handle = kiv_os::erInvalid_Handle;
 
-	for (int i = 0; i < proc_count; i++) {
+	for (size_t i = 0; i < proc_count; i++) {
 		proc_handle = proc_handles[i];
 		tcb = proc_filesystem->get_tcb_by_handle(proc_handle);
 		if (tcb != nullptr) {
@@ -222,7 +222,7 @@ std::shared_ptr<Handler> ProcessManager::get_handle_object(const kiv_os::THandle
 
 void ProcessManager::close_handles() {
 	std::shared_ptr<PCB> pcb = get_proc_context();
-	for (int i = 0; i < pcb->open_files.size(); i++) {
+	for (size_t i = 0; i < pcb->open_files.size(); i++) {
 		if (pcb->open_files[i] != nullptr) {
 			pcb->open_files[i].reset();
 		}
