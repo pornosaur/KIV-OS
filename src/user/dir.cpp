@@ -91,6 +91,7 @@ bool print_directory(std::string path, const kiv_os::TRegisters &regs, bool &rec
 	for (kiv_os::TDir_Entry en : entries) {
 		std::string tmp(path);
 		std::string name(en.file_name, en.file_name + sizeof en.file_name / sizeof en.file_name[0]);
+		name.erase(name.find_last_not_of('\0') + 1);
 		if (!print_directory(tmp.append(name), regs, recursively)) {
 			return false;
 		}
@@ -105,6 +106,7 @@ bool print_entry(kiv_os::TDir_Entry *entry)
 	size_t writen;
 
 	std::string name(entry->file_name, entry->file_name + sizeof entry->file_name / sizeof entry->file_name[0]);
+	name.erase(name.find_last_not_of('\0') + 1);
 	if ((entry->file_attributes & kiv_os::faDirectory) == kiv_os::faDirectory) {
 		name.append("\t\t<DIR>");
 	}

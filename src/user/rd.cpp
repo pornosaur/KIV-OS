@@ -120,6 +120,7 @@ bool remove_subfiles(std::string path, const kiv_os::TRegisters &regs)
 		if (entry) {
 			std::string tmp(path);
 			std::string name(entry->file_name, entry->file_name + sizeof entry->file_name / sizeof entry->file_name[0]);
+			name.erase(name.find_last_not_of('\0') + 1);
 			res = remove_recursively(tmp.append(name), regs);
 		}
 
