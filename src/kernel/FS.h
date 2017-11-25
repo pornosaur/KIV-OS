@@ -1,17 +1,16 @@
 #pragma once
 
-#include <string>
-
-#include "VfsStructures.h"
 #undef stdin
 #undef stdout
 #undef stderr
+
 #include "../api/api.h"
-
+#include "VfsStructures.h"
 #include<mutex>
+#include <string>
 
-#define delimeter "\\"
-#define delimeter_size 1
+#define DELIMETER "\\"
+#define DELIMETER_SIZE 1
 
 class FileHandler;
 

@@ -6,6 +6,7 @@
 
 #include "FS.h"
 #include "FileHandler.h"
+#include "VfsStructures.h"
 
 /**
  * Virtual file system create connection to file systems

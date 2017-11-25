@@ -322,7 +322,7 @@ dentry * FatFS::find_path(const std::string &absolute_path, size_t * start, size
 	m_dentry = this->sb->s_root;
 
 	*start = 0;
-	*end = absolute_path.find(delimeter);
+	*end = absolute_path.find(DELIMETER);
 
 
 	while (*end != std::string::npos)
@@ -335,8 +335,8 @@ dentry * FatFS::find_path(const std::string &absolute_path, size_t * start, size
 
 		m_dentry = f_dentry;
 
-		*start = *end + delimeter_size;
-		*end = absolute_path.find(delimeter, *start);
+		*start = *end + DELIMETER_SIZE;
+		*end = absolute_path.find(DELIMETER, *start);
 	}
 
 	return m_dentry;
