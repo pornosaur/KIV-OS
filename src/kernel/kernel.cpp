@@ -39,7 +39,7 @@ void Initialize_Kernel() {
 	fat_memory = new char[memory_size];
 
 	// intialization FAT
-	FatFS::init_fat_disk(fat_memory, memory_size, 128u);
+	FatFS::init_fat_disk(fat_memory, memory_size, 512u);
 	FS *fs = new FatFS(fat_memory, memory_size, "C:");
 	
 	// register FAT in VFS
