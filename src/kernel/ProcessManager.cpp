@@ -53,16 +53,15 @@ void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_In
 	std::shared_ptr<PCB> pcb = std::make_shared<PCB>();
 	std::shared_ptr<PCB> pcb_context;
 
-	pcb->proc_name = prog_name;
+	
 	pcb_context = get_proc_context();
-	proc_filesystem->add_process(pcb);
-
+	
 	if (pcb_context == nullptr) {
 		regs.flags.carry = 1;
 		regs.rax.r = static_cast<decltype(regs.flags.carry)>(kiv_os::erOut_Of_Memory);
 		return;
 	}
-
+	pcb->proc_name = prog_name;
 	pcb->ppid = pcb_context->pid;
 	pcb->workind_dir = pcb_context->workind_dir;
 	pcb->open_files.push_back(nullptr);
@@ -70,6 +69,7 @@ void ProcessManager::create_process(char *prog_name, kiv_os::TProcess_Startup_In
 	pcb->open_files.push_back(pcb_context->open_files[tsi->stdout]);
 	pcb->open_files.push_back(pcb_context->open_files[tsi->stderr]);
 
+	proc_filesystem->add_process(pcb);
 	char *args = nullptr;
 	if (tsi != nullptr) {
 		args = tsi->arg;
@@ -115,7 +115,6 @@ void ProcessManager::create_thread(kiv_os::TThread_Proc thread_proc, void *data,
 	tcb->proc_thread = std::move(thread);
 	proc_filesystem->unlock_pfs();
 
-	std::cout << "LOG: Thread for process " << pcb_context->proc_name << " created w/ pid " << pcb_context->pid << std::endl;
 	regs.rax.r = static_cast<decltype(regs.rdx.x)>(tcb->tid);
 }
 

@@ -10,7 +10,6 @@ size_t __stdcall rgen(const kiv_os::TRegisters regs) {
 
 	generate = true;
 
-	//TODO check arguments?
 	kiv_os_rtl::Create_Thread((kiv_os::TThread_Proc)wait_for_eof, nullptr, proc_handle);
 	while (generate) {
 		random = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
