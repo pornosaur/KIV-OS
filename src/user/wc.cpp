@@ -11,12 +11,12 @@ size_t __stdcall wc(const kiv_os::TRegisters regs) {
 
 	params.erase(0, params.find_first_not_of(ERASE_CHARS)); // remove redunadat chars from start of string
 
-	kiv_os::THandle handle;
+	kiv_os::THandle handle = kiv_os::stdInput;
 	bool stdin = false, console = false;
 
 	if (params.empty()) {
 		console = stdin = true;
-		handle = kiv_os::stdInput;
+		
 	}
 
 	char *input = (char *)malloc(BUFFER_SIZE * sizeof(char));

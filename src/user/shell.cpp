@@ -20,6 +20,11 @@ size_t __stdcall shell(const kiv_os::TRegisters regs) {
 	kiv_os_rtl::Write_File(kiv_os::stdOutput, hello, strlen(hello), written);
 	
 	char *input = (char *)malloc(BUFFER_SIZE * sizeof(char));
+	if (!input) {
+		kiv_os_rtl::print_error("Out of memory.");
+		return 0;
+	}
+
 	kiv_os_cmd::CommandsWrapper cmd_w;
 
 	while (run_system && run_shell ) {

@@ -6,6 +6,11 @@
 
 size_t __stdcall freq(const kiv_os::TRegisters regs) {
 	char *read_buff = (char *)malloc(1024 * sizeof(char));
+	if (!read_buff) {
+		kiv_os_rtl::print_error("Out of memory.");
+		return 0;
+	}
+
 	int freq_table[256] = { 0 };
 	size_t read = 0;
 	bool res_read = false;
@@ -23,7 +28,14 @@ size_t __stdcall freq(const kiv_os::TRegisters regs) {
 
 	const char *format = "0x%hhx : %d \n";
 	size_t max_line_length = 30;
-	read_buff = (char *)realloc(read_buff, max_line_length * sizeof(char));
+
+	free(read_buff);
+	read_buff = (char *)malloc(max_line_length * sizeof(char));
+
+	if (!read_buff) {
+		kiv_os_rtl::print_error("Out of memory.");
+		return 0;
+	}
 
 	std::string result = "";
 	for (int i = 0; i < 256; i++) {

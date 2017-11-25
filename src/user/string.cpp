@@ -21,7 +21,15 @@ char *kiv_os_str::copy_string(const std::string& str)
 {
 	size_t len = str.size();
 	char *new_str = (char*)malloc(sizeof(char) * (len + 1u));
-	strcpy_s(new_str, len + 1u, str.c_str());
+	if (!new_str) {
+		return nullptr;
+	}
+
+	if (strcpy_s(new_str, len + 1u, str.c_str())) {
+		free(new_str);
+		return nullptr;
+	}
+
 	new_str[len] = '\0';
 
 	assert(str.compare(new_str) == 0);
