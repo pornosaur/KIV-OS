@@ -44,22 +44,52 @@ public:
 	virtual uint16_t write(char* buffer, size_t length, size_t& written) = 0;	/* length = size buffer*/
 	
 	/**
-	 * Abstract method for set position in factual handler which inherit this class.
+	 * Abstract method for set position in specific handler which inherit this class.
 	 *
 	 * @param offset number of bytes to offset from origin
 	 * @param origin position which reference for offset
-	 * @param set_size TODO comment this
+	 * @param set_size if is set the position will be set as a size
 	 * @return error code
 	 */
 	virtual uint16_t fseek(long offset, uint8_t origin, uint8_t set_size) = 0; /* origin = api fs const; set_size = api fsSet const */
 	
+	/**
+	 * Method return specific handler position.
+	 *
+	 * @return specific handler position
+	 */
 	size_t ftell() { return position; }
+
+	/**
+	 * Method return flags which represents how handler is opened - read, write, always_open.
+	 *
+	 * @return handler flags
+	 */
 	uint8_t get_flags() { return flags; }
+
+	/**
+	 * Method return number of reference to specific handler.
+	 *
+	 * @return number of reference
+	 */
 	size_t get_count() { return count; }
+
+	/**
+	 * Method increment number of reference to specific handler.
+	 */
 	void inc_count() { count++; }
+
+	/**
+	 * Method decrement number of reference to specific handler. 
+	 * When method is called when count==0 nothing will happen
+	 */
 	void dec_count() { if (count > 0) count--; }
 	
-	/** decrement counter and return true if counter is 0 */
+	/**
+	 * Decrement number of refernce to specific handler and return true if counter is set to zero.
+	 *
+	 * @return true if counter is set to zero, false otherwise
+	 */
 	bool close_handler() {
 		dec_count();
 		return get_count() <= 0;
