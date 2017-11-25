@@ -38,7 +38,7 @@ public:
 	static const int ERR_DIRECTORY_IS_NOT_EMPTY = -3;
 	static const int ERR_DIRECTORY_IS_FULL = -4;
 	static const int ERR_DISK_IS_FULL = -5;
-	static const int ERR_FILE_OPEN_BY_OTHER = -6; // should mean also direcotry had some subdirecotries
+	static const int ERR_FILE_OPEN_BY_OTHER = -6;
 	static const int ERR_INVALID_ARGUMENTS = -7;
 	static const int ERR_DISK_ERROR = -8;
 	static const int ERR_FS_EXISTS = -9;
