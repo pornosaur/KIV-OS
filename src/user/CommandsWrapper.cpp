@@ -33,7 +33,6 @@ bool kiv_os_cmd::CommandsWrapper::Parse_Pipe(const std::string& cmd_line)
 
 	bool is_pipe = false;
 
-	//TODO check empty string
 	if (*check_line.begin() == PIPE) {
 		error = ERR_UNXPECTED;
 		return false;
