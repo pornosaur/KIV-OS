@@ -20,7 +20,7 @@ private:
 	
 
 public:
-	FileHandler(uint8_t flags = 0, struct dentry *dentry = NULL, size_t position = 0, size_t count = 0) : Handler(flags, position, count), dentry(dentry) {};
+	FileHandler(uint8_t flags = 0, struct dentry *dentry = NULL, size_t position = 0) : Handler(flags, position), dentry(dentry) {};
 	
 	/** Remove dentry from fs is is not NULL */
 	~FileHandler();

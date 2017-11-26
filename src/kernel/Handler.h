@@ -11,7 +11,6 @@ class Handler
 
 protected:
 	size_t position;	/* Represents position in file */
-	size_t count;		/* Represents how much processes have this handler */
 	uint8_t flags;		/* Represents how handler is opened - read, write, always_open */
 
 public:
@@ -20,7 +19,7 @@ public:
 	/* Constant which represents handler for read */
 	static const uint8_t fmOpen_Read = 3;
 
-	Handler(uint8_t flags = 0, size_t position = 0, size_t count = 0) : flags(flags), position(position), count(count) {};
+	Handler(uint8_t flags = 0, size_t position = 0) : flags(flags), position(position){};
 	virtual ~Handler() {};
 	
 	/**
@@ -67,33 +66,6 @@ public:
 	 */
 	uint8_t get_flags() { return flags; }
 
-	/**
-	 * Method return number of reference to specific handler.
-	 *
-	 * @return number of reference
-	 */
-	size_t get_count() { return count; }
-
-	/**
-	 * Method increment number of reference to specific handler.
-	 */
-	void inc_count() { count++; }
-
-	/**
-	 * Method decrement number of reference to specific handler. 
-	 * When method is called when count==0 nothing will happen
-	 */
-	void dec_count() { if (count > 0) count--; }
-	
-	/**
-	 * Decrement number of refernce to specific handler and return true if counter is set to zero.
-	 *
-	 * @return true if counter is set to zero, false otherwise
-	 */
-	bool close_handler() {
-		dec_count();
-		return get_count() <= 0;
-	}
 };
 
 

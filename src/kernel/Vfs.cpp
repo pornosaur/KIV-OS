@@ -48,7 +48,6 @@ uint16_t Vfs::remove_emtpy_dir(const std::string &absolute_path)
 	int ret_code2 = m_fs->fs_remove_emtpy_dir(file);
 	m_fs->m_mutex.unlock(); // unlock FS
 
-	assert(file->get_count() == 1);
 	delete file;
 
 	return FS::translate_return_codes(ret_code2);
@@ -118,7 +117,6 @@ uint16_t Vfs::remove_file(const std::string &absolute_path)
 	int ret_code2 = m_fs->fs_remove_file(file);
 	m_fs->m_mutex.unlock(); // unlock FS
 
-	assert(file->get_count() == 1);
 	delete file;
 
 	return FS::translate_return_codes(ret_code2);

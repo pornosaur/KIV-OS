@@ -247,11 +247,8 @@ void set_current_directory(kiv_os::TRegisters &regs) {
 
 	if (result == kiv_os::erSuccess && handler != NULL) {
 		processManager->set_proc_work_dir(new_path);
-
-		if (handler->close_handler()) {
-			delete handler;
-			handler = NULL;
-		}
+		delete handler;
+		handler = NULL;
 	}
 	else {
 		set_error(regs, result);

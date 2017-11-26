@@ -63,7 +63,7 @@ int ProcFilesystem::fs_open_object(FileHandler **object, const std::string &abso
 		f_dentry = FS::init_dentry(nullptr, "", 0, 0, 1, 0, 0);
 		f_dentry->d_count++;
 		f_dentry->d_fs = this;
-		*object = new FileHandler(0, f_dentry, 0, 1);
+		*object = new FileHandler(0, f_dentry, 0);
 	}
 	else {
 		return ERR_FILE_NOT_FOUND;
