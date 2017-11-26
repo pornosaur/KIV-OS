@@ -7,8 +7,8 @@
 #include "FS.h"
 
 extern "C" {
-	#include "FAT/fat.h"
-	#include "FAT/fat_structure.h"
+	#include "fat.h"
+	#include "fat_structure.h"
 }
 
 class FatFS : public FS

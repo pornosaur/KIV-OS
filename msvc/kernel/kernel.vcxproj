@@ -21,10 +21,10 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\kernel\Console.cpp" />
     <ClCompile Include="..\..\src\kernel\dllmain.cpp" />
-    <ClCompile Include="..\..\src\kernel\FAT\fat.c" />
-    <ClCompile Include="..\..\src\kernel\FAT\library.c" />
+    <ClCompile Include="..\..\src\kernel\fat.c" />
     <ClCompile Include="..\..\src\kernel\FileHandler.cpp" />
     <ClCompile Include="..\..\src\kernel\FS.cpp" />
+    <ClCompile Include="..\..\src\kernel\library.c" />
     <ClCompile Include="..\..\src\kernel\ProcessManager.cpp" />
     <ClCompile Include="..\..\src\kernel\ProcFilesystem.cpp" />
     <ClCompile Include="..\..\src\kernel\Test_vfs.cpp" />
@@ -37,12 +37,12 @@
     <ClCompile Include="..\..\src\kernel\PipeHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\kernel\FAT\fat.h" />
-    <ClInclude Include="..\..\src\kernel\FAT\fat_structure.h" />
-    <ClInclude Include="..\..\src\kernel\FAT\library.h" />
+    <ClInclude Include="..\..\src\kernel\fat.h" />
+    <ClInclude Include="..\..\src\kernel\fat_structure.h" />
     <ClInclude Include="..\..\src\kernel\FileHandler.h" />
     <ClInclude Include="..\..\src\kernel\FS.h" />
     <ClInclude Include="..\..\src\kernel\Handler.h" />
+    <ClInclude Include="..\..\src\kernel\library.h" />
     <ClInclude Include="..\..\src\kernel\ProcessManager.h" />
     <ClInclude Include="..\..\src\kernel\ProcFilesystem.h" />
     <ClInclude Include="..\..\src\kernel\Test_vfs.h" />
