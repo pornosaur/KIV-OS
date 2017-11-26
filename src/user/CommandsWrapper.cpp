@@ -209,7 +209,7 @@ void kiv_os_cmd::CommandsWrapper::Print_Error()
 		kiv_os_rtl::Write_File(kiv_os::stdOutput, c_error, size, written);
 
 		free(c_error);
-		c_error = NULL;
+		c_error = nullptr;
 	}
 
 	Clear();
