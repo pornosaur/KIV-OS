@@ -249,7 +249,10 @@ void ProcessManager::run_init() {
 	kiv_os::TRegisters regs{ 0 };
 	kiv_os::TProcess_Startup_Info tsi;
 	tsi.arg = (char*)malloc(param_size * sizeof(char));
-	strcpy_s(tsi.arg, param_size, "shell");
+	if (tsi.arg) {
+		strcpy_s(tsi.arg, param_size, "shell");
+	}
+	
 	tsi.stdin = kiv_os::stdInput;
 	tsi.stdout = kiv_os::stdOutput;
 	tsi.stderr = kiv_os::stdError;
