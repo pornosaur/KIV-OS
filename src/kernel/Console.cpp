@@ -58,15 +58,15 @@ uint16_t Console::read(char* buffer, size_t length, size_t& read) {
 
 			read = read_dw > 0 ? (size_t)read_dw : 0;
 			 
-			return ( res ? kiv_os::erSuccess : kiv_os::erInvalid_Argument); // TODO return codes by api.h
+			return ( res ? kiv_os::erSuccess : kiv_os::erInvalid_Argument); 
 		}
 		
 		read = mStdInOpen ? (size_t)read_dw : 0;
-		mStdInOpen = true; //TODO only for testing, change it but how?
+		mStdInOpen = true; 
 		err = res ? kiv_os::erSuccess : kiv_os::erInvalid_Argument;
 	}
 	else {
-		read = 0;		//TODO only for testing, change it but how? Console close after press ctrl+z in subshell and stay closed in init shell
+		read = 0;	
 		err = kiv_os::erSuccess;
 	}
 
