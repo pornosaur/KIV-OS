@@ -27,7 +27,6 @@
     <ClCompile Include="..\..\src\kernel\library.c" />
     <ClCompile Include="..\..\src\kernel\ProcessManager.cpp" />
     <ClCompile Include="..\..\src\kernel\ProcFilesystem.cpp" />
-    <ClCompile Include="..\..\src\kernel\Test_vfs.cpp" />
     <ClCompile Include="..\..\src\kernel\Vfs.cpp" />
     <ClCompile Include="..\..\src\kernel\FatFS.cpp" />
     <ClCompile Include="..\..\src\kernel\io.cpp" />
@@ -45,7 +44,6 @@
     <ClInclude Include="..\..\src\kernel\library.h" />
     <ClInclude Include="..\..\src\kernel\ProcessManager.h" />
     <ClInclude Include="..\..\src\kernel\ProcFilesystem.h" />
-    <ClInclude Include="..\..\src\kernel\Test_vfs.h" />
     <ClInclude Include="..\..\src\kernel\Vfs.h" />
     <ClInclude Include="..\..\src\kernel\FatFS.h" />
     <ClInclude Include="..\..\src\api\api.h" />
