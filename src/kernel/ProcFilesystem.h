@@ -96,7 +96,7 @@ public:
 	* @param pcb pcb of process
 	* @return tcb of added thread
 	*/
-	std::shared_ptr<TCB> ProcFilesystem::add_thread(std::shared_ptr<PCB> pcb);
+	std::shared_ptr<TCB> add_thread(std::shared_ptr<PCB> pcb);
 	/**
 	* Remove thread from thread_table by handle
 	* @handle handle of deleted thread

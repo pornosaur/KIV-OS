@@ -71,18 +71,18 @@ class ProcessManager {
 		* Get actual process workspace dir
 		* @return path
 		*/
-		std::string ProcessManager::get_proc_work_dir();
+		std::string get_proc_work_dir();
 		/**
 		* Change workspace dir for actual process
 		* @param new path
 		*/
-		void ProcessManager::set_proc_work_dir(std::string working_dir);
+		void set_proc_work_dir(std::string working_dir);
 		/**
 		* Get handler of file, console or pipe by handle number.
 		* @param handle number
 		* @return handler of file, console or pipe
 		*/
-		std::shared_ptr<Handler> ProcessManager::get_handle_object(const kiv_os::THandle hnd);
+		std::shared_ptr<Handler> get_handle_object(const kiv_os::THandle hnd);
 	private:
 		/**
 		* registered process filesystem
