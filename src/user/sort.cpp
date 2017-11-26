@@ -27,16 +27,17 @@ size_t __stdcall sort(const kiv_os::TRegisters regs)
 	std::smatch match;
 	std::list<std::string> mylist;
 	std::list<std::string>::iterator it;
+	std::string tmp("");
 	// Read data from handle and save to list
 	do {
 		res = kiv_os_rtl::Read_File(handle, input, BUFFER_SIZE, read);
 		if (!res || read == 0) break;
 
-		std::string tmp(input, read);
+		tmp.append(input, read);
 
 		while (!tmp.empty() && std::regex_search(tmp, match, reg_sort)) {
 			if (!match[0].str().empty()) {
-				mylist.push_back(match[0].str().append("\n"));
+				mylist.push_back(match[0].str());
 			}
 			tmp = match.suffix();
 		}
@@ -48,6 +49,10 @@ size_t __stdcall sort(const kiv_os::TRegisters regs)
 		return 0;
 	}
 	
+	if (!tmp.empty()) {
+		mylist.push_back(tmp);
+	}
+
 	mylist.sort(compare_nocase); // sort list
 
 	// Write to stdOutput

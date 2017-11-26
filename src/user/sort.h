@@ -13,7 +13,7 @@
 /* size of read buffer */
 #define BUFFER_SIZE 1024
 
-static std::regex reg_sort("[^\\n]+");
+static std::regex reg_sort("[^\\n]+\\n");
 
 /**
 * Command SORT
