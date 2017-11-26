@@ -1,8 +1,6 @@
 #include "wc.h"
 #include "rtl.h"
 
-#include <vld.h>
-
 static const std::regex reg_wc("\"([\\S\\s][^\"]+)\"|\'([\\S\\s][^\']+)\'|(\\S+)");
 
 size_t __stdcall wc(const kiv_os::TRegisters regs) {	
