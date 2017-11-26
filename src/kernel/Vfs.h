@@ -85,5 +85,5 @@ private:
 	 * @param name of searching file system
 	 * @return found file system or NULL when file system was not find.
 	 */
-	FS * Vfs::find_fs_by_name(const std::string &name);
+	FS * find_fs_by_name(const std::string &name);
 };

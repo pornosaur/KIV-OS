@@ -23,7 +23,7 @@ public:
 	 * @param memory_size size of memory array
 	 * @param name of disk (e.g. C:)
 	 */
-	FatFS::FatFS(char *memory, size_t memory_size, const std::string &disk_id);
+	FatFS(char *memory, size_t memory_size, const std::string &disk_id);
 	
 	/** Remove Fat disk and associated data */
 	~FatFS();
@@ -129,7 +129,7 @@ public:
 	 * @param size of one cluster in FAT disk
 	 * @return ERR_SUCCESS
 	 */
-	static int FatFS::init_fat_disk(char *memory, size_t memory_size, uint16_t cluster_size);
+	static int init_fat_disk(char *memory, size_t memory_size, uint16_t cluster_size);
 
 private:
 
@@ -144,7 +144,7 @@ private:
 	 * @param type of file (FS_OBJECT_DIRECTORY, FS_OBJECT_FILE)
 	 * @return error codes which are defined in FS.h
 	 */
-	struct dentry *FatFS::find_object_in_directory(struct dentry *m_dentry, const std::string& dentry_name, unsigned int type);
+	struct dentry *find_object_in_directory(struct dentry *m_dentry, const std::string& dentry_name, unsigned int type);
 
 	/**
 	 * Parse absolute_path and check if files exists. Last file in path is not tested.
@@ -155,7 +155,7 @@ private:
 	 * @param end return end index of last file in absolute_path
 	 * @return penultimate file in absolute_path or NULL on error
 	 */
-	struct dentry *FatFS::find_path(const std::string &absolute_path, size_t *start, size_t *end);
+	struct dentry *find_path(const std::string &absolute_path, size_t *start, size_t *end);
 	
 	/**
 	 * Create struct dir_file from struct dentry.

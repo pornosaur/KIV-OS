@@ -123,7 +123,7 @@ protected:
 	 *
 	 * @param d_dentry which will be deleted
 	 */
-	void FS::sb_remove_all_dentry(struct dentry **d_entry);
+	void sb_remove_all_dentry(struct dentry **d_entry);
 
 	/**
 	 * Searching for file with name in f_dentry. Searching only in open dentry not in FAT disk
