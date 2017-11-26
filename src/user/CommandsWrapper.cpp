@@ -230,7 +230,7 @@ std::vector<kiv_os::THandle> kiv_os_cmd::CommandsWrapper::Run_Commands()
 	}
 	for (const auto &cmd : commands) {
 		kiv_os::TProcess_Startup_Info tsi;
-		tsi.stdin = kiv_os::stdInput; //nastaveni std - jiz presmerovanych
+		tsi.stdin = kiv_os::stdInput; 
 		tsi.stdout = kiv_os::stdOutput;
 		tsi.stderr = kiv_os::stdError;
 

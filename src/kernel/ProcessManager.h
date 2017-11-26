@@ -115,5 +115,5 @@ class ProcessManager {
 		* @param regs  structure represent registres Set to rax handle of new process.
 		* 
 		*/
-		void ProcessManager::run_thread(kiv_os::TThread_Proc thread_proc, void *data, kiv_os::TRegisters &regs);
+		void run_thread(kiv_os::TThread_Proc thread_proc, void *data, kiv_os::TRegisters &regs);
 };
