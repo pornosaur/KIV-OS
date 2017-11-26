@@ -4,7 +4,7 @@
 class PipeHandler : public Handler {
 
 private: 
-	/** Appropriate pipe */
+	/** Pointer to appropriate pipe */
 	Pipe* pipe;
 
 public:
