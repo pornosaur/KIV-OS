@@ -1,0 +1,3 @@
+﻿     Vytváří se knihovna ..\..\compiled\user.lib a objekt ..\..\compiled\user.exp.
+rtl.obj : error LNK2001: Nerozpoznaný externí symbol __imp__Sys_Call@4
+..\..\compiled\user.dll : fatal error LNK1120: Počet nerozpoznaných externích typů: 1

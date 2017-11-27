@@ -1,0 +1,20 @@
+﻿  wc.cpp
+  type.cpp
+  string.cpp
+  sort.cpp
+  shutdown.cpp
+  shell.cpp
+  rtl.cpp
+  rgen.cpp
+  rd.cpp
+  md.cpp
+  freq.cpp
+  echo.cpp
+  dir.cpp
+  cd.cpp
+  CommandsWrapper.cpp
+  Generování kódu...
+  Kompilování...
+  ps.cpp
+  Generování kódu...
+LINK : fatal error LNK1104: Soubor C:\Users\Patrik\Documents\Projects\KIV-OS\msvc\user\Debug\kernel.lib se nedá otevřít.

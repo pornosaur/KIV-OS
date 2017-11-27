@@ -1,0 +1,19 @@
+﻿  Console.cpp
+  FS.cpp
+  FatFS.cpp
+  FileHandler.cpp
+  Pipe.cpp
+  PipeHandler.cpp
+  ProcFilesystem.cpp
+  ProcessManager.cpp
+  Vfs.cpp
+  io.cpp
+  kernel.cpp
+  fat.c
+  library.c
+     Vytváří se knihovna ..\..\compiled\kernel.lib a objekt ..\..\compiled\kernel.exp.
+  Vytváří se kód.
+  All 1070 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Vytváření kódu se dokončilo.
+  kernel.vcxproj -> C:\Users\Patrik\Documents\Projects\KIV-OS\msvc\kernel\..\..\compiled\kernel.dll
+  kernel.vcxproj -> ..\..\compiled\kernel.pdb (Full PDB)

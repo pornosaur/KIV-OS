@@ -1,6 +1,2 @@
-compiled/**
-msvc/**
-.vs/
 .idea/
 **/cmake-build-debug
-src/kernel/io.cpp

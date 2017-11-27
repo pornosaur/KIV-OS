@@ -1,0 +1,23 @@
+﻿  Console.cpp
+  dllmain.cpp
+  FileHandler.cpp
+  FS.cpp
+  ProcessManager.cpp
+  ProcFilesystem.cpp
+  Vfs.cpp
+  FatFS.cpp
+  io.cpp
+  kernel.cpp
+  BinSemaphore.cpp
+  Pipe.cpp
+  PipeHandler.cpp
+  fat.c
+  library.c
+     Vytváří se knihovna ..\..\compiled\kernel.lib a objekt ..\..\compiled\kernel.exp.
+  Vytváří se kód.
+  1070 of 1070 functions (100.0%) were compiled, the rest were copied from previous compilation.
+    1069 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
+  Vytváření kódu se dokončilo.
+  kernel.vcxproj -> C:\Users\Patrik\Documents\Projects\KIV-OS\msvc\kernel\..\..\compiled\kernel.dll
+  kernel.vcxproj -> ..\..\compiled\kernel.pdb (Full PDB)

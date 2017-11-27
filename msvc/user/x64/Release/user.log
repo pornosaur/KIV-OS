@@ -1,0 +1,23 @@
+﻿  cd.cpp
+  CommandsWrapper.cpp
+  dir.cpp
+  dllmain.cpp
+  echo.cpp
+  freq.cpp
+  md.cpp
+  ps.cpp
+  rd.cpp
+  rgen.cpp
+  rtl.cpp
+  shell.cpp
+  shutdown.cpp
+  sort.cpp
+  string.cpp
+  type.cpp
+  wc.cpp
+     Vytváří se knihovna ..\..\compiled\user.lib a objekt ..\..\compiled\user.exp.
+  Vytváří se kód.
+  All 1355 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Vytváření kódu se dokončilo.
+  user.vcxproj -> C:\Users\Patrik\Documents\Projects\KIV-OS\msvc\user\..\..\compiled\user.dll
+  user.vcxproj -> ..\..\compiled\user.pdb (Full PDB)

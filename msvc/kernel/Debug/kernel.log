@@ -1,0 +1,22 @@
+﻿  kernel.cpp
+  io.cpp
+  Vfs.cpp
+  ProcessManager.cpp
+  ProcFilesystem.cpp
+  Pipe.cpp
+  FatFS.cpp
+  Console.cpp
+  Generování kódu...
+  Kompilování...
+  PipeHandler.cpp
+  FileHandler.cpp
+  FS.cpp
+  Generování kódu...
+  Přeskakuje se... (nezjistily se žádné relevantní změny)
+  BinSemaphore.cpp
+  library.c
+  fat.c
+  Generování kódu...
+     Vytváří se knihovna C:\Users\Patrik\Documents\Projects\KIV-OS\msvc\kernel\Debug\kernel.lib a objekt C:\Users\Patrik\Documents\Projects\KIV-OS\msvc\kernel\Debug\kernel.exp.
+  kernel.vcxproj -> C:\Users\Patrik\Documents\Projects\KIV-OS\msvc\kernel\Debug\kernel.dll
+  kernel.vcxproj -> C:\Users\Patrik\Documents\Projects\KIV-OS\msvc\kernel\Debug\kernel.pdb (Partial PDB)

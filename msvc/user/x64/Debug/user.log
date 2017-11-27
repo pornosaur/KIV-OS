@@ -1,0 +1,22 @@
+﻿  wc.cpp
+  type.cpp
+  string.cpp
+  sort.cpp
+  shutdown.cpp
+  shell.cpp
+  rtl.cpp
+  rgen.cpp
+  rd.cpp
+  ps.cpp
+  md.cpp
+  freq.cpp
+  echo.cpp
+  dllmain.cpp
+  dir.cpp
+  CommandsWrapper.cpp
+  cd.cpp
+  Kompilování...
+  Generování kódu...
+     Vytváří se knihovna ..\..\compiled\user.lib a objekt ..\..\compiled\user.exp.
+  user.vcxproj -> C:\Users\Patrik\Documents\Projects\KIV-OS\msvc\user\..\..\compiled\user.dll
+  user.vcxproj -> ..\..\compiled\user.pdb (Partial PDB)

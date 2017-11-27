@@ -1,0 +1,25 @@
+﻿  cd.cpp
+  CommandsWrapper.cpp
+  dir.cpp
+  dllmain.cpp
+  echo.cpp
+  freq.cpp
+  md.cpp
+  ps.cpp
+  rd.cpp
+  rgen.cpp
+  rtl.cpp
+  shell.cpp
+  shutdown.cpp
+  sort.cpp
+  string.cpp
+  type.cpp
+  wc.cpp
+     Vytváří se knihovna ..\..\compiled\user.lib a objekt ..\..\compiled\user.exp.
+  Vytváří se kód.
+  1354 of 1354 functions (100.0%) were compiled, the rest were copied from previous compilation.
+    1354 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
+  Vytváření kódu se dokončilo.
+  user.vcxproj -> C:\Users\Patrik\Documents\Projects\KIV-OS\msvc\user\..\..\compiled\user.dll
+  user.vcxproj -> ..\..\compiled\user.pdb (Full PDB)
