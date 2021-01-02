@@ -1,6 +1,6 @@
 # Implementation of Simulation of Operating System
 
-Implemented featurs:
+Implemented features:
 * Booting,
 * Process and threads management (PCB and TCB records),
 * Memory management,
